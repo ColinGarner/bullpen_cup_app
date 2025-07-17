@@ -1,0 +1,65 @@
+<div class="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
+  <div class="max-w-md w-full">
+    <!-- Logo/Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">
+        🏆 <span class="text-green-600">Bullpen Cup</span>
+      </h1>
+      <p class="text-gray-600">Welcome back, golfer!</p>
+    </div>
+
+    <!-- Login Form -->
+    <div class="bg-white rounded-lg shadow-md p-8">
+      <h2 class="text-xl font-medium text-gray-900 mb-6 text-center">Sign in to your account</h2>
+      
+      <%= form_for(resource, as: resource_name, url: session_path(resource_name), local: true) do |f| %>
+        <!-- Email Field -->
+        <div class="mb-4">
+          <div class="mb-2">
+            <%= f.label :email, "Email address", class: "block text-sm font-medium text-gray-700" %>
+          </div>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "procore@procore.com", 
+              class: "w-full px-4 py-3 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" %>
+        </div>
+
+        <!-- Password Field -->
+        <div class="mb-4">
+          <div class="mb-2">
+            <%= f.label :password, "Password", class: "block text-sm font-medium text-gray-700" %>
+          </div>
+          <%= f.password_field :password, autocomplete: "current-password", placeholder: "••••••••••••",
+              class: "w-full px-4 py-3 border border-gray-300 rounded-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" %>
+        </div>
+
+        <!-- Remember Me -->
+        <% if devise_mapping.rememberable? %>
+          <div class="flex items-center mb-3">
+            <%= f.check_box :remember_me, class: "h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" %>
+            <%= f.label :remember_me, "Remember me", class: "ml-2 text-sm text-gray-700" %>
+          </div>
+        <% end %>
+        
+        <!-- Forgot Password -->
+        <div class="text-center mb-6">
+          <%= link_to "Forgot password?", new_password_path(resource_name), class: "text-sm text-green-600 hover:text-green-500" %>
+        </div>
+
+        <!-- Submit Button -->
+        <%= f.submit "Sign in", class: "w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200" %>
+      <% end %>
+
+      <!-- Sign Up Link -->
+      <div class="text-center mt-6">
+        <p class="text-sm text-gray-600">
+          Don't have an account? 
+          <%= link_to "Sign up here", new_registration_path(resource_name), class: "text-green-600 hover:text-green-500" %>
+        </p>
+      </div>
+      
+      <!-- Back to Home -->
+      <div class="text-center mt-4 pt-4 border-t border-gray-100">
+        <%= link_to "← Back to Home", root_path, class: "text-sm text-gray-500 hover:text-gray-700" %>
+      </div>
+    </div>
+  </div>
+</div>
