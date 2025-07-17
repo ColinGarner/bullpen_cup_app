@@ -1,38 +1,30 @@
-# PostgreSQL configuration for Bullpen Cup App
+# SQLite configuration (temporary for deployment)
 default: &default
-  adapter: postgresql
-  encoding: unicode
+  adapter: sqlite3
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  timeout: 5000
 
 development:
   <<: *default
-  database: bullpen_cup_app_development
-  username: <%= ENV.fetch("DATABASE_USERNAME") { `whoami`.chomp } %>
-  password: <%= ENV["DATABASE_PASSWORD"] %>
-  host: <%= ENV.fetch("DATABASE_HOST") { "localhost" } %>
-  port: <%= ENV.fetch("DATABASE_PORT") { 5432 } %>
+  database: storage/development.sqlite3
 
 test:
   <<: *default
-  database: bullpen_cup_app_test
-  username: <%= ENV.fetch("DATABASE_USERNAME") { `whoami`.chomp } %>
-  password: <%= ENV["DATABASE_PASSWORD"] %>
-  host: <%= ENV.fetch("DATABASE_HOST") { "localhost" } %>
-  port: <%= ENV.fetch("DATABASE_PORT") { 5432 } %>
+  database: storage/test.sqlite3
 
 production:
   primary:
     <<: *default
-    url: <%= ENV["DATABASE_URL"] %>
+    database: storage/production.sqlite3
   cache:
     <<: *default
-    url: <%= ENV["CACHE_DATABASE_URL"] %>
+    database: storage/production_cache.sqlite3
     migrations_paths: db/cache_migrate
   queue:
     <<: *default
-    url: <%= ENV["QUEUE_DATABASE_URL"] %>
+    database: storage/production_queue.sqlite3
     migrations_paths: db/queue_migrate
   cable:
     <<: *default
-    url: <%= ENV["CABLE_DATABASE_URL"] %>
+    database: storage/production_cable.sqlite3
     migrations_paths: db/cable_migrate
