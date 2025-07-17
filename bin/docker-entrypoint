@@ -7,8 +7,11 @@ if [ -z "${LD_PRELOAD+x}" ]; then
 fi
 
 # If running the rails server then create or migrate existing database
-if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+# Check for various ways Rails server might be started
+if [[ "$*" == *"rails server"* ]] || [[ "$*" == *"server"* ]]; then
+  echo "Running database migrations..."
   ./bin/rails db:prepare
+  echo "Database migrations completed."
 fi
 
 exec "${@}"
