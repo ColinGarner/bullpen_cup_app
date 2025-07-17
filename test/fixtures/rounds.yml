@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  tournament: one
+  round_number: 1
+  name: MyString
+  date: 2025-07-17
+  status: MyString
+  description: MyText
+
+two:
+  tournament: two
+  round_number: 1
+  name: MyString
+  date: 2025-07-17
+  status: MyString
+  description: MyText

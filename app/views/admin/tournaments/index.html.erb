@@ -1,0 +1,123 @@
+<% content_for :title, "Manage Tournaments - Admin" %>
+
+<div class="px-4 sm:px-6 lg:px-8">
+  <div class="sm:flex sm:items-center">
+    <div class="sm:flex-auto">
+      <h1 class="text-2xl font-semibold text-gray-900">Tournaments</h1>
+      <p class="mt-2 text-sm text-gray-700">Manage all golf tournaments</p>
+    </div>
+    <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+      <%= link_to "New Tournament", new_admin_tournament_path, 
+          class: "inline-flex items-center justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2" %>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="mt-6">
+    <%= form_with url: admin_tournaments_path, method: :get, local: true, class: "flex flex-col sm:flex-row gap-4" do |form| %>
+      <div class="flex-1">
+        <%= form.text_field :search, 
+            value: params[:search],
+            placeholder: "Search tournaments by name...", 
+            class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" %>
+      </div>
+      <div>
+        <%= form.select :status, 
+            options_for_select([
+              ['All Statuses', ''],
+              ['Upcoming', 'upcoming'],
+              ['Active', 'active'],
+              ['Completed', 'completed'],
+              ['Cancelled', 'cancelled']
+            ], params[:status]),
+            {},
+            class: "px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" %>
+      </div>
+      <div>
+        <%= form.submit "Search", 
+            class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Tournaments Table -->
+  <div class="mt-8 overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+    <table class="min-w-full divide-y divide-gray-300">
+      <thead class="bg-gray-50">
+        <tr>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tournament</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Venue</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created By</th>
+          <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <% if @tournaments.any? %>
+          <% @tournaments.each do |tournament| %>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div>
+                  <div class="text-sm font-medium text-gray-900">
+                    <%= link_to tournament.name, admin_tournament_path(tournament), class: "hover:text-green-600" %>
+                  </div>
+                  <% if tournament.description.present? %>
+                    <div class="text-sm text-gray-500 truncate max-w-xs">
+                      <%= truncate(tournament.description, length: 60) %>
+                    </div>
+                  <% end %>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <div><%= tournament.start_date.strftime('%b %d, %Y') %></div>
+                <div class="text-gray-500">to <%= tournament.end_date.strftime('%b %d, %Y') %></div>
+                <div class="text-xs text-gray-400"><%= tournament.duration_days %> days</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <%= tournament.venue.presence || "TBD" %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full <%= tournament.status_badge_class %>">
+                  <%= tournament.status.humanize %>
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <%= tournament.created_by.display_name %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <div class="flex justify-end space-x-2">
+                  <%= link_to "View", admin_tournament_path(tournament), class: "text-green-600 hover:text-green-900" %>
+                  <%= link_to "Edit", edit_admin_tournament_path(tournament), class: "text-blue-600 hover:text-blue-900" %>
+                  <% if tournament.upcoming? %>
+                    <%= link_to "Delete", admin_tournament_path(tournament), 
+                        data: { "turbo-method": :delete, confirm: "Are you sure? This action cannot be undone." },
+                        class: "text-red-600 hover:text-red-900" %>
+                  <% else %>
+                    <span class="text-gray-400 cursor-not-allowed" title="Only upcoming tournaments can be deleted">Delete</span>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        <% else %>
+          <tr>
+            <td colspan="6" class="px-6 py-12 text-center">
+              <div class="text-gray-500">
+                <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No tournaments</h3>
+                <p class="mt-1 text-sm text-gray-500">Get started by creating your first tournament.</p>
+                <div class="mt-6">
+                  <%= link_to "New Tournament", new_admin_tournament_path, 
+                      class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
+                </div>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div> 

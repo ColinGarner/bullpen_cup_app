@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  team: one
+  user: one
+  joined_at: 2025-07-17 17:47:15
+
+two:
+  team: two
+  user: two
+  joined_at: 2025-07-17 17:47:15

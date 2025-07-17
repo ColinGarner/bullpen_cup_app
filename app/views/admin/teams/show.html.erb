@@ -1,0 +1,241 @@
+<% content_for :title, "#{@team.name} - #{@tournament.name}" %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <nav class="flex" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-4">
+              <li>
+                <%= link_to admin_root_path, class: "text-gray-500 hover:text-gray-700" do %>
+                  Dashboard
+                <% end %>
+              </li>
+              <li>
+                <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+              </li>
+              <li>
+                <%= link_to admin_tournament_path(@tournament), class: "text-gray-500 hover:text-gray-700" do %>
+                  <%= @tournament.name %>
+                <% end %>
+              </li>
+              <li>
+                <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                </svg>
+              </li>
+              <li>
+                <span class="text-gray-900 font-medium"><%= @team.name %></span>
+              </li>
+            </ol>
+          </nav>
+          <h1 class="mt-4 text-4xl font-bold text-gray-900"><%= @team.name %></h1>
+          <p class="mt-2 text-lg text-gray-600">Team management for <%= @tournament.name %></p>
+        </div>
+        <div class="flex items-center space-x-4">
+          <%= link_to edit_admin_tournament_team_path(@tournament, @team), 
+              class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" do %>
+            Edit Team
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Team Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+            <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-500">Team Captain</p>
+            <p class="text-xl font-bold text-gray-900"><%= @team.captain.display_name %></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+            <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-500">Total Players</p>
+            <p class="text-xl font-bold text-gray-900"><%= @team.player_count %></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+            <svg class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-500">Status</p>
+            <p class="text-xl font-bold text-gray-900">Active</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Current Team Members -->
+      <div class="bg-white rounded-xl shadow-lg">
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4 rounded-t-xl">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3">
+                <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h3 class="text-lg font-bold text-white">Team Members</h3>
+              <span class="ml-auto bg-white/20 text-white text-sm font-medium px-3 py-1 rounded-full">
+                <%= @team.player_count %>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="p-6">
+          <% if @players.any? %>
+            <div class="space-y-3">
+              <% @players.each do |player| %>
+                <div class="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 <%= @team.captain?(player) ? 'bg-yellow-500' : 'bg-blue-500' %> rounded-lg flex items-center justify-center mr-4">
+                      <% if @team.captain?(player) %>
+                        <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                        </svg>
+                      <% else %>
+                        <span class="text-white font-bold text-sm"><%= player.initials %></span>
+                      <% end %>
+                    </div>
+                    <div>
+                      <p class="font-semibold text-gray-900">
+                        <%= player.display_name %>
+                        <% if @team.captain?(player) %>
+                          <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Captain
+                          </span>
+                        <% end %>
+                      </p>
+                      <p class="text-sm text-gray-600"><%= player.email %></p>
+                    </div>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <% unless @team.captain?(player) %>
+                      <%= link_to remove_player_admin_tournament_team_path(@tournament, @team, user_id: player.id), 
+                          data: { "turbo-method": :delete, confirm: "Remove #{player.display_name} from the team?" },
+                          class: "text-red-600 hover:text-red-800 font-medium" do %>
+                        Remove
+                      <% end %>
+                    <% else %>
+                      <span class="text-gray-400 text-sm">Captain</span>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="text-center py-12">
+              <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <p class="text-gray-500 font-medium">No team members yet</p>
+              <p class="text-sm text-gray-400 mt-1">Add players to build your team</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Add Players -->
+      <div class="bg-white rounded-xl shadow-lg">
+        <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4 rounded-t-xl">
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3">
+              <svg class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-white">Add Players</h3>
+          </div>
+        </div>
+        <div class="p-6">
+          <% if @available_users.any? %>
+            <div class="space-y-3 max-h-96 overflow-y-auto">
+              <% @available_users.each do |user| %>
+                <div class="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors duration-200">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-4">
+                      <span class="text-white font-bold text-sm"><%= user.initials %></span>
+                    </div>
+                    <div>
+                      <p class="font-semibold text-gray-900"><%= user.display_name %></p>
+                      <p class="text-sm text-gray-600"><%= user.email %></p>
+                    </div>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <%= link_to add_player_admin_tournament_team_path(@tournament, @team, user_id: user.id), 
+                        data: { "turbo-method": :post },
+                        class: "bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" do %>
+                      Add
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="text-center py-12">
+              <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+              </div>
+              <p class="text-gray-500 font-medium">All users are assigned!</p>
+              <p class="text-sm text-gray-400 mt-1">Everyone available has been added to teams</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Team Information -->
+    <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-4">Team Information</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div>
+          <p class="text-sm font-medium text-gray-500">Team Name</p>
+          <p class="text-lg text-gray-900"><%= @team.name %></p>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-500">Tournament</p>
+          <p class="text-lg text-gray-900"><%= @tournament.name %></p>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-500">Captain</p>
+          <p class="text-lg text-gray-900"><%= @team.captain.display_name %></p>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-500">Player Count</p>
+          <p class="text-lg text-gray-900"><%= @team.player_count %> players</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
