@@ -1,0 +1,13 @@
+[variables]
+NIXPACKS_METADATA = "rails"
+
+[phases.setup]
+nixPkgs = ["postgresql"]
+
+[phases.build]
+cmds = [
+  "bundle install --deployment --without development test"
+]
+
+[start]
+cmd = "bundle exec rails server -b 0.0.0.0 -p $PORT" 
