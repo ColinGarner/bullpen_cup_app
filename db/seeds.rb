@@ -30,11 +30,26 @@ if Rails.env.development?
   
   # Clear existing data in development only
   puts "🧹 Cleaning up existing development data..."
-  TeamMembership.where.not(user: admin).destroy_all
-  Team.destroy_all
-  Round.destroy_all
-  Tournament.where.not(created_by: admin).destroy_all
-  User.where.not(email: admin.email).destroy_all
+  
+  # Use a transaction to ensure data integrity
+  ActiveRecord::Base.transaction do
+    puts "  Deleting match players..."
+    MatchPlayer.destroy_all
+    puts "  Deleting matches..."
+    Match.destroy_all
+    puts "  Deleting rounds..."
+    Round.destroy_all
+    puts "  Deleting team memberships..."
+    TeamMembership.destroy_all
+    puts "  Deleting teams..."
+    Team.destroy_all
+    puts "  Deleting tournaments..."
+    Tournament.destroy_all
+    puts "  Deleting users (except admin)..."
+    User.where.not(email: admin.email).destroy_all
+  end
+  
+  puts "✅ Cleanup completed successfully!"
 
   # Create sample users for development
   puts "👥 Creating sample users..."
@@ -80,7 +95,6 @@ if Rails.env.development?
     description: "The premier spring golf tournament featuring the best players from across the region. Four rounds of challenging golf across beautiful courses.",
     start_date: 2.weeks.from_now.to_date,
     end_date: (2.weeks.from_now + 3.days).to_date,
-    status: "upcoming",
     venue: "Augusta Hills Golf Club",
     created_by: admin
   )
@@ -90,7 +104,6 @@ if Rails.env.development?
     description: "A fun, relaxed tournament perfect for teams of all skill levels. Emphasis on teamwork and enjoying the game.",
     start_date: 1.month.from_now.to_date,
     end_date: (1.month.from_now + 2.days).to_date,
-    status: "upcoming",
     venue: "Pebble Creek Country Club",
     created_by: users.first
   )
@@ -100,7 +113,6 @@ if Rails.env.development?
     description: "Last year's winter tournament - completed with great success!",
     start_date: 2.months.ago.to_date,
     end_date: (2.months.ago + 3.days).to_date,
-    status: "completed",
     venue: "Pine Valley Golf Course",
     created_by: admin
   )

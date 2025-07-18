@@ -81,9 +81,13 @@
         </div>
       <% end %>
 
-      <main class="container mx-auto mt-28 px-5 flex">
+      <% if controller_name == 'home' && action_name == 'index' %>
         <%= yield %>
-      </main>
+      <% else %>
+        <main class="container mx-auto mt-28 px-5 flex">
+          <%= yield %>
+        </main>
+      <% end %>
     <% end %>
   </body>
 </html>

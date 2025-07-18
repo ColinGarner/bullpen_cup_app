@@ -35,8 +35,26 @@
                                          <div class="bg-white/20 rounded-lg p-4">
                        <div class="flex justify-between items-center">
                          <div class="flex-1">
-                           <div class="font-semibold text-yellow-300 mb-1">
-                             <%= match.round.name %> - <%= match.match_type.humanize %>
+                           <div class="font-semibold text-yellow-300 mb-1 flex items-center">
+                             <span><%= match.round.name %> - <%= match.match_type.humanize %></span>
+                             <div class="relative ml-2 group inline-block">
+                               <svg class="w-4 h-4 text-yellow-300/70 hover:text-yellow-300 cursor-help transition-colors duration-200" fill="currentColor" viewBox="0 0 20 20">
+                                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path>
+                               </svg>
+                               <div class="invisible group-hover:visible absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg w-64 z-50 shadow-lg border border-gray-700">
+                                 <% case match.match_type %>
+                                 <% when 'singles_match_play' %>
+                                   <strong>Singles Match Play:</strong> One player from each team competes head-to-head. Each hole is won, lost, or halved. The match is decided by who wins the most holes. The app will automatically apply handicap strokes on designated holes.
+                                 <% when 'fourball_match_play' %>
+                                   <strong>Fourball (Best Ball):</strong> Two players per team, each plays their own ball. The lower score from each team counts on each hole. Holes are won, lost, or halved based on best ball scores. Handicap strokes are applied individually and handled automatically.
+                                 <% when 'alt_shot_match_play' %>
+                                   <strong>Alternate Shot:</strong> Two players per team share one ball, taking turns hitting shots. Teams compete hole-by-hole to see who takes fewer strokes. The app will automatically calculate team handicaps and apply strokes accordingly.
+                                 <% when 'stableford' %>
+                                   <strong>Stableford:</strong> Points-based scoring system. Players earn points based on their net score relative to par (Eagle=4pts, Birdie=3pts, Par=2pts, Bogey=1pt). The app automatically applies handicap strokes and calculates points.
+                                 <% end %>
+                                 <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                               </div>
+                             </div>
                            </div>
                            <div class="text-sm">
                              <% team_a_players = match.team_a_players %>
@@ -96,6 +114,30 @@
                 <% if @upcoming_tournament.venue.present? %>
                   <p class="mt-1">📍 <%= @upcoming_tournament.venue %></p>
                 <% end %>
+                
+                <!-- Countdown Timer -->
+                <div class="mt-4 p-4 bg-white/10 rounded-lg">
+                  <p class="text-sm text-yellow-300 mb-2 font-medium">🕒 Tournament starts in:</p>
+                  <div class="grid grid-cols-4 gap-2 text-center" id="countdown-guest" data-target-date="<%= @upcoming_tournament.start_date.beginning_of_day.iso8601 %>">
+                    <div class="bg-white/20 rounded-lg p-2">
+                      <div class="text-xl font-bold text-yellow-400 countdown-days">00</div>
+                      <div class="text-xs text-white/80">Days</div>
+                    </div>
+                    <div class="bg-white/20 rounded-lg p-2">
+                      <div class="text-xl font-bold text-yellow-400 countdown-hours">00</div>
+                      <div class="text-xs text-white/80">Hours</div>
+                    </div>
+                    <div class="bg-white/20 rounded-lg p-2">
+                      <div class="text-xl font-bold text-yellow-400 countdown-minutes">00</div>
+                      <div class="text-xs text-white/80">Minutes</div>
+                    </div>
+                    <div class="bg-white/20 rounded-lg p-2">
+                      <div class="text-xl font-bold text-yellow-400 countdown-seconds">00</div>
+                      <div class="text-xs text-white/80">Seconds</div>
+                    </div>
+                  </div>
+                </div>
+                
                 <% if @upcoming_tournament.description.present? %>
                   <p class="mt-3 text-white/80"><%= @upcoming_tournament.description %></p>
                 <% end %>
@@ -254,3 +296,71 @@
     </div>
   </div>
 </div>
+
+<script>
+  // Countdown Timer Function
+  function updateCountdown(elementId, targetDate) {
+    const countdownElement = document.getElementById(elementId);
+    if (!countdownElement) return;
+    
+    const daysElement = countdownElement.querySelector('.countdown-days');
+    const hoursElement = countdownElement.querySelector('.countdown-hours');
+    const minutesElement = countdownElement.querySelector('.countdown-minutes');
+    const secondsElement = countdownElement.querySelector('.countdown-seconds');
+    
+    if (!daysElement || !hoursElement || !minutesElement || !secondsElement) return;
+    
+    function calculate() {
+      const now = new Date().getTime();
+      const target = new Date(targetDate).getTime();
+      const distance = target - now;
+      
+      if (distance < 0) {
+        // Tournament has started - show zeros or refresh page
+        daysElement.textContent = '00';
+        hoursElement.textContent = '00';
+        minutesElement.textContent = '00';
+        secondsElement.textContent = '00';
+        
+        // Optionally refresh the page when tournament starts
+        setTimeout(() => {
+          window.location.reload();
+        }, 5000);
+        return;
+      }
+      
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      
+      daysElement.textContent = days.toString().padStart(2, '0');
+      hoursElement.textContent = hours.toString().padStart(2, '0');
+      minutesElement.textContent = minutes.toString().padStart(2, '0');
+      secondsElement.textContent = seconds.toString().padStart(2, '0');
+    }
+    
+    // Update immediately
+    calculate();
+    
+    // Update every second
+    setInterval(calculate, 1000);
+  }
+  
+  // Initialize countdowns when page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    // For signed-in users
+    const signedInCountdown = document.getElementById('countdown-signed-in');
+    if (signedInCountdown) {
+      const targetDate = signedInCountdown.getAttribute('data-target-date');
+      updateCountdown('countdown-signed-in', targetDate);
+    }
+    
+    // For guest users
+    const guestCountdown = document.getElementById('countdown-guest');
+    if (guestCountdown) {
+      const targetDate = guestCountdown.getAttribute('data-target-date');
+      updateCountdown('countdown-guest', targetDate);
+    }
+  });
+</script>
