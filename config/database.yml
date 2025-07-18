@@ -14,8 +14,13 @@ development:
   host: <%= ENV['DATABASE_HOST'] || 'localhost' %>
 
 test:
-  <<: *default
-  database: storage/test.sqlite3
+  adapter: postgresql
+  encoding: unicode
+  database: bullpen_cup_app_test
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  username: <%= ENV['DATABASE_USERNAME'] || ENV['USER'] %>
+  password: <%= ENV['DATABASE_PASSWORD'] %>
+  host: <%= ENV['DATABASE_HOST'] || 'localhost' %>
 
 production:
   primary:
@@ -24,14 +29,23 @@ production:
     pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
     url: <%= ENV['DATABASE_URL'] %>
   cache:
-    <<: *default
-    database: storage/production_cache.sqlite3
+    adapter: postgresql
+    encoding: unicode
+    database: bullpen_cup_app_production_cache
+    pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+    url: <%= ENV['CACHE_DATABASE_URL'] || ENV['DATABASE_URL'] %>
     migrations_paths: db/cache_migrate
   queue:
-    <<: *default
-    database: storage/production_queue.sqlite3
+    adapter: postgresql
+    encoding: unicode
+    database: bullpen_cup_app_production_queue
+    pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+    url: <%= ENV['QUEUE_DATABASE_URL'] || ENV['DATABASE_URL'] %>
     migrations_paths: db/queue_migrate
   cable:
-    <<: *default
-    database: storage/production_cable.sqlite3
+    adapter: postgresql
+    encoding: unicode
+    database: bullpen_cup_app_production_cable
+    pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+    url: <%= ENV['CABLE_DATABASE_URL'] || ENV['DATABASE_URL'] %>
     migrations_paths: db/cable_migrate

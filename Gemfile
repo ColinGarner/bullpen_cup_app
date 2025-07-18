@@ -51,10 +51,7 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 end
 
-group :test do
-  # Use sqlite3 as the database for Active Record in test only
-  gem "sqlite3", ">= 2.1"
-end
+# PostgreSQL is used for all environments (development, test, production)
 
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
