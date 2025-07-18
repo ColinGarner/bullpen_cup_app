@@ -6,9 +6,9 @@ class Admin::UsersController < Admin::BaseController
     
     # Simple search functionality
     if params[:search].present?
-      search_term = "%#{params[:search]}%"
+      search_term = "%#{params[:search].downcase}%"
       @users = @users.where(
-        "first_name ILIKE ? OR last_name ILIKE ? OR email ILIKE ?", 
+        "LOWER(first_name) LIKE ? OR LOWER(last_name) LIKE ? OR LOWER(email) LIKE ?", 
         search_term, search_term, search_term
       )
     end

@@ -11,8 +11,11 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[8.0].define(version: 2025_07_17_230947) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
+
   create_table "rounds", force: :cascade do |t|
-    t.integer "tournament_id", null: false
+    t.bigint "tournament_id", null: false
     t.integer "round_number", null: false
     t.string "name", null: false
     t.date "date"
@@ -27,8 +30,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_17_230947) do
   end
 
   create_table "team_memberships", force: :cascade do |t|
-    t.integer "team_id", null: false
-    t.integer "user_id", null: false
+    t.bigint "team_id", null: false
+    t.bigint "user_id", null: false
     t.datetime "joined_at", default: -> { "CURRENT_TIMESTAMP" }
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -39,8 +42,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_17_230947) do
 
   create_table "teams", force: :cascade do |t|
     t.string "name", null: false
-    t.integer "tournament_id", null: false
-    t.integer "captain_id", null: false
+    t.bigint "tournament_id", null: false
+    t.bigint "captain_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["captain_id"], name: "index_teams_on_captain_id"
@@ -55,7 +58,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_17_230947) do
     t.date "end_date", null: false
     t.string "status", default: "upcoming", null: false
     t.string "venue"
-    t.integer "created_by_id", null: false
+    t.bigint "created_by_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["created_by_id"], name: "index_tournaments_on_created_by_id"
