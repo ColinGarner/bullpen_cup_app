@@ -37,8 +37,8 @@
         <% if @user.admin? %>
           <% if User.admins.count > 1 && @user != current_user %>
             <%= link_to demote_from_admin_admin_user_path(@user), 
-                method: :patch,
                 data: { 
+                  turbo_method: :patch,
                   confirm: "Are you sure you want to remove admin privileges from #{@user.display_name}?" 
                 },
                 class: "px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md text-sm transition-colors duration-200" do %>
@@ -47,8 +47,8 @@
           <% end %>
         <% else %>
           <%= link_to promote_to_admin_admin_user_path(@user), 
-              method: :patch,
               data: { 
+                turbo_method: :patch,
                 confirm: "Are you sure you want to grant admin privileges to #{@user.display_name}?" 
               },
               class: "px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md text-sm transition-colors duration-200" do %>
