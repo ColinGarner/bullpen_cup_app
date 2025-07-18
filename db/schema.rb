@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_17_230947) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_18_122048) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -56,14 +56,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_17_230947) do
     t.text "description"
     t.date "start_date", null: false
     t.date "end_date", null: false
-    t.string "status", default: "upcoming", null: false
     t.string "venue"
     t.bigint "created_by_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "cancelled", default: false, null: false
+    t.index ["cancelled"], name: "index_tournaments_on_cancelled"
     t.index ["created_by_id"], name: "index_tournaments_on_created_by_id"
     t.index ["start_date"], name: "index_tournaments_on_start_date"
-    t.index ["status"], name: "index_tournaments_on_status"
   end
 
   create_table "users", force: :cascade do |t|

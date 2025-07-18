@@ -11,46 +11,54 @@ class Tournament < ApplicationRecord
   validates :name, presence: true, length: { minimum: 3, maximum: 100 }
   validates :description, length: { maximum: 1000 }
   validates :start_date, :end_date, presence: true
-  validates :status, presence: true, inclusion: { in: %w[upcoming active completed cancelled] }
   validates :venue, length: { maximum: 200 }
+  validates :cancelled, inclusion: { in: [true, false] }
   
   # Custom validation to ensure end_date is after start_date
   validate :end_date_after_start_date
   
-  # Scopes
-  scope :upcoming, -> { where(status: 'upcoming') }
-  scope :active, -> { where(status: 'active') }
-  scope :completed, -> { where(status: 'completed') }
+  # Scopes - now based on dates and cancelled status
+  scope :upcoming, -> { where(cancelled: false).where('start_date > ?', Date.current) }
+  scope :active, -> { where(cancelled: false).where('start_date <= ? AND end_date >= ?', Date.current, Date.current) }
+  scope :completed, -> { where(cancelled: false).where('end_date < ?', Date.current) }
+  scope :cancelled, -> { where(cancelled: true) }
   scope :by_start_date, -> { order(:start_date) }
   
-  # Status methods
+  # Computed status method
+  def status
+    return 'cancelled' if cancelled?
+    
+    current_date = Date.current
+    
+    if current_date < start_date
+      'upcoming'
+    elsif current_date >= start_date && current_date <= end_date
+      'active'
+    else
+      'completed'
+    end
+  end
+  
+  # Status query methods
   def upcoming?
-    status == 'upcoming'
+    !cancelled? && Date.current < start_date
   end
   
   def active?
-    status == 'active'
+    !cancelled? && Date.current >= start_date && Date.current <= end_date
   end
   
   def completed?
-    status == 'completed'
+    !cancelled? && Date.current > end_date
   end
   
   def cancelled?
-    status == 'cancelled'
+    cancelled == true
   end
   
-  # Status transitions
-  def start!
-    update!(status: 'active')
-  end
-  
-  def complete!
-    update!(status: 'completed')
-  end
-  
+  # Only keep cancel! method - start and complete are automatic based on dates
   def cancel!
-    update!(status: 'cancelled')
+    update!(cancelled: true)
   end
   
   # Helper methods for teams and rounds

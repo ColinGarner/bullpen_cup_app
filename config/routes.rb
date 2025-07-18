@@ -16,8 +16,6 @@ Rails.application.routes.draw do
     end
     resources :tournaments do
       member do
-        patch :start
-        patch :complete
         patch :cancel
         get :confirm_destroy
       end

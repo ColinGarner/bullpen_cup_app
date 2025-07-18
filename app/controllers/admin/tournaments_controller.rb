@@ -1,5 +1,5 @@
 class Admin::TournamentsController < Admin::BaseController
-  before_action :set_tournament, only: [:show, :edit, :update, :destroy, :start, :complete, :cancel, :confirm_destroy]
+  before_action :set_tournament, only: [:show, :edit, :update, :destroy, :cancel, :confirm_destroy]
   
   def index
     @tournaments = Tournament.includes(:created_by).order(created_at: :desc)
@@ -59,17 +59,7 @@ class Admin::TournamentsController < Admin::BaseController
     redirect_to admin_tournaments_path, notice: 'Tournament and all associated data was successfully deleted.'
   end
   
-  # Status actions
-  def start
-    @tournament.start!
-    redirect_to admin_tournament_path(@tournament), notice: 'Tournament has been started!'
-  end
-  
-  def complete
-    @tournament.complete!
-    redirect_to admin_tournament_path(@tournament), notice: 'Tournament has been completed!'
-  end
-  
+  # Only keep cancel action since cancelled status needs manual setting
   def cancel
     @tournament.cancel!
     redirect_to admin_tournament_path(@tournament), notice: 'Tournament has been cancelled.'
