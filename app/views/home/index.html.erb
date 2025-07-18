@@ -9,33 +9,165 @@
         The ultimate Ryder Cup-style golf tournament experience. Track scores, manage teams, and settle the score on the course.
       </p>
       
-      <!-- Authentication & Navigation -->
-      <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+      <!-- Tournament Status & User Content -->
+      <div class="max-w-4xl mx-auto mb-8">
         <% if user_signed_in? %>
-          <!-- Logged in user options -->
-          <div class="text-lg mb-4">
-            Welcome back, <span class="font-semibold"><%= current_user.display_name %></span>!
+          <!-- Signed In User Content -->
+          <div class="text-lg mb-6">
+            Welcome back, <span class="font-semibold text-yellow-400"><%= current_user.display_name %></span>!
             <% if current_user.admin? %>
               <%= link_to admin_root_path, class: "bg-yellow-500 hover:bg-yellow-600 text-black px-2 py-1 rounded text-sm ml-2 transition-colors" do %>
                 ADMIN
               <% end %>
             <% end %>
           </div>
+          
+          <% if @active_tournament %>
+            <!-- Active Tournament - Show User's Matches -->
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-6">
+              <h2 class="text-2xl font-bold text-yellow-400 mb-4">🏆 <%= @active_tournament.name %> - Active Now!</h2>
+              <p class="text-lg mb-4">Tournament is running from <%= @active_tournament.start_date.strftime('%B %d') %> to <%= @active_tournament.end_date.strftime('%B %d, %Y') %></p>
+              
+              <% if @user_matches && @user_matches.any? %>
+                <h3 class="text-xl font-semibold text-yellow-300 mb-3">📅 Your Upcoming Matches</h3>
+                <div class="space-y-3">
+                  <% @user_matches.each do |match| %>
+                                         <div class="bg-white/20 rounded-lg p-4">
+                       <div class="flex justify-between items-center">
+                         <div class="flex-1">
+                           <div class="font-semibold text-yellow-300 mb-1">
+                             <%= match.round.name %> - <%= match.match_type.humanize %>
+                           </div>
+                           <div class="text-sm">
+                             <% team_a_players = match.team_a_players %>
+                             <% team_b_players = match.team_b_players %>
+                             
+                             <% if team_a_players.any? && team_b_players.any? %>
+                               <span class="font-medium"><%= match.team_a.name %>:</span>
+                               <%= team_a_players.map(&:display_name).join(', ') %>
+                               <span class="text-yellow-300 mx-2">vs</span>
+                               <span class="font-medium"><%= match.team_b.name %>:</span>
+                               <%= team_b_players.map(&:display_name).join(', ') %>
+                             <% else %>
+                               <span class="text-white/70">Players not yet assigned</span>
+                             <% end %>
+                           </div>
+                         </div>
+                         <div class="text-right">
+                           <% if match.scheduled_time %>
+                             <div class="text-yellow-300 text-sm font-medium">
+                               <% 
+                                 match_date = match.scheduled_time.to_date
+                                 today = Date.current
+                                 date_text = case
+                                   when match_date == today
+                                     "Today"
+                                   when match_date == today + 1.day
+                                     "Tomorrow"
+                                   when match_date == today - 1.day
+                                     "Yesterday"
+                                   when match_date.year == today.year
+                                     match_date.strftime('%B %d')
+                                   else
+                                     match_date.strftime('%B %d, %Y')
+                                   end
+                               %>
+                               <%= "#{date_text}, #{match.scheduled_time.strftime('%I:%M %p')}" %>
+                             </div>
+                           <% else %>
+                             <div class="text-white/70 text-sm">Time TBD</div>
+                           <% end %>
+                         </div>
+                       </div>
+                     </div>
+                  <% end %>
+                </div>
+              <% else %>
+                <p class="text-lg">No upcoming matches scheduled yet. Check back soon!</p>
+              <% end %>
+            </div>
+          <% elsif @upcoming_tournament %>
+            <!-- Upcoming Tournament -->
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-6">
+              <h2 class="text-2xl font-bold text-yellow-400 mb-4">⏰ Next Tournament</h2>
+              <div class="text-lg">
+                <h3 class="font-semibold text-xl"><%= @upcoming_tournament.name %></h3>
+                <p class="mt-2">📅 <%= @upcoming_tournament.start_date.strftime('%B %d') %> - <%= @upcoming_tournament.end_date.strftime('%B %d, %Y') %></p>
+                <% if @upcoming_tournament.venue.present? %>
+                  <p class="mt-1">📍 <%= @upcoming_tournament.venue %></p>
+                <% end %>
+                <% if @upcoming_tournament.description.present? %>
+                  <p class="mt-3 text-white/80"><%= @upcoming_tournament.description %></p>
+                <% end %>
+              </div>
+            </div>
+          <% else %>
+            <!-- No tournaments -->
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-6">
+              <h2 class="text-2xl font-bold text-yellow-400 mb-4">🏌️‍♂️ No Tournaments Scheduled</h2>
+              <p class="text-lg">Check back soon for upcoming tournaments!</p>
+            </div>
+          <% end %>
+        <% else %>
+          <!-- Guest User Content -->
+          <% if @active_tournament %>
+            <!-- Active Tournament - Show Leaderboard Link -->
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-6">
+              <h2 class="text-2xl font-bold text-yellow-400 mb-4">🏆 <%= @active_tournament.name %> - Live Now!</h2>
+              <p class="text-lg mb-4">Tournament is running from <%= @active_tournament.start_date.strftime('%B %d') %> to <%= @active_tournament.end_date.strftime('%B %d, %Y') %></p>
+              <% if @active_tournament.venue.present? %>
+                <p class="mb-4">📍 <%= @active_tournament.venue %></p>
+              <% end %>
+              <div class="mt-4">
+                <%= link_to "#", class: "bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-6 py-3 rounded-lg transition-colors inline-block" do %>
+                  📊 View Live Leaderboard
+                <% end %>
+                <p class="text-sm text-white/80 mt-2">Follow the action in real-time</p>
+              </div>
+            </div>
+          <% elsif @upcoming_tournament %>
+            <!-- Upcoming Tournament -->
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-6">
+              <h2 class="text-2xl font-bold text-yellow-400 mb-4">⏰ Next Tournament</h2>
+              <div class="text-lg">
+                <h3 class="font-semibold text-xl"><%= @upcoming_tournament.name %></h3>
+                <p class="mt-2">📅 <%= @upcoming_tournament.start_date.strftime('%B %d') %> - <%= @upcoming_tournament.end_date.strftime('%B %d, %Y') %></p>
+                <% if @upcoming_tournament.venue.present? %>
+                  <p class="mt-1">📍 <%= @upcoming_tournament.venue %></p>
+                <% end %>
+                <% if @upcoming_tournament.description.present? %>
+                  <p class="mt-3 text-white/80"><%= @upcoming_tournament.description %></p>
+                <% end %>
+              </div>
+            </div>
+          <% else %>
+            <!-- No tournaments -->
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-6">
+              <h2 class="text-2xl font-bold text-yellow-400 mb-4">🏌️‍♂️ No Tournaments Scheduled</h2>
+              <p class="text-lg">Check back soon for upcoming tournaments!</p>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+      
+      <!-- Authentication & Navigation -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+        <% if user_signed_in? %>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <% if current_user.admin? %>
               <%= link_to "Admin Dashboard", admin_root_path, class: "bg-gray-800 hover:bg-gray-900 text-white font-semibold px-8 py-3 rounded-lg transition-colors" %>
             <% end %>
-            <%= link_to "View Leaderboard", "#", class: "bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-3 rounded-lg transition-colors" %>
+            <% if @active_tournament %>
+              <%= link_to "#", class: "bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-3 rounded-lg transition-colors" do %>
+                📊 View Leaderboard
+              <% end %>
+            <% end %>
             <%= link_to "Sign Out", destroy_user_session_path, data: { "turbo-method": :delete }, class: "border-2 border-white hover:bg-white hover:text-green-900 text-white font-semibold px-8 py-3 rounded-lg transition-colors" %>
           </div>
         <% else %>
-          <!-- Guest user options -->
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <%= link_to "Sign In", new_user_session_path, class: "bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-3 rounded-lg transition-colors" %>
             <%= link_to "Sign Up", new_user_registration_path, class: "border-2 border-white hover:bg-white hover:text-green-900 text-white font-semibold px-8 py-3 rounded-lg transition-colors" %>
-          </div>
-          <div class="mt-4">
-            <%= link_to "View Leaderboard", "#", class: "text-white hover:text-yellow-400 underline" %>
           </div>
         <% end %>
       </div>
@@ -46,22 +178,40 @@
   <div class="bg-white py-16">
     <div class="container mx-auto px-4">
       <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-4">
-        Features Coming Soon
+        Tournament Management Features
       </h2>
       <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
-        We're building the ultimate golf tournament platform. Here's what's on the roadmap:
+        Professional-grade golf tournament management tools to organize your Ryder Cup-style events.
       </p>
       <div class="grid md:grid-cols-3 gap-8">
         <div class="text-center p-6 relative">
-          <div class="text-4xl mb-4">⛳</div>
-          <h3 class="text-xl font-semibold mb-2">Live Scoring</h3>
-          <p class="text-gray-600">Real-time score tracking with hole-by-hole updates and live leaderboards.</p>
-          <span class="absolute top-2 right-2 bg-yellow-500 text-black text-xs px-2 py-1 rounded">COMING SOON</span>
+          <div class="text-4xl mb-4">🏆</div>
+          <h3 class="text-xl font-semibold mb-2">Tournament Management</h3>
+          <p class="text-gray-600">Create and manage multi-day tournaments with automatic status tracking and scheduling.</p>
+          <span class="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded">LIVE</span>
         </div>
         <div class="text-center p-6 relative">
           <div class="text-4xl mb-4">👥</div>
-          <h3 class="text-xl font-semibold mb-2">Team Management</h3>
-          <p class="text-gray-600">Organize players into teams, assign captains, and track team standings.</p>
+          <h3 class="text-xl font-semibold mb-2">Team & Player Management</h3>
+          <p class="text-gray-600">Organize players into teams, assign captains, and manage player participation across rounds.</p>
+          <span class="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded">LIVE</span>
+        </div>
+        <div class="text-center p-6 relative">
+          <div class="text-4xl mb-4">⚔️</div>
+          <h3 class="text-xl font-semibold mb-2">Match Scheduling</h3>
+          <p class="text-gray-600">Create singles, fourball, and alternate shot matches with flexible scheduling and player assignment.</p>
+          <span class="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded">LIVE</span>
+        </div>
+        <div class="text-center p-6 relative">
+          <div class="text-4xl mb-4">⛳</div>
+          <h3 class="text-xl font-semibold mb-2">Golf Course Integration</h3>
+          <p class="text-gray-600">Real course data, handicap calculations, and stroke allocation for fair competition.</p>
+          <span class="absolute top-2 right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">IN PROGRESS</span>
+        </div>
+        <div class="text-center p-6 relative">
+          <div class="text-4xl mb-4">📊</div>
+          <h3 class="text-xl font-semibold mb-2">Live Scoring</h3>
+          <p class="text-gray-600">Real-time score tracking with hole-by-hole updates and live leaderboards.</p>
           <span class="absolute top-2 right-2 bg-yellow-500 text-black text-xs px-2 py-1 rounded">COMING SOON</span>
         </div>
         <div class="text-center p-6 relative">
@@ -79,13 +229,27 @@
     <div class="container mx-auto px-4 text-center">
       <h3 class="text-2xl font-semibold text-gray-800 mb-4">🚀 Development Status</h3>
       <p class="text-gray-600 mb-6">
-        The Bullpen Cup app is actively being developed. Core authentication is complete!
+        The Bullpen Cup app is rapidly taking shape with core tournament management features now live!
       </p>
-      <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded max-w-md mx-auto">
-        <strong>Authentication:</strong> ✅ Complete<br>
-        <strong>Database:</strong> SQLite ✅<br>
-        <strong>Deployment:</strong> Railway ✅<br>
-        <strong>Next:</strong> Tournament features! ⛳
+      <div class="grid md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+          <strong>✅ Completed Features:</strong><br>
+          🔐 User Authentication<br>
+          🏆 Tournament Management<br>
+          👥 Team Organization<br>
+          🎯 Round Scheduling<br>
+          ⚔️ Match Creation<br>
+          👤 Player Management
+        </div>
+        <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
+          <strong>🚧 Coming Next:</strong><br>
+          ⛳ Golf Course Integration<br>
+          📊 Live Scoring System<br>
+          🏌️‍♂️ Handicap Calculations<br>
+          📈 Real-time Leaderboards<br>
+          💬 Trash Talk Board<br>
+          📱 Mobile Optimization
+        </div>
       </div>
     </div>
   </div>
