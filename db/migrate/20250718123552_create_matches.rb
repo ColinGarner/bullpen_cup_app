@@ -12,13 +12,13 @@ class CreateMatches < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
+
     # Add indexes for performance
     add_index :matches, :match_type
     add_index :matches, :status
-    add_index :matches, [:round_id, :status]
-    add_index :matches, [:team_a_id, :team_b_id]
-    
+    add_index :matches, [ :round_id, :status ]
+    add_index :matches, [ :team_a_id, :team_b_id ]
+
     # Add constraint to ensure teams are different
     add_check_constraint :matches, "team_a_id != team_b_id", name: "matches_different_teams"
   end

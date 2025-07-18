@@ -11,7 +11,7 @@ class CreateTournaments < ActiveRecord::Migration[8.0]
 
       t.timestamps
     end
-    
+
     add_index :tournaments, :status
     add_index :tournaments, :start_date
   end

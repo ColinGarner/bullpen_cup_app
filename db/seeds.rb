@@ -27,10 +27,10 @@ puts "✅ Admin user ready: #{admin.display_name} (#{admin.email})"
 # Only create sample data in development environment
 if Rails.env.development?
   puts "🚀 Creating sample data for development environment..."
-  
+
   # Clear existing data in development only
   puts "🧹 Cleaning up existing development data..."
-  
+
   # Use a transaction to ensure data integrity
   ActiveRecord::Base.transaction do
     puts "  Deleting match players..."
@@ -48,7 +48,7 @@ if Rails.env.development?
     puts "  Deleting users (except admin)..."
     User.where.not(email: admin.email).destroy_all
   end
-  
+
   puts "✅ Cleanup completed successfully!"
 
   # Create sample users for development
@@ -87,9 +87,9 @@ if Rails.env.development?
 
   # Rest of sample data creation only for development...
   # (keeping the tournament, team, and round creation code but only for development)
-  
+
   puts "🏆 Creating sample tournaments..."
-  
+
   tournament1 = Tournament.create!(
     name: "Bullpen Cup 2024 Spring Championship",
     description: "The premier spring golf tournament featuring the best players from across the region. Four rounds of challenging golf across beautiful courses.",
@@ -124,14 +124,14 @@ if Rails.env.development?
 
   # Create teams for Spring Championship (8 teams with 2 players each)
   teams_data = [
-    { name: "Eagle Masters", captain: users[0], players: [users[0], users[1]] },
-    { name: "Birdie Brigade", captain: users[2], players: [users[2], users[3]] },
-    { name: "Par Excellence", captain: users[4], players: [users[4], users[5]] },
-    { name: "Fairway Legends", captain: users[6], players: [users[6], users[7]] },
-    { name: "Green Guardians", captain: users[8], players: [users[8], users[9]] },
-    { name: "Tee Time Titans", captain: users[10], players: [users[10], users[11]] },
-    { name: "Rough Riders", captain: users[12], players: [users[12], users[13]] },
-    { name: "Sand Trap Heroes", captain: users[14], players: [users[14], admin] }
+    { name: "Eagle Masters", captain: users[0], players: [ users[0], users[1] ] },
+    { name: "Birdie Brigade", captain: users[2], players: [ users[2], users[3] ] },
+    { name: "Par Excellence", captain: users[4], players: [ users[4], users[5] ] },
+    { name: "Fairway Legends", captain: users[6], players: [ users[6], users[7] ] },
+    { name: "Green Guardians", captain: users[8], players: [ users[8], users[9] ] },
+    { name: "Tee Time Titans", captain: users[10], players: [ users[10], users[11] ] },
+    { name: "Rough Riders", captain: users[12], players: [ users[12], users[13] ] },
+    { name: "Sand Trap Heroes", captain: users[14], players: [ users[14], admin ] }
   ]
 
   teams_data.each do |team_data|
@@ -140,23 +140,23 @@ if Rails.env.development?
       tournament: tournament1,
       captain: team_data[:captain]
     )
-    
+
     # Add additional players (captain is automatically added by callback)
     team_data[:players].each do |player|
       unless player == team_data[:captain]
         team.add_player(player)
       end
     end
-    
+
     puts "✅ Created team: #{team.name} with #{team.player_count} players (Captain: #{team.captain.display_name})"
   end
 
   # Create teams for Summer Scramble (4 teams with 3-4 players each)
   summer_teams = [
-    { name: "Summer Sluggers", captain: users[1], players: [users[1], users[5], users[9]] },
-    { name: "Heat Wave", captain: users[3], players: [users[3], users[7], users[11], users[13]] },
-    { name: "Sunshine Squad", captain: users[2], players: [users[2], users[6], users[10]] },
-    { name: "Hot Shots", captain: users[4], players: [users[4], users[8], users[12], admin] }
+    { name: "Summer Sluggers", captain: users[1], players: [ users[1], users[5], users[9] ] },
+    { name: "Heat Wave", captain: users[3], players: [ users[3], users[7], users[11], users[13] ] },
+    { name: "Sunshine Squad", captain: users[2], players: [ users[2], users[6], users[10] ] },
+    { name: "Hot Shots", captain: users[4], players: [ users[4], users[8], users[12], admin ] }
   ]
 
   summer_teams.each do |team_data|
@@ -165,14 +165,14 @@ if Rails.env.development?
       tournament: tournament2,
       captain: team_data[:captain]
     )
-    
+
     # Add additional players
     team_data[:players].each do |player|
       unless player == team_data[:captain]
         team.add_player(player)
       end
     end
-    
+
     puts "✅ Created team: #{team.name} with #{team.player_count} players (Captain: #{team.captain.display_name})"
   end
 

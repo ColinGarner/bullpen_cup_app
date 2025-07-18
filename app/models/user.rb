@@ -7,20 +7,20 @@ class User < ApplicationRecord
   # Validations for name fields
   validates :first_name, presence: true, length: { minimum: 2, maximum: 50 }
   validates :last_name, presence: true, length: { minimum: 2, maximum: 50 }
-  
+
   # Validations for handicap
-  validates :handicap, numericality: { 
-    greater_than_or_equal_to: 0, 
+  validates :handicap, numericality: {
+    greater_than_or_equal_to: 0,
     less_than_or_equal_to: 54,
-    allow_nil: true 
+    allow_nil: true
   }
 
   # Team relationships
   has_many :team_memberships, dependent: :destroy
   has_many :teams, through: :team_memberships
-  has_many :captained_teams, class_name: 'Team', foreign_key: 'captain_id', dependent: :destroy
-  has_many :created_tournaments, class_name: 'Tournament', foreign_key: 'created_by_id', dependent: :destroy
-  
+  has_many :captained_teams, class_name: "Team", foreign_key: "captain_id", dependent: :destroy
+  has_many :created_tournaments, class_name: "Tournament", foreign_key: "created_by_id", dependent: :destroy
+
   # Match associations
   has_many :match_players, dependent: :destroy
   has_many :matches, through: :match_players
@@ -45,15 +45,15 @@ class User < ApplicationRecord
   def captain_of?(team)
     captained_teams.include?(team)
   end
-  
+
   def member_of?(team)
     teams.include?(team)
   end
-  
+
   def tournaments_as_participant
     Tournament.joins(:team_memberships).where(team_memberships: { user_id: id }).distinct
   end
-  
+
   def tournaments_as_captain
     Tournament.joins(:teams).where(teams: { captain_id: id }).distinct
   end
@@ -71,7 +71,7 @@ class User < ApplicationRecord
   end
 
   def formatted_handicap
-    return 'N/A' unless handicap.present?
+    return "N/A" unless handicap.present?
     handicap % 1 == 0 ? handicap.to_i.to_s : handicap.to_s
   end
 end

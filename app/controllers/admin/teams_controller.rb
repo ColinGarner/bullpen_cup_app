@@ -1,6 +1,6 @@
 class Admin::TeamsController < Admin::BaseController
   before_action :set_tournament, except: []
-  before_action :set_team, only: [:show, :edit, :update, :destroy, :add_player, :remove_player]
+  before_action :set_team, only: [ :show, :edit, :update, :destroy, :add_player, :remove_player ]
 
   def index
     if @tournament
@@ -9,7 +9,7 @@ class Admin::TeamsController < Admin::BaseController
     else
       # Standalone route: show all teams across tournaments
       @teams = Team.includes(:tournament, :captain, :team_memberships, :players)
-                   .order('tournaments.name, teams.name')
+                   .order("tournaments.name, teams.name")
       @teams = @teams.joins(:tournament).where(tournaments: { name: params[:search] }) if params[:search].present?
     end
   end
@@ -26,10 +26,10 @@ class Admin::TeamsController < Admin::BaseController
 
   def create
     @team = @tournament.teams.build(team_params)
-    
+
     if @team.save
-      redirect_to admin_tournament_path(@tournament), 
-                  notice: 'Team was successfully created.'
+      redirect_to admin_tournament_path(@tournament),
+                  notice: "Team was successfully created."
     else
       # Log errors for debugging
       Rails.logger.debug "Team creation failed: #{@team.errors.full_messages.join(', ')}"
@@ -44,8 +44,8 @@ class Admin::TeamsController < Admin::BaseController
 
   def update
     if @team.update(team_params)
-      redirect_to admin_tournament_team_path(@tournament, @team), 
-                  notice: 'Team was successfully updated.'
+      redirect_to admin_tournament_team_path(@tournament, @team),
+                  notice: "Team was successfully updated."
     else
       @available_captains = User.order(:email)
       render :edit, status: :unprocessable_entity
@@ -54,30 +54,30 @@ class Admin::TeamsController < Admin::BaseController
 
   def destroy
     @team.destroy
-    redirect_to admin_tournament_path(@tournament), 
-                notice: 'Team was successfully deleted.'
+    redirect_to admin_tournament_path(@tournament),
+                notice: "Team was successfully deleted."
   end
 
   def add_player
     @user = User.find(params[:user_id])
-    
+
     if @team.add_player(@user)
-      redirect_to admin_tournament_team_path(@tournament, @team), 
+      redirect_to admin_tournament_team_path(@tournament, @team),
                   notice: "#{@user.display_name} was added to the team."
     else
-      redirect_to admin_tournament_team_path(@tournament, @team), 
+      redirect_to admin_tournament_team_path(@tournament, @team),
                   alert: "Could not add #{@user.display_name} to the team."
     end
   end
 
   def remove_player
     @user = User.find(params[:user_id])
-    
+
     if @team.remove_player(@user)
-      redirect_to admin_tournament_team_path(@tournament, @team), 
+      redirect_to admin_tournament_team_path(@tournament, @team),
                   notice: "#{@user.display_name} was removed from the team."
     else
-      redirect_to admin_tournament_team_path(@tournament, @team), 
+      redirect_to admin_tournament_team_path(@tournament, @team),
                   alert: "Could not remove #{@user.display_name} from the team. Captains cannot be removed."
     end
   end

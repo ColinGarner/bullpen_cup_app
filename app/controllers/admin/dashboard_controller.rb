@@ -5,4 +5,4 @@ class Admin::DashboardController < Admin::BaseController
     @recent_tournaments = Tournament.completed.order(end_date: :desc).limit(3)
     @total_tournaments = Tournament.count
   end
-end 
+end

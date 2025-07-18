@@ -2,13 +2,13 @@ Rails.application.routes.draw do
   devise_for :users
   root "home#index"
   get "home/index"
-  
+
   # Admin routes - protected by authentication in controller
   namespace :admin do
     root "dashboard#index"
-    
+
     # User management
-    resources :users, only: [:index] do
+    resources :users, only: [ :index ] do
       member do
         patch :promote_to_admin
         patch :demote_from_admin
@@ -19,7 +19,7 @@ Rails.application.routes.draw do
         patch :cancel
         get :confirm_destroy
       end
-      
+
       # Nested resources for teams and rounds
       resources :teams do
         member do
@@ -27,14 +27,14 @@ Rails.application.routes.draw do
           delete :remove_player
         end
       end
-      
+
       resources :rounds do
         member do
           patch :start
           patch :complete
           patch :cancel
         end
-        
+
         resources :matches do
           member do
             patch :start
@@ -47,11 +47,11 @@ Rails.application.routes.draw do
         end
       end
     end
-    
+
     # Standalone teams resource for cross-tournament management if needed
-    resources :teams, only: [:index]
+    resources :teams, only: [ :index ]
   end
-  
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

@@ -23,10 +23,10 @@ Rails.application.configure do
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
-  
+
   # Ensure SQLite database directory exists and is writable
   config.after_initialize do
-    FileUtils.mkdir_p(Rails.root.join('storage'))
+    FileUtils.mkdir_p(Rails.root.join("storage"))
   end
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
@@ -63,15 +63,15 @@ Rails.application.configure do
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.perform_deliveries = true
   config.action_mailer.delivery_method = :smtp
-  
+
   # Set host to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: "bullpencup.up.railway.app", protocol: "https" }
 
   # Basic SMTP configuration - you can enhance this later with real SMTP service
   config.action_mailer.smtp_settings = {
-    address: 'localhost',
+    address: "localhost",
     port: 25,
-    domain: 'bullpencup.up.railway.app',
+    domain: "bullpencup.up.railway.app",
     enable_starttls_auto: false
   }
 

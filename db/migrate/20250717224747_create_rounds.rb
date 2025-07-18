@@ -11,8 +11,8 @@ class CreateRounds < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :rounds, [:tournament_id, :round_number], unique: true
-    add_index :rounds, [:tournament_id, :date]
+    add_index :rounds, [ :tournament_id, :round_number ], unique: true
+    add_index :rounds, [ :tournament_id, :date ]
     add_index :rounds, :status
   end
 end

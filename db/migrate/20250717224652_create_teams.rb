@@ -8,6 +8,6 @@ class CreateTeams < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :teams, [:tournament_id, :name], unique: true
+    add_index :teams, [ :tournament_id, :name ], unique: true
   end
 end

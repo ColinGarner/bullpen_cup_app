@@ -12,7 +12,7 @@ class TournamentTest < ActiveSupport::TestCase
       end_date: 2.weeks.from_now.to_date,
       created_by: @user
     )
-    
+
     assert_equal "upcoming", tournament.status
     assert tournament.upcoming?
     assert_not tournament.active?
@@ -27,7 +27,7 @@ class TournamentTest < ActiveSupport::TestCase
       end_date: 1.week.from_now.to_date,
       created_by: @user
     )
-    
+
     assert_equal "active", tournament.status
     assert_not tournament.upcoming?
     assert tournament.active?
@@ -42,7 +42,7 @@ class TournamentTest < ActiveSupport::TestCase
       end_date: 1.week.ago.to_date,
       created_by: @user
     )
-    
+
     assert_equal "completed", tournament.status
     assert_not tournament.upcoming?
     assert_not tournament.active?
@@ -59,7 +59,7 @@ class TournamentTest < ActiveSupport::TestCase
       cancelled: true,
       created_by: @user
     )
-    
+
     assert_equal "cancelled", upcoming_cancelled.status
     assert_not upcoming_cancelled.upcoming?
     assert_not upcoming_cancelled.active?
@@ -74,7 +74,7 @@ class TournamentTest < ActiveSupport::TestCase
       cancelled: true,
       created_by: @user
     )
-    
+
     assert_equal "cancelled", active_cancelled.status
     assert active_cancelled.cancelled?
 
@@ -86,7 +86,7 @@ class TournamentTest < ActiveSupport::TestCase
       cancelled: true,
       created_by: @user
     )
-    
+
     assert_equal "cancelled", completed_cancelled.status
     assert completed_cancelled.cancelled?
   end
@@ -98,7 +98,7 @@ class TournamentTest < ActiveSupport::TestCase
       end_date: 1.week.from_now.to_date,
       created_by: @user
     )
-    
+
     assert_equal "active", tournament.status
     assert tournament.active?
   end
@@ -110,7 +110,7 @@ class TournamentTest < ActiveSupport::TestCase
       end_date: Date.current,
       created_by: @user
     )
-    
+
     assert_equal "active", tournament.status
     assert tournament.active?
   end
@@ -122,14 +122,14 @@ class TournamentTest < ActiveSupport::TestCase
       end_date: 2.weeks.from_now.to_date,
       created_by: @user
     )
-    
+
     active_tournament = Tournament.create!(
       name: "Active Tournament",
       start_date: 1.week.ago.to_date,
       end_date: 1.week.from_now.to_date,
       created_by: @user
     )
-    
+
     completed_tournament = Tournament.create!(
       name: "Past Tournament",
       start_date: 3.weeks.ago.to_date,
@@ -150,14 +150,14 @@ class TournamentTest < ActiveSupport::TestCase
       end_date: 2.weeks.from_now.to_date,
       created_by: @user
     )
-    
+
     active_tournament = Tournament.create!(
       name: "Active Tournament",
       start_date: 1.week.ago.to_date,
       end_date: 1.week.from_now.to_date,
       created_by: @user
     )
-    
+
     completed_tournament = Tournament.create!(
       name: "Past Tournament",
       start_date: 3.weeks.ago.to_date,
@@ -178,14 +178,14 @@ class TournamentTest < ActiveSupport::TestCase
       end_date: 2.weeks.from_now.to_date,
       created_by: @user
     )
-    
+
     active_tournament = Tournament.create!(
       name: "Active Tournament",
       start_date: 1.week.ago.to_date,
       end_date: 1.week.from_now.to_date,
       created_by: @user
     )
-    
+
     completed_tournament = Tournament.create!(
       name: "Past Tournament",
       start_date: 3.weeks.ago.to_date,
@@ -206,7 +206,7 @@ class TournamentTest < ActiveSupport::TestCase
       end_date: 2.weeks.from_now.to_date,
       created_by: @user
     )
-    
+
     cancelled_tournament = Tournament.create!(
       name: "Cancelled Tournament",
       start_date: 1.week.from_now.to_date,
@@ -227,13 +227,13 @@ class TournamentTest < ActiveSupport::TestCase
       end_date: 2.weeks.from_now.to_date,
       created_by: @user
     )
-    
+
     assert_not tournament.cancelled?
     assert_equal "upcoming", tournament.status
-    
+
     tournament.cancel!
     tournament.reload
-    
+
     assert tournament.cancelled?
     assert_equal "cancelled", tournament.status
   end
@@ -245,24 +245,24 @@ class TournamentTest < ActiveSupport::TestCase
       end_date: 2.weeks.from_now.to_date,
       created_by: @user
     )
-    assert_equal 'bg-blue-100 text-blue-800', upcoming_tournament.status_badge_class
-    
+    assert_equal "bg-blue-100 text-blue-800", upcoming_tournament.status_badge_class
+
     active_tournament = Tournament.new(
       name: "Active Tournament",
       start_date: 1.week.ago.to_date,
       end_date: 1.week.from_now.to_date,
       created_by: @user
     )
-    assert_equal 'bg-green-100 text-green-800', active_tournament.status_badge_class
-    
+    assert_equal "bg-green-100 text-green-800", active_tournament.status_badge_class
+
     completed_tournament = Tournament.new(
       name: "Past Tournament",
       start_date: 3.weeks.ago.to_date,
       end_date: 1.week.ago.to_date,
       created_by: @user
     )
-    assert_equal 'bg-gray-100 text-gray-800', completed_tournament.status_badge_class
-    
+    assert_equal "bg-gray-100 text-gray-800", completed_tournament.status_badge_class
+
     cancelled_tournament = Tournament.new(
       name: "Cancelled Tournament",
       start_date: 1.week.from_now.to_date,
@@ -270,7 +270,7 @@ class TournamentTest < ActiveSupport::TestCase
       cancelled: true,
       created_by: @user
     )
-    assert_equal 'bg-red-100 text-red-800', cancelled_tournament.status_badge_class
+    assert_equal "bg-red-100 text-red-800", cancelled_tournament.status_badge_class
   end
 
   test "scopes exclude cancelled tournaments" do
@@ -280,7 +280,7 @@ class TournamentTest < ActiveSupport::TestCase
       end_date: 2.weeks.from_now.to_date,
       created_by: @user
     )
-    
+
     cancelled_upcoming_tournament = Tournament.create!(
       name: "Cancelled Future Tournament",
       start_date: 1.week.from_now.to_date,
