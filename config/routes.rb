@@ -3,12 +3,17 @@ Rails.application.routes.draw do
   root "home#index"
   get "home/index"
   
-  # Temporary admin promotion route (remove after use)
-  get "promote_me_to_admin", to: "application#promote_to_admin"
-  
   # Admin routes - protected by authentication in controller
   namespace :admin do
     root "dashboard#index"
+    
+    # User management
+    resources :users, only: [:index] do
+      member do
+        patch :promote_to_admin
+        patch :demote_from_admin
+      end
+    end
     resources :tournaments do
       member do
         patch :start

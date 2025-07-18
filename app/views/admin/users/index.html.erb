@@ -4,41 +4,22 @@
     <div>
       <h1 class="text-3xl font-bold text-gray-900">User Management</h1>
       <p class="mt-2 text-sm text-gray-700">
-        Manage user accounts and admin privileges
+        Manage admin privileges for registered users
       </p>
     </div>
   </div>
 
-  <!-- Filters and Search -->
+  <!-- Search -->
   <div class="bg-white rounded-lg shadow mb-6">
     <div class="p-6">
-      <div class="flex flex-col sm:flex-row gap-4">
-        <!-- Search -->
-        <%= form_with url: admin_users_path, method: :get, local: true, class: "flex-1" do |f| %>
-          <div class="flex gap-2">
-            <%= f.text_field :search, value: params[:search], placeholder: "Search by name or email...",
-                class: "flex-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
-            <%= f.hidden_field :filter, value: params[:filter] %>
-            <%= f.submit "Search", class: "px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md text-sm transition-colors duration-200" %>
-          </div>
+      <%= form_with url: admin_users_path, method: :get, local: true, class: "flex gap-2" do |f| %>
+        <%= f.text_field :search, value: params[:search], placeholder: "Search by name or email...",
+            class: "flex-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+        <%= f.submit "Search", class: "px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md text-sm transition-colors duration-200" %>
+        <% if params[:search].present? %>
+          <%= link_to "Clear", admin_users_path, class: "px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-md text-sm transition-colors duration-200" %>
         <% end %>
-
-        <!-- Filters -->
-        <div class="flex gap-2">
-          <%= link_to admin_users_path(search: params[:search]), 
-              class: "px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 #{'bg-blue-600 text-white' if params[:filter].blank?} #{'bg-gray-100 text-gray-700 hover:bg-gray-200' unless params[:filter].blank?}" do %>
-            All Users
-          <% end %>
-          <%= link_to admin_users_path(filter: 'admins', search: params[:search]), 
-              class: "px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 #{'bg-blue-600 text-white' if params[:filter] == 'admins'} #{'bg-gray-100 text-gray-700 hover:bg-gray-200' unless params[:filter] == 'admins'}" do %>
-            Admins
-          <% end %>
-          <%= link_to admin_users_path(filter: 'players', search: params[:search]), 
-              class: "px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 #{'bg-blue-600 text-white' if params[:filter] == 'players'} #{'bg-gray-100 text-gray-700 hover:bg-gray-200' unless params[:filter] == 'players'}" do %>
-            Players
-          <% end %>
-        </div>
-      </div>
+      <% end %>
     </div>
   </div>
 
@@ -46,8 +27,7 @@
   <div class="bg-white rounded-lg shadow">
     <div class="px-6 py-4 border-b border-gray-200">
       <h3 class="text-lg font-medium text-gray-900">
-        Users
-        <span class="ml-2 text-sm text-gray-500">(<%= @users.count %> <%= params[:filter] == 'admins' ? 'admins' : params[:filter] == 'players' ? 'players' : 'total' %>)</span>
+        Users (<%= @users.count %>)
       </h3>
     </div>
 
@@ -58,7 +38,6 @@
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Activity</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
             </tr>
@@ -100,54 +79,34 @@
                   <% end %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <div class="space-y-1">
-                    <div>
-                      <span class="font-medium"><%= user.captained_teams.count %></span> teams captained
-                    </div>
-                    <div>
-                      <span class="font-medium"><%= user.teams.count %></span> teams joined
-                    </div>
-                    <div>
-                      <span class="font-medium"><%= user.created_tournaments.count %></span> tournaments created
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <%= user.created_at.strftime('%b %d, %Y') %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div class="flex items-center justify-end space-x-2">
-                    <%= link_to admin_user_path(user), 
-                        class: "text-blue-600 hover:text-blue-900" do %>
-                      View
-                    <% end %>
-                    
-                    <% if user.admin? %>
-                      <% if User.admins.count > 1 && user != current_user %>
-                        <%= link_to admin_user_demote_from_admin_path(user), 
-                            method: :patch,
-                            data: { 
-                              confirm: "Are you sure you want to remove admin privileges from #{user.display_name}?" 
-                            },
-                            class: "text-red-600 hover:text-red-900" do %>
-                          Demote
-                        <% end %>
-                      <% elsif user == current_user %>
-                        <span class="text-gray-400" title="Cannot demote yourself">Demote</span>
-                      <% else %>
-                        <span class="text-gray-400" title="Cannot demote the last admin">Demote</span>
-                      <% end %>
-                    <% else %>
-                      <%= link_to admin_user_promote_to_admin_path(user), 
+                  <% if user.admin? %>
+                    <% if User.admins.count > 1 && user != current_user %>
+                      <%= link_to admin_user_demote_from_admin_path(user), 
                           method: :patch,
                           data: { 
-                            confirm: "Are you sure you want to grant admin privileges to #{user.display_name}?" 
+                            confirm: "Are you sure you want to remove admin privileges from #{user.display_name}?" 
                           },
-                          class: "text-green-600 hover:text-green-900" do %>
-                        Promote
+                          class: "text-red-600 hover:text-red-900 font-medium" do %>
+                        Demote
                       <% end %>
+                    <% elsif user == current_user %>
+                      <span class="text-gray-400" title="Cannot demote yourself">—</span>
+                    <% else %>
+                      <span class="text-gray-400" title="Cannot demote the last admin">—</span>
                     <% end %>
-                  </div>
+                  <% else %>
+                    <%= link_to admin_user_promote_to_admin_path(user), 
+                        method: :patch,
+                        data: { 
+                          confirm: "Are you sure you want to grant admin privileges to #{user.display_name}?" 
+                        },
+                        class: "text-green-600 hover:text-green-900 font-medium" do %>
+                      Promote to Admin
+                    <% end %>
+                  <% end %>
                 </td>
               </tr>
             <% end %>
