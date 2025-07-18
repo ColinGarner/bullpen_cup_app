@@ -82,31 +82,31 @@
                   <%= user.created_at.strftime('%b %d, %Y') %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <% if user.admin? %>
-                    <% if User.admins.count > 1 && user != current_user %>
-                      <%= link_to admin_user_demote_from_admin_path(user), 
+                                      <% if user.admin? %>
+                      <% if User.admins.count > 1 && user != current_user %>
+                        <%= link_to demote_from_admin_admin_user_path(user), 
+                            method: :patch,
+                            data: { 
+                              confirm: "Are you sure you want to remove admin privileges from #{user.display_name}?" 
+                            },
+                            class: "text-red-600 hover:text-red-900 font-medium" do %>
+                          Demote
+                        <% end %>
+                      <% elsif user == current_user %>
+                        <span class="text-gray-400" title="Cannot demote yourself">—</span>
+                      <% else %>
+                        <span class="text-gray-400" title="Cannot demote the last admin">—</span>
+                      <% end %>
+                    <% else %>
+                      <%= link_to promote_to_admin_admin_user_path(user), 
                           method: :patch,
                           data: { 
-                            confirm: "Are you sure you want to remove admin privileges from #{user.display_name}?" 
+                            confirm: "Are you sure you want to grant admin privileges to #{user.display_name}?" 
                           },
-                          class: "text-red-600 hover:text-red-900 font-medium" do %>
-                        Demote
+                          class: "text-green-600 hover:text-green-900 font-medium" do %>
+                        Promote to Admin
                       <% end %>
-                    <% elsif user == current_user %>
-                      <span class="text-gray-400" title="Cannot demote yourself">—</span>
-                    <% else %>
-                      <span class="text-gray-400" title="Cannot demote the last admin">—</span>
                     <% end %>
-                  <% else %>
-                    <%= link_to admin_user_promote_to_admin_path(user), 
-                        method: :patch,
-                        data: { 
-                          confirm: "Are you sure you want to grant admin privileges to #{user.display_name}?" 
-                        },
-                        class: "text-green-600 hover:text-green-900 font-medium" do %>
-                      Promote to Admin
-                    <% end %>
-                  <% end %>
                 </td>
               </tr>
             <% end %>
