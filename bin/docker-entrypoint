@@ -9,9 +9,24 @@ fi
 # If running the rails server then create or migrate existing database
 # Check for various ways Rails server might be started
 if [[ "$*" == *"rails server"* ]] || [[ "$*" == *"server"* ]]; then
+  echo "Ensuring storage directory exists..."
+  mkdir -p /rails/storage
+  ls -la /rails/storage
+  
   echo "Running database migrations..."
-  ./bin/rails db:prepare
+  # Use db:create and db:migrate instead of db:prepare to avoid automatic seeding
+  ./bin/rails db:create
+  ./bin/rails db:migrate
   echo "Database migrations completed."
+  
+  # Only seed if SEED_DB environment variable is set to true
+  if [ "$SEED_DB" = "true" ]; then
+    echo "Seeding database (SEED_DB=true)..."
+    ./bin/rails db:seed
+    echo "Database seeding completed."
+  else
+    echo "Skipping database seeding (set SEED_DB=true to enable)"
+  fi
 fi
 
 exec "${@}"
