@@ -12,6 +12,7 @@ puts "👑 Ensuring admin user exists..."
 admin = User.find_or_create_by(email: "admin@bullpencup.com") do |user|
   user.first_name = "Admin"
   user.last_name = "User"
+  user.handicap = 15.5
   user.password = "password123"
   user.password_confirmation = "password123"
   user.admin = true
@@ -38,21 +39,21 @@ if Rails.env.development?
   # Create sample users for development
   puts "👥 Creating sample users..."
   users_data = [
-    { first_name: "Tiger", last_name: "Woods", email: "tiger.woods@bullpen.com" },
-    { first_name: "Phil", last_name: "Mickelson", email: "phil.mickelson@bullpen.com" },
-    { first_name: "Jordan", last_name: "Spieth", email: "jordan.spieth@bullpen.com" },
-    { first_name: "Rory", last_name: "McIlroy", email: "rory.mcilroy@bullpen.com" },
-    { first_name: "Brooks", last_name: "Koepka", email: "brooks.koepka@bullpen.com" },
-    { first_name: "Dustin", last_name: "Johnson", email: "dustin.johnson@bullpen.com" },
-    { first_name: "Jon", last_name: "Rahm", email: "jon.rahm@bullpen.com" },
-    { first_name: "Justin", last_name: "Thomas", email: "justin.thomas@bullpen.com" },
-    { first_name: "Collin", last_name: "Morikawa", email: "collin.morikawa@bullpen.com" },
-    { first_name: "Bryson", last_name: "DeChambeau", email: "bryson.dechambeau@bullpen.com" },
-    { first_name: "Patrick", last_name: "Cantlay", email: "patrick.cantlay@bullpen.com" },
-    { first_name: "Xander", last_name: "Schauffele", email: "xander.schauffele@bullpen.com" },
-    { first_name: "Tony", last_name: "Finau", email: "tony.finau@bullpen.com" },
-    { first_name: "Viktor", last_name: "Hovland", email: "viktor.hovland@bullpen.com" },
-    { first_name: "Cameron", last_name: "Smith", email: "cameron.smith@bullpen.com" }
+    { first_name: "Tiger", last_name: "Woods", email: "tiger.woods@bullpen.com", handicap: 0.5 },
+    { first_name: "Phil", last_name: "Mickelson", email: "phil.mickelson@bullpen.com", handicap: 2.1 },
+    { first_name: "Jordan", last_name: "Spieth", email: "jordan.spieth@bullpen.com", handicap: 1.8 },
+    { first_name: "Rory", last_name: "McIlroy", email: "rory.mcilroy@bullpen.com", handicap: 1.2 },
+    { first_name: "Brooks", last_name: "Koepka", email: "brooks.koepka@bullpen.com", handicap: 0.9 },
+    { first_name: "Dustin", last_name: "Johnson", email: "dustin.johnson@bullpen.com", handicap: 1.5 },
+    { first_name: "Jon", last_name: "Rahm", email: "jon.rahm@bullpen.com", handicap: 1.0 },
+    { first_name: "Justin", last_name: "Thomas", email: "justin.thomas@bullpen.com", handicap: 1.4 },
+    { first_name: "Collin", last_name: "Morikawa", email: "collin.morikawa@bullpen.com", handicap: 1.7 },
+    { first_name: "Bryson", last_name: "DeChambeau", email: "bryson.dechambeau@bullpen.com", handicap: 2.3 },
+    { first_name: "Patrick", last_name: "Cantlay", email: "patrick.cantlay@bullpen.com", handicap: 1.6 },
+    { first_name: "Xander", last_name: "Schauffele", email: "xander.schauffele@bullpen.com", handicap: 1.9 },
+    { first_name: "Tony", last_name: "Finau", email: "tony.finau@bullpen.com", handicap: 2.4 },
+    { first_name: "Viktor", last_name: "Hovland", email: "viktor.hovland@bullpen.com", handicap: 2.0 },
+    { first_name: "Cameron", last_name: "Smith", email: "cameron.smith@bullpen.com", handicap: 1.3 }
   ]
 
   users = users_data.map do |user_data|
@@ -60,6 +61,7 @@ if Rails.env.development?
       first_name: user_data[:first_name],
       last_name: user_data[:last_name],
       email: user_data[:email],
+      handicap: user_data[:handicap],
       password: "password123",
       password_confirmation: "password123",
       admin: false

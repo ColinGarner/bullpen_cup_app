@@ -10,9 +10,46 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_18_122048) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_18_131855) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "match_players", force: :cascade do |t|
+    t.bigint "match_id", null: false
+    t.bigint "team_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["match_id", "team_id"], name: "index_match_players_on_match_id_and_team_id"
+    t.index ["match_id", "user_id"], name: "index_match_players_on_match_and_user_unique", unique: true
+    t.index ["match_id", "user_id"], name: "index_match_players_on_match_id_and_user_id"
+    t.index ["match_id"], name: "index_match_players_on_match_id"
+    t.index ["team_id", "user_id"], name: "index_match_players_on_team_id_and_user_id"
+    t.index ["team_id"], name: "index_match_players_on_team_id"
+    t.index ["user_id"], name: "index_match_players_on_user_id"
+  end
+
+  create_table "matches", force: :cascade do |t|
+    t.bigint "round_id", null: false
+    t.bigint "team_a_id", null: false
+    t.bigint "team_b_id", null: false
+    t.string "match_type", null: false
+    t.string "status", default: "upcoming", null: false
+    t.bigint "winner_team_id"
+    t.datetime "scheduled_time"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["match_type"], name: "index_matches_on_match_type"
+    t.index ["round_id", "status"], name: "index_matches_on_round_id_and_status"
+    t.index ["round_id"], name: "index_matches_on_round_id"
+    t.index ["status"], name: "index_matches_on_status"
+    t.index ["team_a_id", "team_b_id"], name: "index_matches_on_team_a_id_and_team_b_id"
+    t.index ["team_a_id"], name: "index_matches_on_team_a_id"
+    t.index ["team_b_id"], name: "index_matches_on_team_b_id"
+    t.index ["winner_team_id"], name: "index_matches_on_winner_team_id"
+    t.check_constraint "team_a_id <> team_b_id", name: "matches_different_teams"
+  end
 
   create_table "rounds", force: :cascade do |t|
     t.bigint "tournament_id", null: false
@@ -77,11 +114,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_18_122048) do
     t.boolean "admin", default: false, null: false
     t.string "first_name"
     t.string "last_name"
+    t.decimal "handicap", precision: 4, scale: 1
     t.index ["admin"], name: "index_users_on_admin"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "match_players", "matches"
+  add_foreign_key "match_players", "teams"
+  add_foreign_key "match_players", "users"
+  add_foreign_key "matches", "rounds"
+  add_foreign_key "matches", "teams", column: "team_a_id"
+  add_foreign_key "matches", "teams", column: "team_b_id"
+  add_foreign_key "matches", "teams", column: "winner_team_id"
   add_foreign_key "rounds", "tournaments"
   add_foreign_key "team_memberships", "teams"
   add_foreign_key "team_memberships", "users"

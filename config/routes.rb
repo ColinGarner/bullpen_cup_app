@@ -34,6 +34,17 @@ Rails.application.routes.draw do
           patch :complete
           patch :cancel
         end
+        
+        resources :matches do
+          member do
+            patch :start
+            patch :complete
+            patch :cancel
+            get :players
+            post :add_player
+            delete :remove_player
+          end
+        end
       end
     end
     

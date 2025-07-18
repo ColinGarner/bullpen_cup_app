@@ -1,5 +1,6 @@
 class Round < ApplicationRecord
   belongs_to :tournament
+  has_many :matches, dependent: :destroy
   
   # Validations
   validates :round_number, presence: true, uniqueness: { scope: :tournament_id }

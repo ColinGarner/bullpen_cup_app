@@ -1,0 +1,247 @@
+<% content_for :title, "#{@match.display_name} - Admin" %>
+
+<div class="px-4 sm:px-6 lg:px-8">
+  <!-- Breadcrumb -->
+  <nav class="mb-6" aria-label="Breadcrumb">
+    <ol class="flex items-center space-x-4 text-sm">
+      <li>
+        <%= link_to "Tournaments", admin_tournaments_path, class: "text-gray-500 hover:text-gray-700" %>
+      </li>
+      <li>
+        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+      </li>
+      <li>
+        <%= link_to @tournament.name, admin_tournament_path(@tournament), class: "text-gray-500 hover:text-gray-700" %>
+      </li>
+      <li>
+        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+      </li>
+      <li>
+        <%= link_to @round.name, admin_tournament_round_path(@tournament, @round), class: "text-gray-500 hover:text-gray-700" %>
+      </li>
+      <li>
+        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+      </li>
+      <li>
+        <%= link_to "Matches", admin_tournament_round_matches_path(@tournament, @round), class: "text-gray-500 hover:text-gray-700" %>
+      </li>
+      <li>
+        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+      </li>
+      <li>
+        <span class="text-gray-900 font-medium"><%= @match.display_name %></span>
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Match Header -->
+  <div class="bg-white rounded-xl shadow-lg mb-8">
+    <div class="px-6 py-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900"><%= @match.display_name %></h1>
+          <p class="mt-2 text-lg text-gray-600"><%= @match.match_type_display %></p>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium <%= @match.status_badge_class %>">
+            <%= @match.status.titleize %>
+          </span>
+          <div class="flex space-x-2">
+            <%= link_to edit_admin_tournament_round_match_path(@tournament, @round, @match), 
+                class: "bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" do %>
+              Edit Match
+            <% end %>
+            <% if @match.upcoming? %>
+              <%= link_to admin_tournament_round_match_path(@tournament, @round, @match), 
+                  data: { "turbo-method": :delete, confirm: "Are you sure you want to delete this match? This action cannot be undone." },
+                  class: "bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" do %>
+                Delete Match
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Match Info Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+    <!-- Match Details -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-4">Match Details</h3>
+      <dl class="space-y-3">
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Match Type</dt>
+          <dd class="text-lg text-gray-900"><%= @match.match_type_display %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Status</dt>
+          <dd>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= @match.status_badge_class %>">
+              <%= @match.status.titleize %>
+            </span>
+          </dd>
+        </div>
+        <% if @match.scheduled_time %>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Scheduled Time</dt>
+            <dd class="text-lg text-gray-900"><%= @match.scheduled_time.strftime('%B %d, %Y at %I:%M %p') %></dd>
+          </div>
+        <% end %>
+        <% if @match.completed_at %>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Completed At</dt>
+            <dd class="text-lg text-gray-900"><%= @match.completed_at.strftime('%B %d, %Y at %I:%M %p') %></dd>
+          </div>
+        <% end %>
+        <% if @match.winner_team %>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Winner</dt>
+            <dd class="text-lg text-green-600 font-semibold"><%= @match.winner_team.name %></dd>
+          </div>
+        <% end %>
+      </dl>
+    </div>
+
+    <!-- Team A Players -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-4">
+        <%= @match.team_a.name %> Players
+        <span class="text-sm font-normal text-gray-500">(<%= @team_a_players.count %>/<%= @match.players_per_team %>)</span>
+      </h3>
+      
+      <% if @team_a_players.any? %>
+        <div class="space-y-3">
+          <% @team_a_players.each do |player| %>
+            <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+              <div>
+                <p class="font-medium text-gray-900"><%= player.display_name %></p>
+                <p class="text-sm text-gray-600"><%= player.email %></p>
+              </div>
+              <% if @match.upcoming? %>
+                <% match_player = @match.match_players.find_by(user: player) %>
+                <%= link_to remove_player_admin_tournament_round_match_path(@tournament, @round, @match, match_player_id: match_player.id), 
+                    data: { "turbo-method": :delete, confirm: "Remove #{player.display_name} from this match?" },
+                    class: "text-red-600 hover:text-red-800 text-sm font-medium" do %>
+                  Remove
+                <% end %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-gray-500 text-center py-4">No players assigned</p>
+      <% end %>
+    </div>
+
+    <!-- Team B Players -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-4">
+        <%= @match.team_b.name %> Players
+        <span class="text-sm font-normal text-gray-500">(<%= @team_b_players.count %>/<%= @match.players_per_team %>)</span>
+      </h3>
+      
+      <% if @team_b_players.any? %>
+        <div class="space-y-3">
+          <% @team_b_players.each do |player| %>
+            <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+              <div>
+                <p class="font-medium text-gray-900"><%= player.display_name %></p>
+                <p class="text-sm text-gray-600"><%= player.email %></p>
+              </div>
+              <% if @match.upcoming? %>
+                <% match_player = @match.match_players.find_by(user: player) %>
+                <%= link_to remove_player_admin_tournament_round_match_path(@tournament, @round, @match, match_player_id: match_player.id), 
+                    data: { "turbo-method": :delete, confirm: "Remove #{player.display_name} from this match?" },
+                    class: "text-red-600 hover:text-red-800 text-sm font-medium" do %>
+                  Remove
+                <% end %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-gray-500 text-center py-4">No players assigned</p>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Player Management -->
+  <% if @match.upcoming? %>
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+      <h3 class="text-lg font-bold text-gray-900 mb-4">Manage Players</h3>
+      <%= link_to players_admin_tournament_round_match_path(@tournament, @round, @match),
+          class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+        <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+        Add/Remove Players
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Match Actions -->
+  <div class="bg-white rounded-xl shadow-lg p-6">
+    <h3 class="text-lg font-bold text-gray-900 mb-4">Match Actions</h3>
+    <div class="flex space-x-4">
+      <% if @match.upcoming? %>
+        <%= link_to start_admin_tournament_round_match_path(@tournament, @round, @match), 
+            data: { "turbo-method": :patch, confirm: "Start this match?" },
+            class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" do %>
+          <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m-5-9V3m0 0L8 6m3-3l3 3" />
+          </svg>
+          Start Match
+        <% end %>
+
+        <%= link_to cancel_admin_tournament_round_match_path(@tournament, @round, @match), 
+            data: { "turbo-method": :patch, confirm: "Cancel this match?" },
+            class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
+          <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          Cancel Match
+        <% end %>
+      <% elsif @match.active? %>
+        <div class="flex space-x-2">
+          <%= form_with url: complete_admin_tournament_round_match_path(@tournament, @round, @match), method: :patch, class: "flex items-center space-x-2" do |form| %>
+            <%= form.select :winner_team_id, 
+                options_for_select([
+                  [@match.team_a.name, @match.team_a.id],
+                  [@match.team_b.name, @match.team_b.id]
+                ]),
+                { prompt: "Select winner..." },
+                { class: "px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" } %>
+            <%= form.submit "Complete Match", 
+                class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
+          <% end %>
+        </div>
+
+        <%= link_to cancel_admin_tournament_round_match_path(@tournament, @round, @match), 
+            data: { "turbo-method": :patch, confirm: "Cancel this match?" },
+            class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
+          <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          Cancel Match
+        <% end %>
+      <% elsif @match.completed? %>
+        <div class="text-green-600 font-semibold">
+          ✅ Match completed - Winner: <%= @match.winner_display %>
+        </div>
+      <% elsif @match.cancelled? %>
+        <div class="text-red-600 font-semibold">
+          ❌ Match cancelled
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div> 

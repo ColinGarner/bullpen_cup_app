@@ -1,0 +1,276 @@
+<% content_for :title, "Manage Players - #{@match.display_name}" %>
+
+<div class="px-4 sm:px-6 lg:px-8">
+  <!-- Breadcrumb -->
+  <nav class="mb-6" aria-label="Breadcrumb">
+    <ol class="flex items-center space-x-4 text-sm">
+      <li>
+        <%= link_to "Tournaments", admin_tournaments_path, class: "text-gray-500 hover:text-gray-700" %>
+      </li>
+      <li>
+        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+      </li>
+      <li>
+        <%= link_to @tournament.name, admin_tournament_path(@tournament), class: "text-gray-500 hover:text-gray-700" %>
+      </li>
+      <li>
+        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+      </li>
+      <li>
+        <%= link_to @round.name, admin_tournament_round_path(@tournament, @round), class: "text-gray-500 hover:text-gray-700" %>
+      </li>
+      <li>
+        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+      </li>
+      <li>
+        <%= link_to @match.display_name, admin_tournament_round_match_path(@tournament, @round, @match), class: "text-gray-500 hover:text-gray-700" %>
+      </li>
+      <li>
+        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+      </li>
+      <li>
+        <span class="text-gray-900 font-medium">Manage Players</span>
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Header -->
+  <div class="bg-white rounded-xl shadow-lg mb-8">
+    <div class="px-6 py-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">Manage Players</h1>
+          <p class="mt-2 text-lg text-gray-600"><%= @match.display_name %></p>
+          <p class="mt-1 text-sm text-gray-500">
+            <%= @match.match_type.humanize %> • 
+            Expected: <%= @expected_players_per_team %> player<%= 's' if @expected_players_per_team != 1 %> per team
+          </p>
+        </div>
+        <div class="flex space-x-3">
+          <%= link_to admin_tournament_round_match_path(@tournament, @round, @match),
+              class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Match
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Teams and Players -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Team A -->
+    <div class="bg-white rounded-xl shadow-lg">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900"><%= @match.team_a.name %></h2>
+        <p class="text-sm text-gray-500">
+          <%= pluralize(@match.team_a_players.count, 'player') %> assigned
+          <% if @match.team_a_players.count < @expected_players_per_team %>
+            <span class="text-amber-600">
+              (Need <%= @expected_players_per_team - @match.team_a_players.count %> more)
+            </span>
+          <% elsif @match.team_a_players.count > @expected_players_per_team %>
+            <span class="text-red-600">
+              (<%= @match.team_a_players.count - @expected_players_per_team %> too many)
+            </span>
+          <% else %>
+            <span class="text-green-600">(Complete)</span>
+          <% end %>
+        </p>
+      </div>
+      
+      <!-- Current Players -->
+      <div class="p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Current Players</h3>
+        <% if @match.team_a_players.any? %>
+          <div class="space-y-3 mb-6">
+                        <% @match.team_a_players.each do |player| %>
+               <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                 <div class="flex items-center">
+                   <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                     <span class="text-sm font-medium text-blue-800">
+                      <%= player.initials %>
+                     </span>
+                   </div>
+                   <div>
+                    <p class="text-sm font-medium text-gray-900"><%= player.display_name %></p>
+                     <p class="text-xs text-gray-500">Handicap: <%= player.formatted_handicap %></p>
+                   </div>
+                 </div>
+                 <%= link_to remove_player_admin_tournament_round_match_path(@tournament, @round, @match, player_id: player.id),
+                     data: { 
+                       turbo_method: :delete, 
+                       confirm: "Remove #{player.display_name} from this match?",
+                       turbo_frame: "_top"
+                     },
+                     class: "text-red-600 hover:text-red-900 p-1" do %>
+                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                   </svg>
+                 <% end %>
+               </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-gray-500 text-sm mb-6">No players assigned yet</p>
+        <% end %>
+
+        <!-- Add Players -->
+        <% if @team_a_available_players.any? %>
+          <div>
+            <h4 class="text-md font-medium text-gray-900 mb-3">Add Players</h4>
+            <div class="space-y-2">
+              <% @team_a_available_players.each do |player| %>
+                <%= form_with url: add_player_admin_tournament_round_match_path(@tournament, @round, @match), method: :post, local: true do |form| %>
+                  <%= form.hidden_field :team_id, value: @match.team_a.id %>
+                  <%= form.hidden_field :user_id, value: player.id %>
+                  <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div class="flex items-center">
+                      <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                        <span class="text-sm font-medium text-gray-600">
+                          <%= player.initials %>
+                        </span>
+                      </div>
+                      <div>
+                        <p class="text-sm font-medium text-gray-900"><%= player.display_name %></p>
+                        <p class="text-xs text-gray-500">Handicap: <%= player.formatted_handicap %></p>
+                      </div>
+                    </div>
+                    <%= form.submit "Add", class: "px-3 py-1 text-xs font-medium text-blue-600 border border-blue-300 rounded hover:bg-blue-50 transition-colors duration-200" %>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        <% else %>
+          <p class="text-gray-500 text-sm">All team members are either assigned to this match or other matches.</p>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Team B -->
+    <div class="bg-white rounded-xl shadow-lg">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900"><%= @match.team_b.name %></h2>
+        <p class="text-sm text-gray-500">
+          <%= pluralize(@match.team_b_players.count, 'player') %> assigned
+          <% if @match.team_b_players.count < @expected_players_per_team %>
+            <span class="text-amber-600">
+              (Need <%= @expected_players_per_team - @match.team_b_players.count %> more)
+            </span>
+          <% elsif @match.team_b_players.count > @expected_players_per_team %>
+            <span class="text-red-600">
+              (<%= @match.team_b_players.count - @expected_players_per_team %> too many)
+            </span>
+          <% else %>
+            <span class="text-green-600">(Complete)</span>
+          <% end %>
+        </p>
+      </div>
+      
+      <!-- Current Players -->
+      <div class="p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Current Players</h3>
+        <% if @match.team_b_players.any? %>
+          <div class="space-y-3 mb-6">
+            <% @match.team_b_players.each do |player| %>
+                             <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                 <div class="flex items-center">
+                   <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                     <span class="text-sm font-medium text-green-800">
+                       <%= player.initials %>
+                     </span>
+                   </div>
+                   <div>
+                     <p class="text-sm font-medium text-gray-900"><%= player.display_name %></p>
+                                           <p class="text-xs text-gray-500">Handicap: <%= player.formatted_handicap %></p>
+                   </div>
+                 </div>
+                 <%= link_to remove_player_admin_tournament_round_match_path(@tournament, @round, @match, player_id: player.id),
+                     data: { 
+                       turbo_method: :delete, 
+                       confirm: "Remove #{player.display_name} from this match?",
+                       turbo_frame: "_top"
+                     },
+                     class: "text-red-600 hover:text-red-900 p-1" do %>
+                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                   </svg>
+                 <% end %>
+               </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-gray-500 text-sm mb-6">No players assigned yet</p>
+        <% end %>
+
+        <!-- Add Players -->
+        <% if @team_b_available_players.any? %>
+          <div>
+            <h4 class="text-md font-medium text-gray-900 mb-3">Add Players</h4>
+            <div class="space-y-2">
+              <% @team_b_available_players.each do |player| %>
+                <%= form_with url: add_player_admin_tournament_round_match_path(@tournament, @round, @match), method: :post, local: true do |form| %>
+                  <%= form.hidden_field :team_id, value: @match.team_b.id %>
+                  <%= form.hidden_field :user_id, value: player.id %>
+                  <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div class="flex items-center">
+                      <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                        <span class="text-sm font-medium text-gray-600">
+                          <%= player.initials %>
+                        </span>
+                      </div>
+                      <div>
+                        <p class="text-sm font-medium text-gray-900"><%= player.display_name %></p>
+                        <p class="text-xs text-gray-500">Handicap: <%= player.formatted_handicap %></p>
+                      </div>
+                    </div>
+                    <%= form.submit "Add", class: "px-3 py-1 text-xs font-medium text-green-600 border border-green-300 rounded hover:bg-green-50 transition-colors duration-200" %>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        <% else %>
+          <p class="text-gray-500 text-sm">All team members are either assigned to this match or other matches.</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Match Type Information -->
+  <div class="bg-blue-50 rounded-xl p-6 mt-8">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3">
+        <h3 class="text-sm font-medium text-blue-800">Match Type: <%= @match.match_type.humanize %></h3>
+        <div class="mt-2 text-sm text-blue-700">
+          <% case @match.match_type %>
+          <% when 'singles_match_play' %>
+            <p>Each team needs <strong><%= @expected_players_per_team %> player</strong>. Players compete individually against each other.</p>
+          <% when 'fourball_match_play' %>
+            <p>Each team needs <strong><%= @expected_players_per_team %> players</strong>. Teams play best ball format where the lowest score from each team counts on each hole.</p>
+          <% when 'alt_shot_match_play' %>
+            <p>Each team needs <strong><%= @expected_players_per_team %> players</strong>. Teams alternate shots with the same ball throughout the round.</p>
+          <% when 'stableford' %>
+            <p>Each team needs <strong><%= @expected_players_per_team %> player<%= 's' if @expected_players_per_team != 1 %></strong>. Players score points based on their performance relative to par.</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

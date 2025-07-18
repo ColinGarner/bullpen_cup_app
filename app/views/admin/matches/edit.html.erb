@@ -1,0 +1,139 @@
+<% content_for :title, "Edit #{@match.display_name} - Admin" %>
+
+<div class="px-4 sm:px-6 lg:px-8">
+  <!-- Breadcrumb -->
+  <nav class="mb-6" aria-label="Breadcrumb">
+    <ol class="flex items-center space-x-4 text-sm">
+      <li>
+        <%= link_to "Tournaments", admin_tournaments_path, class: "text-gray-500 hover:text-gray-700" %>
+      </li>
+      <li>
+        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+      </li>
+      <li>
+        <%= link_to @tournament.name, admin_tournament_path(@tournament), class: "text-gray-500 hover:text-gray-700" %>
+      </li>
+      <li>
+        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+      </li>
+      <li>
+        <%= link_to @round.name, admin_tournament_round_path(@tournament, @round), class: "text-gray-500 hover:text-gray-700" %>
+      </li>
+      <li>
+        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+      </li>
+      <li>
+        <%= link_to "Matches", admin_tournament_round_matches_path(@tournament, @round), class: "text-gray-500 hover:text-gray-700" %>
+      </li>
+      <li>
+        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+      </li>
+      <li>
+        <%= link_to @match.display_name, admin_tournament_round_match_path(@tournament, @round, @match), class: "text-gray-500 hover:text-gray-700" %>
+      </li>
+      <li>
+        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+        </svg>
+      </li>
+      <li>
+        <span class="text-gray-900 font-medium">Edit</span>
+      </li>
+    </ol>
+  </nav>
+
+  <div class="max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Edit Match</h1>
+      <p class="mt-2 text-lg text-gray-600">
+        Update details for <strong><%= @match.display_name %></strong>
+      </p>
+    </div>
+
+    <!-- Current Match Status -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+      <h3 class="text-lg font-bold text-gray-900 mb-4">Current Match Status</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <p class="text-sm font-medium text-gray-500">Status</p>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= @match.status_badge_class %>">
+            <%= @match.status.titleize %>
+          </span>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-500">Match Type</p>
+          <p class="text-lg text-gray-900"><%= @match.match_type_display %></p>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-500">Players Assigned</p>
+          <p class="text-lg text-gray-900"><%= @match.match_players.count %> / <%= @match.expected_player_count %></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-xl shadow-lg p-8">
+      <%= render 'form', 
+          url: admin_tournament_round_match_path(@tournament, @round, @match), 
+          button_text: 'Update Match' %>
+    </div>
+
+    <!-- Warning for Active/Completed Matches -->
+    <% unless @match.upcoming? %>
+      <div class="mt-8 bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-yellow-800">
+              Match Status: <%= @match.status.titleize %>
+            </h3>
+            <div class="mt-2 text-sm text-yellow-700">
+              <p>
+                This match is <%= @match.status %>. 
+                <% if @match.active? %>
+                  Be careful when making changes to an active match.
+                <% elsif @match.completed? %>
+                  Changes to completed matches should be made cautiously.
+                <% elsif @match.cancelled? %>
+                  This match has been cancelled.
+                <% end %>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Tournament Context -->
+    <div class="mt-8 bg-white rounded-xl shadow-lg p-6">
+      <h3 class="text-lg font-bold text-gray-900 mb-4">Tournament Context</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <p class="text-sm font-medium text-gray-500">Tournament</p>
+          <p class="text-lg text-gray-900"><%= @tournament.name %></p>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-500">Round</p>
+          <p class="text-lg text-gray-900"><%= @round.name %></p>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-500">Available Teams</p>
+          <p class="text-lg text-gray-900"><%= @available_teams.count %> teams</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 
