@@ -9,10 +9,6 @@ fi
 # If running the rails server then create or migrate existing database
 # Check for various ways Rails server might be started
 if [[ "$*" == *"rails server"* ]] || [[ "$*" == *"server"* ]]; then
-  echo "Ensuring storage directory exists..."
-  mkdir -p /rails/storage
-  ls -la /rails/storage
-  
   echo "Running database migrations..."
   # Use db:create and db:migrate instead of db:prepare to avoid automatic seeding
   ./bin/rails db:create
