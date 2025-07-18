@@ -212,7 +212,7 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
       }
     end
     
-    assert_redirected_to admin_tournament_round_match_path(@tournament, @round, @match)
+    assert_redirected_to players_admin_tournament_round_match_path(@tournament, @round, @match)
     assert_equal 'Player was successfully added to the match.', flash[:notice]
   end
 
@@ -227,7 +227,7 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
       }
     end
     
-    assert_redirected_to admin_tournament_round_match_path(@tournament, @round, @match)
+    assert_redirected_to players_admin_tournament_round_match_path(@tournament, @round, @match)
     assert_equal 'Player was successfully removed from the match.', flash[:notice]
   end
 

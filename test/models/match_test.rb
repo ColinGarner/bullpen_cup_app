@@ -151,12 +151,13 @@ class MatchTest < ActiveSupport::TestCase
     match = Match.new(
       round: @round,
       team_a: @team_a,
-      team_b: @team_b,
-      match_type: 'invalid_type'
+      team_b: @team_b
     )
     
-    assert_not match.valid?
-    assert_includes match.errors[:match_type], "is not included in the list"
+    # Rails enums throw ArgumentError when setting invalid values
+    assert_raises(ArgumentError) do
+      match.match_type = 'invalid_type'
+    end
   end
 
   test "should have valid status enum values" do
