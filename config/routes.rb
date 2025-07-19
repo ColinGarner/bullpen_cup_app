@@ -36,6 +36,9 @@ Rails.application.routes.draw do
         end
 
         resources :matches do
+          collection do
+            get :search_courses
+          end
           member do
             patch :start
             patch :complete

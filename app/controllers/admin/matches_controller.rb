@@ -22,9 +22,14 @@ class Admin::MatchesController < Admin::BaseController
   def create
     @match = @round.matches.build(match_params)
 
-    if @match.save
+    # Validate that golf course is selected
+    if golf_course_missing?
+      @match.errors.add(:golf_course_id, "must be selected")
+    end
+
+    if @match.errors.empty? && @match.save
       redirect_to admin_tournament_round_match_path(@tournament, @round, @match),
-                  notice: "Match was successfully created."
+                  notice: "Match was successfully created with course: #{@match.golf_course_display}"
     else
       @available_teams = @tournament.teams.order(:name)
       render :new, status: :unprocessable_entity
@@ -36,7 +41,12 @@ class Admin::MatchesController < Admin::BaseController
   end
 
   def update
-    if @match.update(match_params)
+    # Validate that golf course is selected
+    if golf_course_missing?
+      @match.errors.add(:golf_course_id, "must be selected")
+    end
+
+    if @match.errors.empty? && @match.update(match_params)
       redirect_to admin_tournament_round_match_path(@tournament, @round, @match),
                   notice: "Match was successfully updated."
     else
@@ -129,6 +139,44 @@ class Admin::MatchesController < Admin::BaseController
     end
   end
 
+  def search_courses
+    query = params[:q]
+
+    if query.blank? || query.length < 3
+      render json: { error: "Search query must be at least 3 characters" }, status: :unprocessable_entity
+      return
+    end
+
+    begin
+      service = GolfCourseApiService.new
+      courses = service.search_courses(query)
+      
+      if courses&.any? 
+        formatted_courses = courses.map do |course| 
+          # Handle both integer and string IDs safely
+          course_id = course['id'] || course[:id]
+          course_name = course['course_name'] || course[:course_name]
+          club_name = course['club_name'] || course[:club_name]
+          location_data = course['location'] || course[:location]
+          
+          {
+            id: course_id.to_s,  # Convert to string explicitly
+            name: course_name,
+            club_name: club_name,
+            location: format_course_location(location_data),
+          }
+        end
+
+        render json: { courses: formatted_courses }, status: :ok
+      else 
+        render json: { courses: [] }, status: :ok
+      end
+    rescue => e 
+      Rails.logger.error "Golf Course API Error: #{e.message}"
+      render json: { courses: [], error: "Unable to search courses at this time" }, status: :service_unavailable
+    end
+  end
+
   private
 
   def set_tournament_and_round
@@ -141,6 +189,32 @@ class Admin::MatchesController < Admin::BaseController
   end
 
   def match_params
-    params.require(:match).permit(:team_a_id, :team_b_id, :match_type, :scheduled_time)
+    params.require(:match).permit(:team_a_id, :team_b_id, :match_type, :scheduled_time, :golf_course_id, :golf_course_name, :golf_course_location)
+  end
+
+  def golf_course_missing? 
+    params.dig(:match, :golf_course_id).blank?
+  end
+
+  def format_course_location(location_data)
+    return "Location unavailable" unless location_data.present?
+    
+    begin
+      if location_data.is_a?(Hash)
+        city = location_data['city'] || location_data[:city]
+        state = location_data['state'] || location_data[:state]
+        
+        if city && state
+          "#{city}, #{state}"
+        else
+          location_data['address'] || location_data[:address] || "Location details unavailable"
+        end
+      else
+        location_data.to_s
+      end
+    rescue => e
+      Rails.logger.error "Error formatting location: #{e.message}"
+      "Location unavailable"
+    end
   end
 end

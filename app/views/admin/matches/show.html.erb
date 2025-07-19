@@ -90,6 +90,18 @@
             </span>
           </dd>
         </div>
+        <% if @match.has_golf_course? %>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Golf Course</dt>
+            <dd class="text-lg text-gray-900"><%= @match.golf_course_name %></dd>
+          </div>
+          <% if @match.golf_course_location.present? %>
+            <div>
+              <dt class="text-sm font-medium text-gray-500">Location</dt>
+              <dd class="text-base text-gray-700"><%= @match.golf_course_location %></dd>
+            </div>
+          <% end %>
+        <% end %>
         <% if @match.scheduled_time %>
           <div>
             <dt class="text-sm font-medium text-gray-500">Scheduled Time</dt>

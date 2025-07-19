@@ -27,6 +27,9 @@ class Match < ApplicationRecord
   validate :teams_must_be_different
   validate :teams_must_belong_to_tournament
   validate :winner_must_be_competing_team
+  # Simple golf course validations
+  validates :golf_course_name, length: { maximum: 200 }, allow_blank: true
+  validates :golf_course_location, length: { maximum: 200 }, allow_blank: true
 
   # Scopes
   scope :by_round, ->(round) { where(round: round) }
@@ -134,6 +137,29 @@ class Match < ApplicationRecord
     winner_team.name
   end
 
+  # Golf course helper methods
+  def has_golf_course?
+    golf_course_id.present?
+  end
+
+  def golf_course_display
+    return "No course selected" unless has_golf_course?
+    golf_course_name.present? ? golf_course_name : "Course ##{golf_course_id}"
+  end
+
+  def course_setup_complete?
+    golf_course_id.present?
+  end
+
+  def tee_display 
+    return "TBD" unless has_golf_course? && selected_tee_name.present?
+    "#{selected_tee_name}"
+  end
+
+  def course_par_display
+    return "TBD" unless has_golf_course?
+    course_par
+  end
   private
 
   def teams_must_be_different
