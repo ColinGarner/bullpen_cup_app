@@ -13,7 +13,7 @@
               Hi <%= current_user.display_name %>, you're almost ready to start.
             </p>
             <p class="text-lg text-gray-500">
-              You'll need an invitation to join a golf group, or you can create your own.
+              You'll need an invitation to join a golf trip, or you can create your own.
             </p>
           </div>
 
@@ -25,24 +25,24 @@
               <!-- Join Existing Group -->
               <div class="border-2 border-green-200 rounded-xl p-8 hover:border-green-300 transition-colors">
                 <div class="text-4xl mb-4">🔑</div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-3">Join Existing Group</h3>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">Join Golf Trip</h3>
                 <p class="text-gray-600 mb-6">
-                  Have a group invite code? Enter it here to join your golf club or organization instantly.
+                  Got invited to a golf trip? Enter your group invite code here to join the fun and see who you're playing against.
                 </p>
                 <%= link_to join_group_path, class: "w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors inline-block text-center" do %>
-                  Enter Group Code
+                  Enter Trip Code
                 <% end %>
               </div>
 
               <!-- Create New Group -->
               <div class="border-2 border-blue-200 rounded-xl p-8 hover:border-blue-300 transition-colors">
                 <div class="text-4xl mb-4">🏆</div>
-                <h3 class="text-xl font-semibold text-gray-900 mb-3">Create New Group</h3>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">Organize Golf Trip</h3>
                 <p class="text-gray-600 mb-6">
-                  Setting up tournaments for your golf club? Create a new group and become an administrator.
+                  Planning a golf getaway with the crew? Create your trip here and invite your buddies to join the competition.
                 </p>
                 <%= link_to new_group_path, class: "w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors inline-block text-center" do %>
-                  Create Group
+                  Create Trip
                 <% end %>
               </div>
             </div>
@@ -51,15 +51,15 @@
               <h3 class="text-lg font-semibold text-gray-900 mb-2">How it works</h3>
               <div class="grid md:grid-cols-2 gap-6 text-left">
                 <div>
-                  <h4 class="font-semibold text-gray-900 mb-2">🔑 Joining a Group</h4>
+                  <h4 class="font-semibold text-gray-900 mb-2">🔑 Joining a Trip</h4>
                   <p class="text-gray-600 text-sm">
-                    Ask your golf club admin for a 6-character invite code. Enter it to join instantly and start participating in tournaments.
+                    Ask the trip organizer for your 6-character invite code. Enter it to join instantly and start trash talking.
                   </p>
                 </div>
                 <div>
-                  <h4 class="font-semibold text-gray-900 mb-2">🏆 Creating a Group</h4>
+                  <h4 class="font-semibold text-gray-900 mb-2">🏆 Organizing a Trip</h4>
                   <p class="text-gray-600 text-sm">
-                    Set up your golf club or organization, invite members using your unique group code, and manage tournaments.
+                    Set up your golf trip, invite your buddies using your unique group code, and organize epic tournaments.
                   </p>
                 </div>
               </div>
@@ -106,12 +106,12 @@
         <!-- Main Headline -->
         <div class="mb-16">
           <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            Professional Golf
-            <span class="block text-yellow-300">Tournament Platform</span>
+            Epic Golf Trips
+            <span class="block text-yellow-300">Made Simple</span>
           </h1>
           <p class="text-xl md:text-2xl text-green-100 mb-8 max-w-4xl mx-auto leading-relaxed">
-            The complete solution for golf clubs and organizations to manage tournaments, 
-            track scores, and engage members with enterprise-grade tools.
+            The easiest way to organize tournaments, track scores, and settle the score 
+            with your golf buddies. Perfect for weekend getaways and annual golf trips.
           </p>
         </div>
       </div>
@@ -122,65 +122,65 @@
       <div class="container mx-auto px-4">
         <div class="text-center mb-12">
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Everything Your Golf Group Needs
+            Everything Your Golf Trip Needs
           </h2>
           <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            From tournament creation to live scoring, manage every aspect of your golf competitions with professional tools designed for clubs and organizations.
+            From organizing teams to tracking live scores, turn your golf getaway into an unforgettable competition that your crew will talk about all year.
           </p>
         </div>
 
         <div class="grid md:grid-cols-3 gap-8 mb-12">
-          <!-- Multi-Tenant Groups -->
+          <!-- Easy Setup -->
           <div class="text-center p-6 bg-green-50 rounded-xl">
-            <div class="text-4xl mb-4">🏢</div>
-            <h3 class="text-xl font-semibold mb-3 text-gray-900">Multi-Group Management</h3>
+            <div class="text-4xl mb-4">🚀</div>
+            <h3 class="text-xl font-semibold mb-3 text-gray-900">Dead Simple Setup</h3>
             <p class="text-gray-600">
-              Each golf club gets their own space. Members can belong to multiple groups while keeping data separate and organized.
+              Create your trip in minutes. Invite your buddies with a simple code. No complicated apps or confusing menus.
             </p>
           </div>
 
-          <!-- Tournament Management -->
+          <!-- Tournament Formats -->
           <div class="text-center p-6 bg-blue-50 rounded-xl">
             <div class="text-4xl mb-4">🏆</div>
-            <h3 class="text-xl font-semibold mb-3 text-gray-900">Tournament Management</h3>
+            <h3 class="text-xl font-semibold mb-3 text-gray-900">Epic Competitions</h3>
             <p class="text-gray-600">
-              Create Ryder Cup-style tournaments with multiple formats: singles, fourball, and alternate shot matches.
+              Ryder Cup style matches, team tournaments, and singles competitions. Create the drama your trip deserves.
             </p>
           </div>
 
-          <!-- Team Organization -->
+          <!-- Team Drama -->
           <div class="text-center p-6 bg-yellow-50 rounded-xl">
             <div class="text-4xl mb-4">👥</div>
-            <h3 class="text-xl font-semibold mb-3 text-gray-900">Smart Team Building</h3>
+            <h3 class="text-xl font-semibold mb-3 text-gray-900">Team Drama</h3>
             <p class="text-gray-600">
-              Organize players into teams, assign captains, and manage participation across multiple tournament rounds.
+              Draft teams, assign captains, and watch the friendly rivalry unfold. Perfect for group dynamics and trash talk.
             </p>
           </div>
 
-          <!-- Match Scheduling -->
+          <!-- Live Action -->
           <div class="text-center p-6 bg-purple-50 rounded-xl">
-            <div class="text-4xl mb-4">📅</div>
-            <h3 class="text-xl font-semibold mb-3 text-gray-900">Flexible Scheduling</h3>
+            <div class="text-4xl mb-4">📱</div>
+            <h3 class="text-xl font-semibold mb-3 text-gray-900">Live Updates</h3>
             <p class="text-gray-600">
-              Schedule matches across multiple days and formats with automatic player assignment and conflict detection.
+              Track scores in real-time from the course. See who's choking and who's clutch as it happens.
             </p>
           </div>
 
-          <!-- Course Integration -->
+          <!-- Settle Bets -->
           <div class="text-center p-6 bg-red-50 rounded-xl">
-            <div class="text-4xl mb-4">⛳</div>
-            <h3 class="text-xl font-semibold mb-3 text-gray-900">Course Integration</h3>
+            <div class="text-4xl mb-4">💰</div>
+            <h3 class="text-xl font-semibold mb-3 text-gray-900">Settle the Score</h3>
             <p class="text-gray-600">
-              Connect with real golf courses for accurate handicap calculations and stroke allocation.
+              Final leaderboards, match results, and bragging rights documentation. Know exactly who owes who drinks.
             </p>
           </div>
 
-          <!-- Live Scoring -->
+          <!-- Multiple Trips -->
           <div class="text-center p-6 bg-indigo-50 rounded-xl">
-            <div class="text-4xl mb-4">📊</div>
-            <h3 class="text-xl font-semibold mb-3 text-gray-900">Live Scoring</h3>
+            <div class="text-4xl mb-4">🌎</div>
+            <h3 class="text-xl font-semibold mb-3 text-gray-900">Multiple Trips</h3>
             <p class="text-gray-600">
-              Real-time score updates, live leaderboards, and instant match results to keep everyone engaged.
+              Join different golf trips throughout the year. Weekend trips, bachelor parties, annual getaways - all in one place.
             </p>
           </div>
         </div>
@@ -188,12 +188,12 @@
         <!-- CTA Section -->
         <div class="text-center bg-gray-50 rounded-2xl p-8">
           <h3 class="text-2xl font-bold text-gray-900 mb-4">
-            Ready to Elevate Your Golf Tournaments?
+            Ready to Plan Your Next Golf Trip?
           </h3>
           <p class="text-gray-600 mb-6 max-w-2xl mx-auto">
-            Join golf clubs and organizations already using Scorecard to create memorable tournament experiences.
+            Join golfers already using Scorecard to turn their weekend getaways into legendary competitions.
           </p>
-          <%= link_to "Get Started Free", new_user_registration_path, 
+          <%= link_to "Start Planning Free", new_user_registration_path, 
               class: "bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-lg text-lg transition-colors inline-block" %>
         </div>
       </div>
