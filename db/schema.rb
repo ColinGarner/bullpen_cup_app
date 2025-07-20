@@ -10,9 +10,39 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_18_200435) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_19_195101) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "group_memberships", force: :cascade do |t|
+    t.bigint "group_id", null: false
+    t.bigint "user_id", null: false
+    t.string "role", default: "member", null: false
+    t.datetime "joined_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["group_id", "user_id"], name: "index_group_memberships_on_group_id_and_user_id", unique: true
+    t.index ["group_id"], name: "index_group_memberships_on_group_id"
+    t.index ["joined_at"], name: "index_group_memberships_on_joined_at"
+    t.index ["role"], name: "index_group_memberships_on_role"
+    t.index ["user_id"], name: "index_group_memberships_on_user_id"
+  end
+
+  create_table "groups", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "slug", null: false
+    t.text "description"
+    t.boolean "active", default: true, null: false
+    t.jsonb "settings", default: {}
+    t.string "contact_email"
+    t.string "contact_phone"
+    t.text "address"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_groups_on_active"
+    t.index ["name"], name: "index_groups_on_name"
+    t.index ["slug"], name: "index_groups_on_slug", unique: true
+  end
 
   create_table "match_players", force: :cascade do |t|
     t.bigint "match_id", null: false
@@ -43,6 +73,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_18_200435) do
     t.string "golf_course_id"
     t.string "golf_course_name"
     t.string "golf_course_location"
+    t.bigint "scorer_user_id"
+    t.jsonb "holes_data"
+    t.string "selected_tee_name"
     t.index ["golf_course_id"], name: "index_matches_on_golf_course_id"
     t.index ["match_type"], name: "index_matches_on_match_type"
     t.index ["round_id", "status"], name: "index_matches_on_round_id_and_status"
@@ -68,6 +101,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_18_200435) do
     t.index ["tournament_id", "date"], name: "index_rounds_on_tournament_id_and_date"
     t.index ["tournament_id", "round_number"], name: "index_rounds_on_tournament_id_and_round_number", unique: true
     t.index ["tournament_id"], name: "index_rounds_on_tournament_id"
+  end
+
+  create_table "scores", force: :cascade do |t|
+    t.bigint "match_id", null: false
+    t.bigint "user_id", null: false
+    t.integer "hole_number"
+    t.integer "strokes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["match_id"], name: "index_scores_on_match_id"
+    t.index ["user_id"], name: "index_scores_on_user_id"
   end
 
   create_table "team_memberships", force: :cascade do |t|
@@ -102,8 +146,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_18_200435) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "cancelled", default: false, null: false
+    t.bigint "group_id"
     t.index ["cancelled"], name: "index_tournaments_on_cancelled"
     t.index ["created_by_id"], name: "index_tournaments_on_created_by_id"
+    t.index ["group_id"], name: "index_tournaments_on_group_id"
     t.index ["start_date"], name: "index_tournaments_on_start_date"
   end
 
@@ -124,6 +170,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_18_200435) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "group_memberships", "groups"
+  add_foreign_key "group_memberships", "users"
   add_foreign_key "match_players", "matches"
   add_foreign_key "match_players", "teams"
   add_foreign_key "match_players", "users"
@@ -132,9 +180,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_18_200435) do
   add_foreign_key "matches", "teams", column: "team_b_id"
   add_foreign_key "matches", "teams", column: "winner_team_id"
   add_foreign_key "rounds", "tournaments"
+  add_foreign_key "scores", "matches"
+  add_foreign_key "scores", "users"
   add_foreign_key "team_memberships", "teams"
   add_foreign_key "team_memberships", "users"
   add_foreign_key "teams", "tournaments"
   add_foreign_key "teams", "users", column: "captain_id"
+  add_foreign_key "tournaments", "groups"
   add_foreign_key "tournaments", "users", column: "created_by_id"
 end

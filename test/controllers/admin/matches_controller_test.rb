@@ -4,12 +4,14 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
   def setup
     @admin = users(:two) # From fixtures, admin: true
     @user = users(:one)  # Regular user
+    @group = groups(:one)
 
     @tournament = Tournament.create!(
       name: "Test Tournament",
       start_date: 1.week.from_now.to_date,
       end_date: 2.weeks.from_now.to_date,
-      created_by: @admin
+      created_by: @admin,
+      group: @group
     )
 
     @round = Round.create!(
@@ -55,20 +57,20 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
 
   test "should redirect non-admin users" do
     sign_in @user
-    get admin_tournament_round_matches_path(@tournament, @round)
+    get admin_tournament_round_matches_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id)
     assert_redirected_to root_path
   end
 
   test "should get index for admin" do
     sign_in @admin
-    get admin_tournament_round_matches_path(@tournament, @round)
+    get admin_tournament_round_matches_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id)
     assert_response :success
     assert_includes response.body, @match.display_name
   end
 
   test "should show match for admin" do
     sign_in @admin
-    get admin_tournament_round_match_path(@tournament, @round, @match)
+    get admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id)
     assert_response :success
     assert_includes response.body, @match.display_name
     assert_includes response.body, @match.match_type_display
@@ -76,7 +78,7 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
 
   test "should get new match form for admin" do
     sign_in @admin
-    get new_admin_tournament_round_match_path(@tournament, @round)
+    get new_admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id)
     assert_response :success
     assert_includes response.body, "Create New Match"
   end
@@ -85,29 +87,35 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
     sign_in @admin
 
     assert_difference("Match.count") do
-      post admin_tournament_round_matches_path(@tournament, @round), params: {
+      post admin_tournament_round_matches_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id), params: {
         match: {
           team_a_id: @team_a.id,
           team_b_id: @team_b.id,
           match_type: "fourball_match_play",
-          scheduled_time: 2.hours.from_now
+          scheduled_time: 2.hours.from_now,
+          golf_course_id: "1",
+          golf_course_name: "Test Golf Course",
+          golf_course_location: "Test Location"
         }
       }
     end
 
-    assert_redirected_to admin_tournament_round_match_path(@tournament, @round, Match.last)
-    assert_equal "Match was successfully created.", flash[:notice]
+    assert_redirected_to admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: Match.last.id)
+    assert_equal "Match was successfully created with course: Test Golf Course", flash[:notice]
   end
 
   test "should not create invalid match" do
     sign_in @admin
 
     assert_no_difference("Match.count") do
-      post admin_tournament_round_matches_path(@tournament, @round), params: {
+      post admin_tournament_round_matches_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id), params: {
         match: {
           team_a_id: @team_a.id,
           team_b_id: @team_a.id, # Same team - invalid
-          match_type: "singles_match_play"
+          match_type: "singles_match_play",
+          golf_course_id: "1",
+          golf_course_name: "Test Golf Course",
+          golf_course_location: "Test Location"
         }
       }
     end
@@ -118,7 +126,7 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
 
   test "should get edit match form for admin" do
     sign_in @admin
-    get edit_admin_tournament_round_match_path(@tournament, @round, @match)
+    get edit_admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id)
     assert_response :success
     assert_includes response.body, "Edit Match"
   end
@@ -126,14 +134,17 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
   test "should update match for admin" do
     sign_in @admin
 
-    patch admin_tournament_round_match_path(@tournament, @round, @match), params: {
+    patch admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id), params: {
       match: {
         match_type: "fourball_match_play",
-        scheduled_time: 3.hours.from_now
+        scheduled_time: 3.hours.from_now,
+        golf_course_id: "1",
+        golf_course_name: "Updated Golf Course",
+        golf_course_location: "Updated Location"
       }
     }
 
-    assert_redirected_to admin_tournament_round_match_path(@tournament, @round, @match)
+    assert_redirected_to admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id)
     assert_equal "Match was successfully updated.", flash[:notice]
 
     @match.reload
@@ -143,9 +154,12 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
   test "should not update match with invalid data" do
     sign_in @admin
 
-    patch admin_tournament_round_match_path(@tournament, @round, @match), params: {
+    patch admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id), params: {
       match: {
-        team_b_id: @team_a.id # Same as team_a - invalid
+        team_b_id: @team_a.id, # Same as team_a - invalid
+        golf_course_id: "1",
+        golf_course_name: "Test Golf Course",
+        golf_course_location: "Test Location"
       }
     }
 
@@ -157,28 +171,28 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
     sign_in @admin
 
     assert_difference("Match.count", -1) do
-      delete admin_tournament_round_match_path(@tournament, @round, @match)
+      delete admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id)
     end
 
-    assert_redirected_to admin_tournament_round_matches_path(@tournament, @round)
+    assert_redirected_to admin_tournament_round_matches_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id)
     assert_equal "Match was successfully deleted.", flash[:notice]
   end
 
   test "should start match for admin" do
     sign_in @admin
 
-    patch start_admin_tournament_round_match_path(@tournament, @round, @match)
+    patch start_admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id)
 
     @match.reload
     assert @match.active?
-    assert_redirected_to admin_tournament_round_match_path(@tournament, @round, @match)
+    assert_redirected_to admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id)
     assert_equal "Match has been started!", flash[:notice]
   end
 
   test "should complete match with winner for admin" do
     sign_in @admin
 
-    patch complete_admin_tournament_round_match_path(@tournament, @round, @match), params: {
+    patch complete_admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id), params: {
       winner_team_id: @team_a.id
     }
 
@@ -186,18 +200,18 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
     assert @match.completed?
     assert_equal @team_a, @match.winner_team
     assert_not_nil @match.completed_at
-    assert_redirected_to admin_tournament_round_match_path(@tournament, @round, @match)
+    assert_redirected_to admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id)
     assert_equal "Match has been completed!", flash[:notice]
   end
 
   test "should cancel match for admin" do
     sign_in @admin
 
-    patch cancel_admin_tournament_round_match_path(@tournament, @round, @match)
+    patch cancel_admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id)
 
     @match.reload
     assert @match.cancelled?
-    assert_redirected_to admin_tournament_round_match_path(@tournament, @round, @match)
+    assert_redirected_to admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id)
     assert_equal "Match has been cancelled.", flash[:notice]
   end
 
@@ -206,13 +220,13 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
 
     # Test adding a player to the match
     assert_difference("@match.match_players.count") do
-      post add_player_admin_tournament_round_match_path(@tournament, @round, @match), params: {
+      post add_player_admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id), params: {
         team_id: @team_a.id,
         user_id: @player_a2.id
       }
     end
 
-    assert_redirected_to players_admin_tournament_round_match_path(@tournament, @round, @match)
+    assert_redirected_to players_admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id)
     assert_equal "Player was successfully added to the match.", flash[:notice]
   end
 
@@ -222,12 +236,12 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
     match_player = @match.match_players.first
 
     assert_difference("@match.match_players.count", -1) do
-      delete remove_player_admin_tournament_round_match_path(@tournament, @round, @match), params: {
+      delete remove_player_admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id), params: {
         match_player_id: match_player.id
       }
     end
 
-    assert_redirected_to players_admin_tournament_round_match_path(@tournament, @round, @match)
+    assert_redirected_to players_admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id)
     assert_equal "Player was successfully removed from the match.", flash[:notice]
   end
 
@@ -237,7 +251,7 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
     other_user = User.create!(first_name: "Other", last_name: "User", email: "other@example.com", password: "password123")
 
     assert_no_difference("@match.match_players.count") do
-      post add_player_admin_tournament_round_match_path(@tournament, @round, @match), params: {
+      post add_player_admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id), params: {
         team_id: @team_a.id,
         user_id: other_user.id # Not a member of team_a
       }
@@ -249,7 +263,7 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
 
   test "should get players selection page" do
     sign_in @admin
-    get players_admin_tournament_round_match_path(@tournament, @round, @match)
+    get players_admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id)
     assert_response :success
     assert_includes response.body, "Manage Players"
   end

@@ -1,4 +1,4 @@
-# 🏌️ Bullpen Cup Web App – Developer To-Do List
+# 🏌️ Scorecard Web App – Developer To-Do List
 
 A full-featured Ruby on Rails app to manage a Ryder Cup-style golf trip with live scoring, team management, golf course integration, and advanced handicap calculations.
 

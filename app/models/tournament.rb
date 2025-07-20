@@ -1,5 +1,8 @@
 class Tournament < ApplicationRecord
+  include TenantScoped
+
   belongs_to :created_by, class_name: "User"
+  belongs_to :group
 
   # New relationships
   has_many :teams, dependent: :destroy
@@ -23,6 +26,7 @@ class Tournament < ApplicationRecord
   scope :completed, -> { where(cancelled: false).where("end_date < ?", Date.current) }
   scope :cancelled, -> { where(cancelled: true) }
   scope :by_start_date, -> { order(:start_date) }
+  scope :in_group, ->(group) { where(group: group) }
 
   # Computed status method
   def status
@@ -104,6 +108,15 @@ class Tournament < ApplicationRecord
     when "cancelled" then "bg-red-100 text-red-800"
     else "bg-gray-100 text-gray-800"
     end
+  end
+
+  # Group-related methods
+  def group_name
+    group&.name
+  end
+
+  def group_slug
+    group&.slug
   end
 
   private

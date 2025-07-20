@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: Pebble Beach Golf Club
+  slug: pebble-beach-gc
+  description: Premier golf club on the Monterey Peninsula
+  active: true
+  settings: {}
+  contact_email: info@pebblebeach.test
+  contact_phone: (831) 555-0100
+  address: 17-Mile Drive, Pebble Beach, CA 93953
+
+two:
+  name: Augusta National Golf Club
+  slug: augusta-national
+  description: Home of the Masters Tournament
+  active: true
+  settings: {}
+  contact_email: info@augusta.test
+  contact_phone: (706) 555-0200
+  address: 2604 Washington Rd, Augusta, GA 30904

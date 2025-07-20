@@ -8,6 +8,7 @@ one:
   cancelled: false
   venue: Pebble Beach Golf Club
   created_by: one
+  group: one
 
 two:
   name: Winter Classic 2024
@@ -17,3 +18,4 @@ two:
   cancelled: false
   venue: Augusta Hills Golf Club
   created_by: two
+  group: two

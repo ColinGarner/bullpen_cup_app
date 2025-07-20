@@ -4,10 +4,10 @@ class GolfCourseApiService
 
   def initialize
     @api_key = ENV.fetch("GOLF_COURSE_API_KEY", nil)
-    raise 'Golf Course API key is not set' unless @api_key.present?
+    raise "Golf Course API key is not set" unless @api_key.present?
   end
 
-  def search_courses(search_term) 
+  def search_courses(search_term)
     return unless search_term.present? && search_term.length >= 3
 
     begin
@@ -18,9 +18,9 @@ class GolfCourseApiService
       )
 
       parsed_response = handle_response(response)
-      
-      if parsed_response && parsed_response.is_a?(Hash) && parsed_response['courses']
-        parsed_response['courses']
+
+      if parsed_response && parsed_response.is_a?(Hash) && parsed_response["courses"]
+        parsed_response["courses"]
       else
         []
       end
@@ -30,7 +30,7 @@ class GolfCourseApiService
     end
   end
 
-  def get_course_details(course_id) 
+  def get_course_details(course_id)
     response = self.class.get(
       "#{base_uri}/courses/#{course_id}",
       headers: {
@@ -41,7 +41,7 @@ class GolfCourseApiService
     handle_response(response)
   end
 
-  private 
+  private
 
   def handle_response(response)
     if response.success?
@@ -49,7 +49,7 @@ class GolfCourseApiService
         response.parsed_response
       rescue => e
         Rails.logger.error "Golf Course API Parse Error: #{e.class}: #{e.message}"
-        
+
         # Try manual JSON parsing as fallback
         begin
           JSON.parse(response.body)

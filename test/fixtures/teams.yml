@@ -1,14 +1,14 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
+  name: Eagles Team
   tournament: one
   captain: one
   created_at: 2025-07-17 17:46:53
   updated_at: 2025-07-17 17:46:53
 
 two:
-  name: MyString
+  name: Birdies Team
   tournament: two
   captain: two
   created_at: 2025-07-17 17:46:53

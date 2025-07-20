@@ -15,6 +15,10 @@ class User < ApplicationRecord
     allow_nil: true
   }
 
+  # Group relationships
+  has_many :group_memberships, dependent: :destroy
+  has_many :groups, through: :group_memberships
+
   # Team relationships
   has_many :team_memberships, dependent: :destroy
   has_many :teams, through: :team_memberships
@@ -41,6 +45,31 @@ class User < ApplicationRecord
     update!(admin: false)
   end
 
+  # Group-related methods
+  def group_admin?(group)
+    group_memberships.find_by(group: group, role: "admin").present?
+  end
+
+  def group_member?(group)
+    groups.include?(group)
+  end
+
+  def groups_as_admin
+    groups.joins(:group_memberships).where(group_memberships: { role: "admin", user_id: id })
+  end
+
+  def groups_as_member
+    groups.joins(:group_memberships).where(group_memberships: { role: "member", user_id: id })
+  end
+
+  def join_group(group, role: "member")
+    group.add_member(self, role: role)
+  end
+
+  def leave_group(group)
+    group.remove_member(self)
+  end
+
   # Team-related methods
   def captain_of?(team)
     captained_teams.include?(team)
@@ -56,6 +85,15 @@ class User < ApplicationRecord
 
   def tournaments_as_captain
     Tournament.joins(:teams).where(teams: { captain_id: id }).distinct
+  end
+
+  # Scoped tournament methods by group
+  def tournaments_in_group(group)
+    tournaments_as_participant.where(group: group)
+  end
+
+  def tournaments_created_in_group(group)
+    created_tournaments.where(group: group)
   end
 
   def display_name

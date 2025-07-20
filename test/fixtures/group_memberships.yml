@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  group: one
+  user: one
+  role: MyString
+  joined_at: 2025-07-19 14:50:50
+
+two:
+  group: two
+  user: two
+  role: MyString
+  joined_at: 2025-07-19 14:50:50

@@ -151,7 +151,7 @@ class Match < ApplicationRecord
     golf_course_id.present?
   end
 
-  def tee_display 
+  def tee_display
     return "TBD" unless has_golf_course? && selected_tee_name.present?
     "#{selected_tee_name}"
   end

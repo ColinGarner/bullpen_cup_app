@@ -5,7 +5,7 @@
   <nav class="mb-6" aria-label="Breadcrumb">
     <ol class="flex items-center space-x-4 text-sm">
       <li>
-        <%= link_to "Tournaments", admin_tournaments_path, class: "text-gray-500 hover:text-gray-700" %>
+        <%= link_to "Tournaments", scoped_admin_tournaments_path, class: "text-gray-500 hover:text-gray-700" %>
       </li>
       <li>
         <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
@@ -13,7 +13,7 @@
         </svg>
       </li>
       <li>
-        <%= link_to @tournament.name, admin_tournament_path(@tournament), class: "text-gray-500 hover:text-gray-700" %>
+        <%= link_to @tournament.name, scoped_admin_tournament_path(@tournament), class: "text-gray-500 hover:text-gray-700" %>
       </li>
       <li>
         <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
@@ -21,7 +21,7 @@
         </svg>
       </li>
       <li>
-        <%= link_to @round.name, admin_tournament_round_path(@tournament, @round), class: "text-gray-500 hover:text-gray-700" %>
+        <%= link_to @round.name, scoped_admin_tournament_round_path(@tournament, @round), class: "text-gray-500 hover:text-gray-700" %>
       </li>
       <li>
         <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
@@ -29,7 +29,7 @@
         </svg>
       </li>
       <li>
-        <%= link_to @match.display_name, admin_tournament_round_match_path(@tournament, @round, @match), class: "text-gray-500 hover:text-gray-700" %>
+        <%= link_to @match.display_name, scoped_admin_tournament_round_match_path(@tournament, @round, @match), class: "text-gray-500 hover:text-gray-700" %>
       </li>
       <li>
         <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
@@ -55,7 +55,7 @@
           </p>
         </div>
         <div class="flex space-x-3">
-          <%= link_to admin_tournament_round_match_path(@tournament, @round, @match),
+          <%= link_to scoped_admin_tournament_round_match_path(@tournament, @round, @match),
               class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200" do %>
             <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -119,7 +119,7 @@
                      <p class="text-xs text-gray-500">Handicap: <%= player.formatted_handicap %></p>
                    </div>
                  </div>
-                 <%= link_to remove_player_admin_tournament_round_match_path(@tournament, @round, @match, player_id: player.id),
+                 <%= link_to scoped_remove_player_admin_tournament_round_match_path(@tournament, @round, @match, player_id: player.id),
                      data: { 
                        turbo_method: :delete, 
                        confirm: "Remove #{player.display_name} from this match?",
@@ -143,7 +143,7 @@
             <h4 class="text-md font-medium text-gray-900 mb-3">Add Players</h4>
             <div class="space-y-2">
               <% @team_a_available_players.each do |player| %>
-                <%= form_with url: add_player_admin_tournament_round_match_path(@tournament, @round, @match), method: :post, local: true do |form| %>
+                <%= form_with url: scoped_add_player_admin_tournament_round_match_path(@tournament, @round, @match), method: :post, local: true do |form| %>
                   <%= form.hidden_field :team_id, value: @match.team_a.id %>
                   <%= form.hidden_field :user_id, value: player.id %>
                   <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
@@ -208,7 +208,7 @@
                                            <p class="text-xs text-gray-500">Handicap: <%= player.formatted_handicap %></p>
                    </div>
                  </div>
-                 <%= link_to remove_player_admin_tournament_round_match_path(@tournament, @round, @match, player_id: player.id),
+                 <%= link_to scoped_remove_player_admin_tournament_round_match_path(@tournament, @round, @match, player_id: player.id),
                      data: { 
                        turbo_method: :delete, 
                        confirm: "Remove #{player.display_name} from this match?",
@@ -232,7 +232,7 @@
             <h4 class="text-md font-medium text-gray-900 mb-3">Add Players</h4>
             <div class="space-y-2">
               <% @team_b_available_players.each do |player| %>
-                <%= form_with url: add_player_admin_tournament_round_match_path(@tournament, @round, @match), method: :post, local: true do |form| %>
+                <%= form_with url: scoped_add_player_admin_tournament_round_match_path(@tournament, @round, @match), method: :post, local: true do |form| %>
                   <%= form.hidden_field :team_id, value: @match.team_b.id %>
                   <%= form.hidden_field :user_id, value: player.id %>
                   <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">

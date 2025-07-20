@@ -2,8 +2,8 @@
   <!-- Header -->
   <div class="mb-8">
     <nav class="text-sm breadcrumbs mb-4">
-      <%= link_to "Tournaments", admin_tournaments_path, class: "text-blue-600 hover:text-blue-900" %> /
-      <%= link_to @tournament.name, admin_tournament_path(@tournament), class: "text-blue-600 hover:text-blue-900" %> /
+      <%= link_to "Tournaments", scoped_admin_tournaments_path, class: "text-blue-600 hover:text-blue-900" %> /
+      <%= link_to @tournament.name, scoped_admin_tournament_path(@tournament), class: "text-blue-600 hover:text-blue-900" %> /
       <span class="text-gray-500">New Round</span>
     </nav>
     
@@ -20,7 +20,7 @@
     </div>
     
     <div class="p-6">
-      <%= form_with model: [@tournament, @round], url: admin_tournament_rounds_path(@tournament), local: true do |f| %>
+      <%= form_with model: [@tournament, @round], url: scoped_admin_tournament_rounds_path(@tournament), local: true do |f| %>
         <% if @round.errors.any? %>
           <div class="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
             <div class="flex">
@@ -85,7 +85,7 @@
         <!-- Form Actions -->
         <div class="mt-8 flex items-center justify-between pt-6 border-t border-gray-200">
           <div class="flex space-x-3">
-            <%= link_to admin_tournament_path(@tournament), 
+            <%= link_to scoped_admin_tournament_path(@tournament), 
                 class: "px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" do %>
               Cancel
             <% end %>

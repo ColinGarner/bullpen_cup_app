@@ -1,277 +1,225 @@
-# This file should ensure the existence of records required to run the application in every environment (production,
-# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
+# Clear existing data
+puts "Clearing existing data..."
+MatchPlayer.destroy_all
+Match.destroy_all
+Round.destroy_all
+TeamMembership.destroy_all
+Team.destroy_all
+Tournament.destroy_all
+GroupMembership.destroy_all
+Group.destroy_all
+User.destroy_all
 
-puts "🌱 Starting to seed the database..."
+puts "Creating groups..."
 
-# Production-safe seeding - only create if not exists
-# Do NOT destroy existing data in production!
+# Create Groups
+pebble_beach = Group.create!(
+  name: "Pebble Beach Golf Club",
+  slug: "pebble-beach",
+  description: "Premier golf club featuring championship tournaments and beautiful coastal views.",
+  contact_email: "info@pebblebeach.golf",
+  contact_phone: "(831) 647-7500",
+  address: "1700 17-Mile Drive, Pebble Beach, CA 93953",
+  active: true
+)
 
-# Create Admin User (only if one doesn't exist)
-puts "👑 Ensuring admin user exists..."
-admin = User.find_or_create_by(email: "admin@bullpencup.com") do |user|
-  user.first_name = "Admin"
-  user.last_name = "User"
-  user.handicap = 15.5
-  user.password = "password123"
-  user.password_confirmation = "password123"
-  user.admin = true
+augusta_national = Group.create!(
+  name: "Augusta National Golf Club",
+  slug: "augusta-national",
+  description: "Home of the Masters Tournament and one of the most prestigious golf clubs in the world.",
+  contact_email: "contact@augusta.golf",
+  contact_phone: "(706) 667-6000",
+  address: "2604 Washington Road, Augusta, GA 30904",
+  active: true
+)
+
+pinehurst = Group.create!(
+  name: "Pinehurst Resort",
+  slug: "pinehurst",
+  description: "Historic golf resort in North Carolina featuring multiple championship courses.",
+  contact_email: "golf@pinehurst.com",
+  contact_phone: "(855) 235-8507",
+  address: "1 Carolina Vista Dr, Pinehurst, NC 28374",
+  active: true
+)
+
+puts "Creating users..."
+
+# Create Admin Users for each group
+admin_users = []
+
+admin_users << User.create!(
+  first_name: "James",
+  last_name: "Mitchell",
+  email: "james.mitchell@pebblebeach.golf",
+  password: "password123",
+  handicap: 8.5,
+  admin: false
+)
+
+admin_users << User.create!(
+  first_name: "Sarah",
+  last_name: "Johnson",
+  email: "sarah.johnson@augusta.golf",
+  password: "password123",
+  handicap: 12.0,
+  admin: false
+)
+
+admin_users << User.create!(
+  first_name: "Robert",
+  last_name: "Williams",
+  email: "robert.williams@pinehurst.com",
+  password: "password123",
+  handicap: 6.2,
+  admin: false
+)
+
+# Create Global Admin
+global_admin = User.create!(
+  first_name: "System",
+  last_name: "Administrator",
+      email: "admin@scorecard.golf",
+  password: "password123",
+  handicap: 15.0,
+  admin: true
+)
+
+puts "Creating group memberships..."
+
+# Add admin users to their respective groups as admins
+pebble_beach.add_member(admin_users[0], role: 'admin')
+augusta_national.add_member(admin_users[1], role: 'admin')
+pinehurst.add_member(admin_users[2], role: 'admin')
+
+# Add global admin to all groups
+pebble_beach.add_member(global_admin, role: 'admin')
+augusta_national.add_member(global_admin, role: 'admin')
+pinehurst.add_member(global_admin, role: 'admin')
+
+# Create regular members for each group
+puts "Creating regular members..."
+
+pebble_members = []
+pebble_names = [
+  [ "David", "Anderson" ], [ "Emma", "Brown" ], [ "Michael", "Davis" ],
+  [ "Sarah", "Garcia" ], [ "Christopher", "Wilson" ]
+]
+pebble_names.each_with_index do |(first, last), i|
+  user = User.create!(
+    first_name: first,
+    last_name: last,
+    email: "#{first.downcase}.#{last.downcase}@pebblebeach.golf",
+    password: "password123",
+    handicap: rand(0.0..25.0).round(1)
+  )
+  pebble_beach.add_member(user, role: 'member')
+  pebble_members << user
 end
 
-if admin.persisted? && !admin.admin?
-  admin.update!(admin: true)
+augusta_members = []
+augusta_names = [
+  [ "Jennifer", "Miller" ], [ "Robert", "Taylor" ], [ "Amanda", "Thomas" ],
+  [ "Daniel", "Jackson" ], [ "Ashley", "White" ]
+]
+augusta_names.each_with_index do |(first, last), i|
+  user = User.create!(
+    first_name: first,
+    last_name: last,
+    email: "#{first.downcase}.#{last.downcase}@augusta.golf",
+    password: "password123",
+    handicap: rand(0.0..25.0).round(1)
+  )
+  augusta_national.add_member(user, role: 'member')
+  augusta_members << user
 end
 
-puts "✅ Admin user ready: #{admin.display_name} (#{admin.email})"
+pinehurst_members = []
+pinehurst_names = [
+  [ "Matthew", "Harris" ], [ "Jessica", "Martin" ], [ "Andrew", "Thompson" ],
+  [ "Nicole", "Garcia" ], [ "Kevin", "Martinez" ]
+]
+pinehurst_names.each_with_index do |(first, last), i|
+  user = User.create!(
+    first_name: first,
+    last_name: last,
+    email: "#{first.downcase}.#{last.downcase}@pinehurst.com",
+    password: "password123",
+    handicap: rand(0.0..25.0).round(1)
+  )
+  pinehurst.add_member(user, role: 'member')
+  pinehurst_members << user
+end
 
-# Only create sample data in development environment
-if Rails.env.development?
-  puts "🚀 Creating sample data for development environment..."
+puts "Creating tournaments..."
 
-  # Clear existing data in development only
-  puts "🧹 Cleaning up existing development data..."
+# Create tournaments for each group
+pebble_tournament = Tournament.create!(
+  name: "Pebble Beach Pro-Am Championship",
+  description: "Annual championship tournament featuring professional and amateur players.",
+  start_date: 2.months.from_now,
+  end_date: 2.months.from_now + 3.days,
+  venue: "Pebble Beach Golf Links",
+  group: pebble_beach,
+  created_by: admin_users[0]
+)
 
-  # Use a transaction to ensure data integrity
-  ActiveRecord::Base.transaction do
-    puts "  Deleting match players..."
-    MatchPlayer.destroy_all
-    puts "  Deleting matches..."
-    Match.destroy_all
-    puts "  Deleting rounds..."
-    Round.destroy_all
-    puts "  Deleting team memberships..."
-    TeamMembership.destroy_all
-    puts "  Deleting teams..."
-    Team.destroy_all
-    puts "  Deleting tournaments..."
-    Tournament.destroy_all
-    puts "  Deleting users (except admin)..."
-    User.where.not(email: admin.email).destroy_all
+augusta_tournament = Tournament.create!(
+  name: "Augusta Spring Invitational",
+  description: "Exclusive member tournament played on the famous Augusta National course.",
+  start_date: 3.months.from_now,
+  end_date: 3.months.from_now + 4.days,
+  venue: "Augusta National Golf Course",
+  group: augusta_national,
+  created_by: admin_users[1]
+)
+
+pinehurst_tournament = Tournament.create!(
+  name: "Pinehurst Summer Classic",
+  description: "Multi-course tournament featuring Pinehurst's championship layouts.",
+  start_date: 4.months.from_now,
+  end_date: 4.months.from_now + 5.days,
+  venue: "Pinehurst Resort & Country Club",
+  group: pinehurst,
+  created_by: admin_users[2]
+)
+
+puts "Creating teams..."
+
+# Create teams for each tournament
+[ pebble_tournament, augusta_tournament, pinehurst_tournament ].each_with_index do |tournament, group_index|
+  members = case group_index
+  when 0 then pebble_members
+  when 1 then augusta_members
+  when 2 then pinehurst_members
   end
 
-  puts "✅ Cleanup completed successfully!"
-
-  # Create sample users for development
-  puts "👥 Creating sample users..."
-  users_data = [
-    { first_name: "Tiger", last_name: "Woods", email: "tiger.woods@bullpen.com", handicap: 0.5 },
-    { first_name: "Phil", last_name: "Mickelson", email: "phil.mickelson@bullpen.com", handicap: 2.1 },
-    { first_name: "Jordan", last_name: "Spieth", email: "jordan.spieth@bullpen.com", handicap: 1.8 },
-    { first_name: "Rory", last_name: "McIlroy", email: "rory.mcilroy@bullpen.com", handicap: 1.2 },
-    { first_name: "Brooks", last_name: "Koepka", email: "brooks.koepka@bullpen.com", handicap: 0.9 },
-    { first_name: "Dustin", last_name: "Johnson", email: "dustin.johnson@bullpen.com", handicap: 1.5 },
-    { first_name: "Jon", last_name: "Rahm", email: "jon.rahm@bullpen.com", handicap: 1.0 },
-    { first_name: "Justin", last_name: "Thomas", email: "justin.thomas@bullpen.com", handicap: 1.4 },
-    { first_name: "Collin", last_name: "Morikawa", email: "collin.morikawa@bullpen.com", handicap: 1.7 },
-    { first_name: "Bryson", last_name: "DeChambeau", email: "bryson.dechambeau@bullpen.com", handicap: 2.3 },
-    { first_name: "Patrick", last_name: "Cantlay", email: "patrick.cantlay@bullpen.com", handicap: 1.6 },
-    { first_name: "Xander", last_name: "Schauffele", email: "xander.schauffele@bullpen.com", handicap: 1.9 },
-    { first_name: "Tony", last_name: "Finau", email: "tony.finau@bullpen.com", handicap: 2.4 },
-    { first_name: "Viktor", last_name: "Hovland", email: "viktor.hovland@bullpen.com", handicap: 2.0 },
-    { first_name: "Cameron", last_name: "Smith", email: "cameron.smith@bullpen.com", handicap: 1.3 }
-  ]
-
-  users = users_data.map do |user_data|
-    User.create!(
-      first_name: user_data[:first_name],
-      last_name: user_data[:last_name],
-      email: user_data[:email],
-      handicap: user_data[:handicap],
-      password: "password123",
-      password_confirmation: "password123",
-      admin: false
-    )
-  end
-
-  puts "✅ Created #{users.count} sample users"
-
-  # Rest of sample data creation only for development...
-  # (keeping the tournament, team, and round creation code but only for development)
-
-  puts "🏆 Creating sample tournaments..."
-
-  tournament1 = Tournament.create!(
-    name: "Bullpen Cup 2024 Spring Championship",
-    description: "The premier spring golf tournament featuring the best players from across the region. Four rounds of challenging golf across beautiful courses.",
-    start_date: 2.weeks.from_now.to_date,
-    end_date: (2.weeks.from_now + 3.days).to_date,
-    venue: "Augusta Hills Golf Club",
-    created_by: admin
-  )
-
-  tournament2 = Tournament.create!(
-    name: "Summer Scramble Tournament",
-    description: "A fun, relaxed tournament perfect for teams of all skill levels. Emphasis on teamwork and enjoying the game.",
-    start_date: 1.month.from_now.to_date,
-    end_date: (1.month.from_now + 2.days).to_date,
-    venue: "Pebble Creek Country Club",
-    created_by: users.first
-  )
-
-  tournament3 = Tournament.create!(
-    name: "Winter Classic 2023",
-    description: "Last year's winter tournament - completed with great success!",
-    start_date: 2.months.ago.to_date,
-    end_date: (2.months.ago + 3.days).to_date,
-    venue: "Pine Valley Golf Course",
-    created_by: admin
-  )
-
-  puts "✅ Created tournaments: #{Tournament.count} total"
-
-  # Continue with teams and rounds creation...
-  puts "⛳ Creating teams for tournaments..."
-
-  # Create teams for Spring Championship (8 teams with 2 players each)
-  teams_data = [
-    { name: "Eagle Masters", captain: users[0], players: [ users[0], users[1] ] },
-    { name: "Birdie Brigade", captain: users[2], players: [ users[2], users[3] ] },
-    { name: "Par Excellence", captain: users[4], players: [ users[4], users[5] ] },
-    { name: "Fairway Legends", captain: users[6], players: [ users[6], users[7] ] },
-    { name: "Green Guardians", captain: users[8], players: [ users[8], users[9] ] },
-    { name: "Tee Time Titans", captain: users[10], players: [ users[10], users[11] ] },
-    { name: "Rough Riders", captain: users[12], players: [ users[12], users[13] ] },
-    { name: "Sand Trap Heroes", captain: users[14], players: [ users[14], admin ] }
-  ]
-
-  teams_data.each do |team_data|
+  # Create 2 teams per tournament
+  2.times do |team_index|
     team = Team.create!(
-      name: team_data[:name],
-      tournament: tournament1,
-      captain: team_data[:captain]
+      name: "Team #{[ 'Alpha', 'Bravo' ][team_index]}",
+      tournament: tournament,
+      captain: members[team_index * 2]
     )
 
-    # Add additional players (captain is automatically added by callback)
-    team_data[:players].each do |player|
-      unless player == team_data[:captain]
-        team.add_player(player)
-      end
+    # Add 3 additional players to each team
+    (1..3).each do |player_index|
+      team.add_player(members[team_index * 2 + player_index])
     end
-
-    puts "✅ Created team: #{team.name} with #{team.player_count} players (Captain: #{team.captain.display_name})"
   end
-
-  # Create teams for Summer Scramble (4 teams with 3-4 players each)
-  summer_teams = [
-    { name: "Summer Sluggers", captain: users[1], players: [ users[1], users[5], users[9] ] },
-    { name: "Heat Wave", captain: users[3], players: [ users[3], users[7], users[11], users[13] ] },
-    { name: "Sunshine Squad", captain: users[2], players: [ users[2], users[6], users[10] ] },
-    { name: "Hot Shots", captain: users[4], players: [ users[4], users[8], users[12], admin ] }
-  ]
-
-  summer_teams.each do |team_data|
-    team = Team.create!(
-      name: team_data[:name],
-      tournament: tournament2,
-      captain: team_data[:captain]
-    )
-
-    # Add additional players
-    team_data[:players].each do |player|
-      unless player == team_data[:captain]
-        team.add_player(player)
-      end
-    end
-
-    puts "✅ Created team: #{team.name} with #{team.player_count} players (Captain: #{team.captain.display_name})"
-  end
-
-  puts "🎯 Creating rounds for tournaments..."
-
-  # Create rounds for Spring Championship
-  round1 = Round.create!(
-    tournament: tournament1,
-    round_number: 1,
-    name: "Opening Round",
-    description: "First round to set the pace",
-    date: tournament1.start_date,
-    status: "upcoming"
-  )
-
-  round2 = Round.create!(
-    tournament: tournament1,
-    round_number: 2,
-    name: "Challenge Round",
-    description: "The most difficult course layout",
-    date: tournament1.start_date + 1.day,
-    status: "upcoming"
-  )
-
-  round3 = Round.create!(
-    tournament: tournament1,
-    round_number: 3,
-    name: "Moving Day",
-    description: "Where tournaments are won or lost",
-    date: tournament1.start_date + 2.days,
-    status: "upcoming"
-  )
-
-  round4 = Round.create!(
-    tournament: tournament1,
-    round_number: 4,
-    name: "Championship Final",
-    description: "The final round to determine the champion",
-    date: tournament1.start_date + 3.days,
-    status: "upcoming"
-  )
-
-  # Create rounds for Summer Scramble
-  Round.create!(
-    tournament: tournament2,
-    round_number: 1,
-    name: "Scramble Start",
-    description: "Team scramble format - best ball",
-    date: tournament2.start_date,
-    status: "upcoming"
-  )
-
-  Round.create!(
-    tournament: tournament2,
-    round_number: 2,
-    name: "Summer Finale",
-    description: "Final round with prizes and celebration",
-    date: tournament2.start_date + 2.days,
-    status: "upcoming"
-  )
-
-  # Create completed rounds for Winter Classic
-  Round.create!(
-    tournament: tournament3,
-    round_number: 1,
-    name: "Winter Opener",
-    description: "Braving the cold for great golf",
-    date: tournament3.start_date,
-    status: "completed"
-  )
-
-  Round.create!(
-    tournament: tournament3,
-    round_number: 2,
-    name: "Frost Final",
-    description: "Championship round in winter conditions",
-    date: tournament3.start_date + 3.days,
-    status: "completed"
-  )
-
-  puts "✅ Created rounds: #{Round.count} total"
-
-  puts "\n🎉 Development database seeding completed!"
-  puts "\n📊 Summary:"
-  puts "👤 Users: #{User.count} (#{User.admins.count} admin, #{User.players.count} players)"
-  puts "🏆 Tournaments: #{Tournament.count}"
-  puts "⛳ Teams: #{Team.count}"
-  puts "🎯 Rounds: #{Round.count}"
-  puts "👥 Team Memberships: #{TeamMembership.count}"
-else
-  puts "ℹ️  Production environment - only ensuring admin user exists"
-  puts "ℹ️  Set SEED_DB=true environment variable to run full seeding if needed"
 end
 
-puts "\n🔐 Login credentials:"
-puts "Admin: admin@bullpencup.com / password123"
-if Rails.env.development?
-  puts "Users: Use any email from the list above / password123"
-end
-
-puts "\n✨ Seeding completed!"
-puts "🚀 Ready for #{Rails.env}!"
+puts "\n" + "="*50
+puts "SEED DATA SUMMARY"
+puts "="*50
+puts "Groups created: #{Group.count}"
+puts "Users created: #{User.count}"
+puts "Group memberships created: #{GroupMembership.count}"
+puts "Tournaments created: #{Tournament.count}"
+puts "Teams created: #{Team.count}"
+puts "\nLogin credentials:"
+puts "Global Admin: admin@scorecard.golf / password123"
+puts "Pebble Beach Admin: james.mitchell@pebblebeach.golf / password123"
+puts "Augusta Admin: sarah.johnson@augusta.golf / password123"
+puts "Pinehurst Admin: robert.williams@pinehurst.com / password123"
+puts "="*50

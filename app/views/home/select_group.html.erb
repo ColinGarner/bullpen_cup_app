@@ -1,0 +1,111 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
+  <div class="w-full py-16">
+    <div class="w-full">
+      <!-- Header -->
+      <div class="text-center mb-12 px-4">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <% if @user_groups.count == 1 %>
+            Welcome to <span class="text-green-600">Scorecard</span>
+          <% else %>
+            Choose Your <span class="text-green-600">Golf Group</span>
+          <% end %>
+        </h1>
+        <p class="text-xl text-gray-600 mb-2">
+          Welcome back, <%= current_user.display_name %>! 👋
+        </p>
+        <p class="text-lg text-gray-500">
+          <% if @user_groups.count == 1 %>
+            Ready to manage your tournaments and golf activities?
+          <% else %>
+            You're a member of <%= pluralize(@user_groups.count, 'group') %>. Which one would you like to access today?
+          <% end %>
+        </p>
+      </div>
+
+      <!-- Groups Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 mb-8 px-4">
+        <% @user_groups.each do |group| %>
+          <% membership = current_user.group_memberships.find_by(group: group) %>
+          <% active_count = group.tournaments.active.count + group.tournaments.upcoming.count %>
+          
+          <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
+            <!-- Group Header -->
+            <div class="bg-gradient-to-r from-green-600 to-green-700 p-6 text-white">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-white font-bold text-xl">
+                    <%= group.name.first.upcase %>
+                  </div>
+                  <div>
+                    <h3 class="text-xl font-bold"><%= group.name %></h3>
+                    <div class="flex items-center space-x-2 mt-1">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= membership.role == 'admin' ? 'bg-yellow-400 text-yellow-900' : 'bg-blue-400 text-blue-900' %>">
+                        <%= membership.role.titleize %>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Group Content -->
+            <div class="p-6">
+              <% if group.description.present? %>
+                <p class="text-gray-600 mb-4 text-sm leading-relaxed">
+                  <%= truncate(group.description, length: 120) %>
+                </p>
+              <% end %>
+
+              <!-- Group Stats -->
+              <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                  <div class="text-2xl font-bold text-green-600"><%= group.member_count %></div>
+                  <div class="text-xs text-gray-500">Members</div>
+                </div>
+                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                  <div class="text-2xl font-bold text-blue-600"><%= group.tournaments.count %></div>
+                  <div class="text-xs text-gray-500">Tournaments</div>
+                </div>
+                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                  <div class="text-2xl font-bold text-purple-600"><%= active_count %></div>
+                  <div class="text-xs text-gray-500">Active</div>
+                </div>
+              </div>
+
+              <!-- Enter Group Button -->
+              <%= link_to group_path(group.slug), 
+                  class: "w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-4 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl text-center inline-block" do %>
+                <div class="flex items-center justify-center">
+                  <% if @user_groups.count == 1 %>
+                    <span class="text-lg">Enter Dashboard</span>
+                  <% else %>
+                    <span class="text-lg">Enter <%= group.name %></span>
+                  <% end %>
+                  <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                  </svg>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="text-center space-y-4 px-4">
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <%= link_to new_group_path, class: "bg-gray-600 hover:bg-gray-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors" do %>
+            ➕ Create New Group
+          <% end %>
+        </div>
+        
+        <div class="pt-4">
+          <%= link_to "Sign Out", destroy_user_session_path, data: { "turbo-method": :delete }, 
+              class: "text-gray-500 hover:text-gray-700 underline text-sm" %>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</div> 

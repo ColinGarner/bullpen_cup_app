@@ -1,0 +1,296 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white shadow-sm border-b">
+    <div class="container mx-auto px-4 py-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900"><%= @group.name %></h1>
+          <p class="text-gray-600 mt-1">
+            <% membership = current_user.group_memberships.find_by(group: @group) %>
+            <%= membership.role.titleize %> • <%= pluralize(@group.member_count, 'member') %>
+          </p>
+        </div>
+        
+        <div class="flex items-center gap-4">
+          <% if current_user.admin? || current_user.group_admin?(@group) %>
+            <%= link_to admin_group_admin_root_path(group_slug: @group.slug), class: "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold px-6 py-3 rounded-lg transition-all shadow-lg hover:shadow-xl flex items-center" do %>
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+              Admin Portal
+            <% end %>
+          <% end %>
+          
+          <% if user_can_switch_groups? %>
+            <%= link_to select_group_path, class: "bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center" do %>
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+              </svg>
+              Switch Group
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mx-auto px-4 py-8">
+    <!-- Admin Quick Actions (Only for Admins) -->
+    <% if current_user.admin? || current_user.group_admin?(@group) %>
+      <div class="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-2xl p-6 mb-8">
+        <div class="flex items-start justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-gray-900 mb-2 flex items-center">
+              <svg class="w-6 h-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+              </svg>
+              Admin Quick Actions
+            </h2>
+            <p class="text-gray-600">Manage <%= @group.name %> tournaments, teams, and members</p>
+          </div>
+          <%= link_to admin_group_admin_root_path(group_slug: @group.slug), class: "bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors text-sm" do %>
+            Full Admin Portal →
+          <% end %>
+        </div>
+        
+        <div class="grid md:grid-cols-4 gap-4 mt-6">
+          <%= link_to admin_tournaments_path(group_slug: @group.slug), class: "bg-white border border-green-200 rounded-lg p-4 hover:bg-green-50 transition-colors text-center" do %>
+            <div class="text-2xl mb-2">🏆</div>
+            <div class="font-semibold text-gray-900">Tournaments</div>
+            <div class="text-sm text-gray-600"><%= @group.tournaments.count %> total</div>
+          <% end %>
+          
+          <%= link_to admin_teams_path(group_slug: @group.slug), class: "bg-white border border-blue-200 rounded-lg p-4 hover:bg-blue-50 transition-colors text-center" do %>
+            <div class="text-2xl mb-2">👥</div>
+            <div class="font-semibold text-gray-900">Teams</div>
+            <div class="text-sm text-gray-600">
+              <%= Team.joins(:tournament).where(tournaments: { group: @group }).count %> total
+            </div>
+          <% end %>
+          
+          <%= link_to admin_users_path(group_slug: @group.slug), class: "bg-white border border-purple-200 rounded-lg p-4 hover:bg-purple-50 transition-colors text-center" do %>
+            <div class="text-2xl mb-2">👤</div>
+            <div class="font-semibold text-gray-900">Members</div>
+            <div class="text-sm text-gray-600"><%= @group.users.count %> total</div>
+          <% end %>
+          
+          <%= link_to new_admin_tournament_path(group_slug: @group.slug), class: "bg-white border border-yellow-200 rounded-lg p-4 hover:bg-yellow-50 transition-colors text-center" do %>
+            <div class="text-2xl mb-2">➕</div>
+            <div class="font-semibold text-gray-900">New Tournament</div>
+            <div class="text-sm text-gray-600">Quick create</div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+    
+    <div class="grid lg:grid-cols-3 gap-8">
+      <!-- Main Content -->
+      <div class="lg:col-span-2 space-y-8">
+        <!-- Active Tournaments -->
+        <% if @active_tournaments.any? %>
+          <div class="bg-white rounded-2xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                🔥 Active Tournaments
+              </h2>
+            </div>
+            
+            <div class="space-y-4">
+              <% @active_tournaments.each do |tournament| %>
+                <div class="border border-green-200 rounded-xl p-4 bg-green-50">
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <h3 class="text-xl font-semibold text-gray-900"><%= tournament.name %></h3>
+                      <p class="text-gray-600 mt-1">
+                        📅 <%= tournament.start_date.strftime('%B %d') %> - <%= tournament.end_date.strftime('%B %d, %Y') %>
+                      </p>
+                      <% if tournament.venue.present? %>
+                        <p class="text-gray-600">📍 <%= tournament.venue %></p>
+                      <% end %>
+                    </div>
+                    <div class="text-right">
+                      <span class="bg-green-600 text-white text-xs px-2 py-1 rounded-full font-medium">
+                        ACTIVE
+                      </span>
+                      <div class="text-sm text-gray-600 mt-1">
+                        <%= pluralize(tournament.team_count, 'team') %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Upcoming Tournaments -->
+        <% if @upcoming_tournaments.any? %>
+          <div class="bg-white rounded-2xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                ⏰ Upcoming Tournaments
+              </h2>
+            </div>
+            
+            <div class="space-y-4">
+              <% @upcoming_tournaments.each do |tournament| %>
+                <div class="border border-blue-200 rounded-xl p-4 bg-blue-50">
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <h3 class="text-xl font-semibold text-gray-900"><%= tournament.name %></h3>
+                      <p class="text-gray-600 mt-1">
+                        📅 <%= tournament.start_date.strftime('%B %d') %> - <%= tournament.end_date.strftime('%B %d, %Y') %>
+                      </p>
+                      <% if tournament.venue.present? %>
+                        <p class="text-gray-600">📍 <%= tournament.venue %></p>
+                      <% end %>
+                      <% if tournament.description.present? %>
+                        <p class="text-gray-700 text-sm mt-2">
+                          <%= truncate(tournament.description, length: 120) %>
+                        </p>
+                      <% end %>
+                    </div>
+                    <div class="text-right">
+                      <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-medium">
+                        <%= distance_of_time_in_words(Date.current, tournament.start_date) %> away
+                      </span>
+                      <div class="text-sm text-gray-600 mt-1">
+                        <%= pluralize(tournament.team_count, 'team') %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Recent Tournaments -->
+        <% if @recent_tournaments.any? %>
+          <div class="bg-white rounded-2xl shadow-sm p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                🏆 Recent Tournaments
+              </h2>
+            </div>
+            
+            <div class="space-y-4">
+              <% @recent_tournaments.each do |tournament| %>
+                <div class="border border-gray-200 rounded-xl p-4">
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <h3 class="text-lg font-semibold text-gray-900"><%= tournament.name %></h3>
+                      <p class="text-gray-600 mt-1">
+                        📅 <%= tournament.start_date.strftime('%B %d') %> - <%= tournament.end_date.strftime('%B %d, %Y') %>
+                      </p>
+                    </div>
+                    <div class="text-right">
+                      <span class="bg-gray-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                        COMPLETED
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- No Tournaments Message -->
+        <% if @active_tournaments.empty? && @upcoming_tournaments.empty? && @recent_tournaments.empty? %>
+          <div class="bg-white rounded-2xl shadow-sm p-8 text-center">
+            <div class="text-6xl mb-4">🏌️‍♂️</div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">No tournaments yet</h2>
+            <p class="text-gray-600 mb-6">
+              <%= @group.name %> hasn't created any tournaments yet. Check back soon!
+            </p>
+            <% if current_user.admin? || current_user.group_admin?(@group) %>
+              <%= link_to admin_tournaments_path(group_slug: @group.slug), class: "bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors" do %>
+                Create First Tournament
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+        <!-- Your Participation -->
+        <div class="bg-white rounded-2xl shadow-sm p-6">
+          <h3 class="text-lg font-bold text-gray-900 mb-4">👤 Your Participation</h3>
+          
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Teams joined:</span>
+              <span class="font-semibold text-gray-900"><%= @user_teams.count %></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Upcoming matches:</span>
+              <span class="font-semibold text-gray-900"><%= @user_upcoming_matches.count %></span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-600">Member since:</span>
+              <span class="font-semibold text-gray-900">
+                <% membership = current_user.group_memberships.find_by(group: @group) %>
+                <%= membership.joined_at.strftime('%b %Y') %>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upcoming Matches -->
+        <% if @user_upcoming_matches.any? %>
+          <div class="bg-white rounded-2xl shadow-sm p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">⚔️ Your Upcoming Matches</h3>
+            
+            <div class="space-y-3">
+              <% @user_upcoming_matches.each do |match| %>
+                <div class="border border-gray-200 rounded-lg p-3">
+                  <div class="text-sm font-medium text-gray-900">
+                    <%= match.round.name %>
+                  </div>
+                  <div class="text-xs text-gray-600 mt-1">
+                    <%= match.team_a.name %> vs <%= match.team_b.name %>
+                  </div>
+                  <% if match.scheduled_time %>
+                    <div class="text-xs text-blue-600 mt-1">
+                      <%= match.scheduled_time.strftime('%b %d, %I:%M %p') %>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Group Info -->
+        <div class="bg-white rounded-2xl shadow-sm p-6">
+          <h3 class="text-lg font-bold text-gray-900 mb-4">ℹ️ Group Information</h3>
+          
+          <% if @group.description.present? %>
+            <p class="text-gray-600 text-sm mb-4"><%= @group.description %></p>
+          <% end %>
+          
+          <div class="space-y-2 text-sm">
+            <% if @group.contact_email.present? %>
+              <div class="flex items-center text-gray-600">
+                📧 <a href="mailto:<%= @group.contact_email %>" class="text-blue-600 hover:text-blue-700 ml-2"><%= @group.contact_email %></a>
+              </div>
+            <% end %>
+            <% if @group.contact_phone.present? %>
+              <div class="flex items-center text-gray-600">
+                📞 <span class="ml-2"><%= @group.contact_phone %></span>
+              </div>
+            <% end %>
+            <% if @group.address.present? %>
+              <div class="flex items-start text-gray-600">
+                📍 <span class="ml-2"><%= @group.address %></span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

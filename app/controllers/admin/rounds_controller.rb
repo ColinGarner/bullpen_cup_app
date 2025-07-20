@@ -19,7 +19,7 @@ class Admin::RoundsController < Admin::BaseController
     @round = @tournament.rounds.build(round_params)
 
     if @round.save
-      redirect_to admin_tournament_path(@tournament),
+      redirect_to scoped_admin_tournament_path(@tournament),
                   notice: "Round was successfully created."
     else
       render :new, status: :unprocessable_entity
@@ -31,7 +31,7 @@ class Admin::RoundsController < Admin::BaseController
 
   def update
     if @round.update(round_params)
-      redirect_to admin_tournament_round_path(@tournament, @round),
+      redirect_to scoped_admin_tournament_round_path(@tournament, @round),
                   notice: "Round was successfully updated."
     else
       render :edit, status: :unprocessable_entity
@@ -40,36 +40,36 @@ class Admin::RoundsController < Admin::BaseController
 
   def destroy
     @round.destroy
-    redirect_to admin_tournament_path(@tournament),
+    redirect_to scoped_admin_tournament_path(@tournament),
                 notice: "Round was successfully deleted."
   end
 
   def start
     if @round.start!
-      redirect_to admin_tournament_round_path(@tournament, @round),
+      redirect_to scoped_admin_tournament_round_path(@tournament, @round),
                   notice: "Round has been started."
     else
-      redirect_to admin_tournament_round_path(@tournament, @round),
+      redirect_to scoped_admin_tournament_round_path(@tournament, @round),
                   alert: "Could not start the round."
     end
   end
 
   def complete
     if @round.complete!
-      redirect_to admin_tournament_round_path(@tournament, @round),
+      redirect_to scoped_admin_tournament_round_path(@tournament, @round),
                   notice: "Round has been completed."
     else
-      redirect_to admin_tournament_round_path(@tournament, @round),
+      redirect_to scoped_admin_tournament_round_path(@tournament, @round),
                   alert: "Could not complete the round."
     end
   end
 
   def cancel
     if @round.cancel!
-      redirect_to admin_tournament_round_path(@tournament, @round),
+      redirect_to scoped_admin_tournament_round_path(@tournament, @round),
                   notice: "Round has been cancelled."
     else
-      redirect_to admin_tournament_round_path(@tournament, @round),
+      redirect_to scoped_admin_tournament_round_path(@tournament, @round),
                   alert: "Could not cancel the round."
     end
   end
@@ -77,7 +77,10 @@ class Admin::RoundsController < Admin::BaseController
   private
 
   def set_tournament
-    @tournament = Tournament.find(params[:tournament_id])
+    @tournament = current_group.tournaments.find(params[:tournament_id])
+  rescue ActiveRecord::RecordNotFound
+    redirect_to scoped_admin_tournaments_path,
+                alert: "Tournament not found in #{current_group.name}."
   end
 
   def set_round
@@ -85,6 +88,6 @@ class Admin::RoundsController < Admin::BaseController
   end
 
   def round_params
-    params.require(:round).permit(:round_number, :name, :date, :description)
+    params.require(:round).permit(:round_number, :name, :date, :description, :status)
   end
 end

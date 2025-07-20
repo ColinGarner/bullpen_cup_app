@@ -3,11 +3,13 @@ require "test_helper"
 class MatchPlayerTest < ActiveSupport::TestCase
   def setup
     @user = users(:one)
+    @group = groups(:one)
     @tournament = Tournament.create!(
       name: "Test Tournament",
       start_date: 1.week.from_now.to_date,
       end_date: 2.weeks.from_now.to_date,
-      created_by: @user
+      created_by: @user,
+      group: @group
     )
 
     @round = Round.create!(

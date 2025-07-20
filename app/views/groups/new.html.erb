@@ -1,0 +1,121 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
+  <div class="container mx-auto px-4 py-16">
+    <div class="max-w-2xl mx-auto">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          Create Your <span class="text-green-600">Golf Group</span>
+        </h1>
+        <p class="text-xl text-gray-600">
+          Set up your golf club or organization on Scorecard
+        </p>
+      </div>
+
+      <!-- Form Card -->
+      <div class="bg-white rounded-2xl shadow-xl p-8">
+        <%= form_with model: @group, local: true, class: "space-y-6" do |form| %>
+          <% if @group.errors.any? %>
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+              <h3 class="text-red-800 font-semibold mb-2">Please fix the following errors:</h3>
+              <ul class="text-red-700 text-sm space-y-1">
+                <% @group.errors.full_messages.each do |message| %>
+                  <li>• <%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <!-- Group Name -->
+          <div>
+            <%= form.label :name, class: "block text-sm font-semibold text-gray-700 mb-2" do %>
+              Group Name <span class="text-red-500">*</span>
+            <% end %>
+            <%= form.text_field :name, 
+                placeholder: "e.g., Pebble Beach Golf Club",
+                class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" %>
+            <p class="text-sm text-gray-500 mt-1">
+              This will be your group's display name and used to generate your unique URL
+            </p>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <%= form.label :description, class: "block text-sm font-semibold text-gray-700 mb-2" do %>
+              Description
+            <% end %>
+            <%= form.text_area :description, 
+                placeholder: "Brief description of your golf club or organization...",
+                rows: 4,
+                class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors resize-none" %>
+          </div>
+
+          <!-- Contact Information -->
+          <div class="bg-gray-50 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
+            
+            <div class="grid md:grid-cols-2 gap-4">
+              <!-- Contact Email -->
+              <div>
+                <%= form.label :contact_email, class: "block text-sm font-semibold text-gray-700 mb-2" do %>
+                  Contact Email
+                <% end %>
+                <%= form.email_field :contact_email, 
+                    placeholder: "info@yourgolfclub.com",
+                    class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" %>
+              </div>
+
+              <!-- Contact Phone -->
+              <div>
+                <%= form.label :contact_phone, class: "block text-sm font-semibold text-gray-700 mb-2" do %>
+                  Contact Phone
+                <% end %>
+                <%= form.telephone_field :contact_phone, 
+                    placeholder: "(555) 123-4567",
+                    class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors" %>
+              </div>
+            </div>
+
+            <!-- Address -->
+            <div class="mt-4">
+              <%= form.label :address, class: "block text-sm font-semibold text-gray-700 mb-2" do %>
+                Address
+              <% end %>
+              <%= form.text_area :address, 
+                  placeholder: "123 Golf Course Drive, City, State 12345",
+                  rows: 2,
+                  class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors resize-none" %>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="flex items-center justify-between pt-6">
+            <%= link_to "Cancel", root_path, 
+                class: "text-gray-600 hover:text-gray-800 font-medium transition-colors" %>
+            
+            <%= form.submit "Create Golf Group", 
+                class: "bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors cursor-pointer" %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Info Section -->
+      <div class="mt-8 bg-blue-50 rounded-xl p-6">
+        <h3 class="text-lg font-semibold text-blue-900 mb-2">What happens next?</h3>
+        <ul class="text-blue-800 space-y-2">
+          <li class="flex items-start">
+            <span class="text-blue-600 mr-2">✓</span>
+            You'll become an administrator of your new group
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-600 mr-2">✓</span>
+            You can invite members and start creating tournaments
+          </li>
+          <li class="flex items-start">
+            <span class="text-blue-600 mr-2">✓</span>
+            Your group will get a unique URL: <code class="bg-blue-100 px-1 rounded">scorecard.com/groups/your-group-name</code>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div> 
