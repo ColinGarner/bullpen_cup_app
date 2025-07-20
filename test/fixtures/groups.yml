@@ -9,6 +9,7 @@ one:
   contact_email: info@pebblebeach.test
   contact_phone: (831) 555-0100
   address: 17-Mile Drive, Pebble Beach, CA 93953
+  invite_code: ABC123
 
 two:
   name: Augusta National Golf Club
@@ -19,3 +20,15 @@ two:
   contact_email: info@augusta.test
   contact_phone: (706) 555-0200
   address: 2604 Washington Rd, Augusta, GA 30904
+  invite_code: XYZ789
+
+three:
+  name: St. Andrews Golf Club
+  slug: st-andrews
+  description: The home of golf
+  active: false
+  settings: {}
+  contact_email: info@standrews.test
+  contact_phone: (441) 555-0300
+  address: St Andrews, Scotland
+  invite_code: DEF456

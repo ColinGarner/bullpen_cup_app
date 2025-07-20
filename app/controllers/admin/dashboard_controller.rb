@@ -10,4 +10,10 @@ class Admin::DashboardController < Admin::BaseController
     @total_users = @group.users.count
     @recent_activity = @group.tournaments.order(updated_at: :desc).limit(5)
   end
+
+  def regenerate_invite_code
+    current_group.regenerate_invite_code!
+    redirect_to admin_group_admin_root_path(group_slug: current_group.slug),
+                notice: "New invite code generated: #{current_group.invite_code}"
+  end
 end

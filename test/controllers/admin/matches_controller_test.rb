@@ -6,6 +6,15 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
     @user = users(:one)  # Regular user
     @group = groups(:one)
 
+    # Create a user with no admin privileges for testing
+    @non_admin_user = User.create!(
+      first_name: "Regular",
+      last_name: "User",
+      email: "regular@example.com",
+      password: "password123",
+      admin: false
+    )
+
     @tournament = Tournament.create!(
       name: "Test Tournament",
       start_date: 1.week.from_now.to_date,
@@ -56,7 +65,7 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should redirect non-admin users" do
-    sign_in @user
+    sign_in @non_admin_user
     get admin_tournament_round_matches_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id)
     assert_redirected_to root_path
   end

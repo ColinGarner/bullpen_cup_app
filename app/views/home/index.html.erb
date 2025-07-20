@@ -21,7 +21,19 @@
           <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
             <h2 class="text-2xl font-bold text-gray-900 mb-6">Get Started with Scorecard</h2>
             
-            <div class="max-w-md mx-auto">
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              <!-- Join Existing Group -->
+              <div class="border-2 border-green-200 rounded-xl p-8 hover:border-green-300 transition-colors">
+                <div class="text-4xl mb-4">🔑</div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">Join Existing Group</h3>
+                <p class="text-gray-600 mb-6">
+                  Have a group invite code? Enter it here to join your golf club or organization instantly.
+                </p>
+                <%= link_to join_group_path, class: "w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors inline-block text-center" do %>
+                  Enter Group Code
+                <% end %>
+              </div>
+
               <!-- Create New Group -->
               <div class="border-2 border-blue-200 rounded-xl p-8 hover:border-blue-300 transition-colors">
                 <div class="text-4xl mb-4">🏆</div>
@@ -36,10 +48,21 @@
             </div>
 
             <div class="mt-8 p-6 bg-gray-50 rounded-xl">
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">Looking to join an existing group?</h3>
-              <p class="text-gray-600">
-                Golf groups on Scorecard are invitation-only. Contact your golf club or organization administrator to request access to their group.
-              </p>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">How it works</h3>
+              <div class="grid md:grid-cols-2 gap-6 text-left">
+                <div>
+                  <h4 class="font-semibold text-gray-900 mb-2">🔑 Joining a Group</h4>
+                  <p class="text-gray-600 text-sm">
+                    Ask your golf club admin for a 6-character invite code. Enter it to join instantly and start participating in tournaments.
+                  </p>
+                </div>
+                <div>
+                  <h4 class="font-semibold text-gray-900 mb-2">🏆 Creating a Group</h4>
+                  <p class="text-gray-600 text-sm">
+                    Set up your golf club or organization, invite members using your unique group code, and manage tournaments.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 

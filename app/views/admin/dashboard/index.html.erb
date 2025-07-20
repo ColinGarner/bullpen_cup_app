@@ -51,6 +51,67 @@
       </div>
     </div>
 
+    <!-- Group Invite Code Section -->
+    <% if current_group %>
+      <div class="mb-8">
+        <div class="bg-gradient-to-r from-green-100 to-blue-100 rounded-xl shadow-lg p-6 border border-green-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                <svg class="w-5 h-5 inline mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Group Invite Code
+              </h3>
+              <p class="text-gray-600 text-sm mb-4">Share this code with people you want to invite to <%= current_group.name %></p>
+              
+              <div class="flex items-center space-x-4">
+                <div class="bg-white rounded-lg px-4 py-3 border-2 border-dashed border-green-300">
+                  <div class="flex items-center space-x-3">
+                    <span class="text-2xl font-mono font-bold text-green-700 tracking-wider">
+                      <%= current_group.invite_code %>
+                    </span>
+                    <button onclick="copyInviteCode()" 
+                            class="text-green-600 hover:text-green-700 transition-colors"
+                            title="Copy code">
+                      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="text-sm text-gray-600">
+                  <p><strong>How to invite:</strong></p>
+                  <p>1. Share this code with new members</p>
+                  <p>2. They visit: <%= link_to join_group_url, join_group_url, class: "text-green-600 hover:text-green-700 underline", target: "_blank" %></p>
+                  <p>3. They enter the code and join instantly!</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="flex flex-col space-y-2">
+              <%= link_to admin_regenerate_invite_code_path(group_slug: current_group.slug), 
+                  method: :patch,
+                  data: { 
+                    confirm: "Are you sure? This will invalidate the current code and anyone with the old code won't be able to join." 
+                  },
+                  class: "inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" do %>
+                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Regenerate Code
+              <% end %>
+              
+              <span class="text-xs text-gray-500 text-center">
+                <%= pluralize(current_group.member_count, 'member') %>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
     <!-- Stats Overview with Enhanced Design -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
       <!-- Upcoming Tournaments -->
@@ -303,4 +364,30 @@
       </div>
     </div>
   </div>
-</div> 
+</div>
+
+<script>
+  function copyInviteCode() {
+    const code = '<%= current_group&.invite_code %>';
+    
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(code).then(function() {
+        // Show success feedback
+        const button = event.target.closest('button');
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
+        button.classList.add('text-green-500');
+        
+        setTimeout(() => {
+          button.innerHTML = originalContent;
+          button.classList.remove('text-green-500');
+        }, 2000);
+      }).catch(function() {
+        alert('Code: ' + code + '\n\nCopy this code manually.');
+      });
+    } else {
+      // Fallback for older browsers
+      alert('Code: ' + code + '\n\nCopy this code manually.');
+    }
+  }
+</script> 

@@ -8,6 +8,10 @@ Rails.application.routes.draw do
   get "groups/new", to: "groups#new", as: "new_group"
   post "groups", to: "groups#create", as: "groups"
 
+  # Group join routes (via invite code)
+  get "join", to: "group_joins#new", as: "join_group"
+  post "join", to: "group_joins#create"
+
   # Group management routes
   get "select-group", to: "home#select_group", as: "select_group"
   post "groups/:group_slug/switch", to: "home#switch_group", as: "switch_group"
@@ -20,6 +24,9 @@ Rails.application.routes.draw do
   scope path: "/groups/:group_slug" do
     namespace :admin do
       root "dashboard#index", as: "group_admin_root"
+
+      # Group management
+      patch "regenerate_invite_code", to: "dashboard#regenerate_invite_code", as: "regenerate_invite_code"
       resources :tournaments do
         member do
           get :confirm_destroy

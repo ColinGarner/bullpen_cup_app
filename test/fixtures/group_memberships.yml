@@ -1,13 +1,22 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
+# John Doe is admin of Pebble Beach
 one:
   group: one
   user: one
-  role: MyString
-  joined_at: 2025-07-19 14:50:50
+  role: admin
+  joined_at: 2025-01-01 10:00:00
 
+# Jane Smith is member of Pebble Beach
 two:
+  group: one
+  user: two
+  role: member
+  joined_at: 2025-01-02 10:00:00
+
+# Jane Smith is also admin of Augusta National
+three:
   group: two
   user: two
-  role: MyString
-  joined_at: 2025-07-19 14:50:50
+  role: admin
+  joined_at: 2025-01-03 10:00:00
