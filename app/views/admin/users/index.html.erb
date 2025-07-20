@@ -65,16 +65,27 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
+                  <% membership = user.group_memberships.find_by(group: current_group) %>
                   <% if user.admin? %>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                       <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                       </svg>
-                      Admin
+                      Global Admin
+                    </span>
+                  <% elsif membership&.admin? %>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      Group Admin
                     </span>
                   <% else %>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      Player
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                      </svg>
+                      Member
                     </span>
                   <% end %>
                 </td>
@@ -82,31 +93,34 @@
                   <%= user.created_at.strftime('%b %d, %Y') %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                      <% if user.admin? %>
-                      <% if User.admins.count > 1 && user != current_user %>
-                                              <%= link_to demote_from_admin_admin_user_path(user), 
+                  <% membership = user.group_memberships.find_by(group: current_group) %>
+                  <% if user.admin? %>
+                    <span class="text-gray-400" title="Global admins cannot be managed from group context">—</span>
+                  <% elsif membership&.admin? %>
+                    <% if current_group.admin_count > 1 && user != current_user %>
+                      <%= link_to demote_from_group_admin_admin_user_path(group_slug: current_group.slug, id: user), 
                           data: { 
                             turbo_method: :patch,
-                            confirm: "Are you sure you want to remove admin privileges from #{user.display_name}?" 
+                            confirm: "Are you sure you want to remove group admin privileges from #{user.display_name}?" 
                           },
                           class: "text-red-600 hover:text-red-900 font-medium" do %>
-                          Demote
-                        <% end %>
-                      <% elsif user == current_user %>
-                        <span class="text-gray-400" title="Cannot demote yourself">—</span>
-                      <% else %>
-                        <span class="text-gray-400" title="Cannot demote the last admin">—</span>
+                        Demote from Group Admin
                       <% end %>
+                    <% elsif user == current_user %>
+                      <span class="text-gray-400" title="Cannot demote yourself">—</span>
                     <% else %>
-                      <%= link_to promote_to_admin_admin_user_path(user), 
-                          data: { 
-                            turbo_method: :patch,
-                            confirm: "Are you sure you want to grant admin privileges to #{user.display_name}?" 
-                          },
-                          class: "text-green-600 hover:text-green-900 font-medium" do %>
-                        Promote to Admin
-                      <% end %>
+                      <span class="text-gray-400" title="Cannot demote the last group admin">—</span>
                     <% end %>
+                  <% else %>
+                    <%= link_to promote_to_group_admin_admin_user_path(group_slug: current_group.slug, id: user), 
+                        data: { 
+                          turbo_method: :patch,
+                          confirm: "Are you sure you want to grant group admin privileges to #{user.display_name}?" 
+                        },
+                        class: "text-green-600 hover:text-green-900 font-medium" do %>
+                      Promote to Group Admin
+                    <% end %>
+                  <% end %>
                 </td>
               </tr>
             <% end %>

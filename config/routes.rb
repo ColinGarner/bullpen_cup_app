@@ -59,7 +59,12 @@ Rails.application.routes.draw do
         end
       end
       resources :teams, only: [ :index ]
-      resources :users, only: [ :index, :show ]
+              resources :users, only: [ :index, :show ] do
+          member do
+            patch :promote_to_group_admin
+            patch :demote_from_group_admin
+          end
+        end
     end
   end
 
