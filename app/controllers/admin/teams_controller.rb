@@ -17,7 +17,16 @@ class Admin::TeamsController < Admin::BaseController
 
   def show
     @players = @team.players.includes(:team_memberships)
-    @available_users = current_group.users.where.not(id: @team.player_ids).order(:first_name, :last_name)
+    
+    # Exclude users who are already on ANY team in this tournament
+    users_on_tournament_teams = User.joins(team_memberships: :team)
+                                   .where(teams: { tournament: @tournament })
+                                   .distinct
+                                   .pluck(:id)
+    
+    @available_users = current_group.users
+                                   .where.not(id: users_on_tournament_teams)
+                                   .order(:first_name, :last_name)
   end
 
   def new
@@ -59,6 +68,17 @@ class Admin::TeamsController < Admin::BaseController
 
   def add_player
     @user = current_group.users.find(params[:user_id])
+
+    # Check if user is already on a team in this tournament
+    existing_team = @tournament.teams.joins(:team_memberships)
+                               .where(team_memberships: { user: @user })
+                               .first
+
+    if existing_team
+      redirect_to scoped_admin_tournament_team_path(@tournament, @team),
+                  alert: "#{@user.display_name} is already on team '#{existing_team.name}' in this tournament."
+      return
+    end
 
     if @team.add_player(@user)
       redirect_to scoped_admin_tournament_team_path(@tournament, @team),

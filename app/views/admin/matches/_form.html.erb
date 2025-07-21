@@ -165,18 +165,29 @@
 <% end %> 
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('turbo:load', function() {
   const searchInput = document.getElementById('golf_course_search');
   const searchBtn = document.getElementById('golf_course_search_btn');
   const resultsContainer = document.getElementById('course_search_results');
   const selectedDisplay = document.getElementById('selected_course_display');
   const selectedCourseName = document.getElementById('selected_course_name');
   const clearButton = document.getElementById('clear_course_selection');
-  const form = searchInput.closest('form');
   
+  // Exit if elements don't exist (not on match form page)
+  if (!searchInput || !searchBtn || !resultsContainer) {
+    return;
+  }
+  
+  const form = searchInput.closest('form');
   const courseIdField = document.getElementById('match_golf_course_id');
   const courseNameField = document.getElementById('match_golf_course_name');
   const courseLocationField = document.getElementById('match_golf_course_location');
+  
+  // Prevent duplicate event listeners
+  if (searchInput.dataset.initialized === 'true') {
+    return;
+  }
+  searchInput.dataset.initialized = 'true';
   
         const searchEndpoint = '<%= scoped_search_courses_admin_tournament_round_matches_path(@tournament, @round) %>';
   
@@ -326,6 +337,14 @@ document.addEventListener('DOMContentLoaded', function() {
     selectedDisplay.classList.add('hidden');
     searchInput.value = ''; // Clear search input
     hideResults();
+  }
+});
+
+// Clean up initialization flag when page is cached by Turbo
+document.addEventListener('turbo:before-cache', function() {
+  const searchInput = document.getElementById('golf_course_search');
+  if (searchInput) {
+    searchInput.dataset.initialized = 'false';
   }
 });
 </script> 

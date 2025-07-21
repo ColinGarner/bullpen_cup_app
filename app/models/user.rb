@@ -28,6 +28,7 @@ class User < ApplicationRecord
   # Match associations
   has_many :match_players, dependent: :destroy
   has_many :matches, through: :match_players
+  has_many :scores, dependent: :destroy
 
   # Admin functionality
   scope :admins, -> { where(admin: true) }

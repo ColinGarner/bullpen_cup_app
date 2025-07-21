@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_20_190633) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_20_215358) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -112,7 +112,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_20_190633) do
     t.integer "strokes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "net_strokes"
+    t.decimal "handicap_used", precision: 4, scale: 1
+    t.integer "strokes_received_on_hole", default: 0, null: false
+    t.string "hole_result"
+    t.index ["hole_result"], name: "index_scores_on_hole_result"
+    t.index ["match_id", "hole_number"], name: "index_scores_on_match_and_hole"
+    t.index ["match_id", "user_id", "hole_number"], name: "index_scores_unique_per_hole", unique: true
     t.index ["match_id"], name: "index_scores_on_match_id"
+    t.index ["user_id", "handicap_used"], name: "index_scores_on_user_and_handicap"
     t.index ["user_id"], name: "index_scores_on_user_id"
   end
 

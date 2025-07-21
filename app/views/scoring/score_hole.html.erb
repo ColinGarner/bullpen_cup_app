@@ -1,0 +1,285 @@
+<% content_for :title, "Hole #{@hole_number} - #{@match.round.tournament.name}" %>
+
+<div class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+  <div class="container mx-auto px-4 py-6 max-w-md">
+    
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-lg p-4 mb-6">
+      <div class="text-center">
+        <h1 class="text-2xl font-bold text-gray-900 mb-1">
+          Hole <%= @hole_number %>
+        </h1>
+        <p class="text-gray-600 text-sm">
+          <%= @match.round.tournament.name %> • Round <%= @match.round.name %>
+        </p>
+      </div>
+      
+      <!-- Hole Info -->
+      <% if @hole_data %>
+        <div class="mt-4 bg-green-50 rounded-lg p-3">
+          <div class="flex justify-between items-center">
+            <div class="text-center">
+              <p class="text-xs text-gray-500 uppercase tracking-wide">Par</p>
+              <p class="text-2xl font-bold text-green-600"><%= @hole_data['par'] %></p>
+            </div>
+            <div class="text-center">
+              <p class="text-xs text-gray-500 uppercase tracking-wide">Yardage</p>
+              <p class="text-lg font-semibold text-gray-900"><%= @hole_data['yardage'] %></p>
+            </div>
+            <div class="text-center">
+              <p class="text-xs text-gray-500 uppercase tracking-wide">Handicap</p>
+              <p class="text-lg font-semibold text-gray-900 <%= hole_difficulty_class(@hole_data['handicap']) %>">
+                <%= @hole_data['handicap'] %>
+              </p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Scoring Form -->
+    <%= form_with url: update_score_match_path(@match, hole: @hole_number), method: :post, local: true do |form| %>
+      
+      <!-- Players Scoring -->
+      <% if @match.match_type == 'fourball_match_play' %>
+        <!-- Fourball Match Play - Group by Teams -->
+        <% team_a_players = @match.players_for_team(@match.team_a) %>
+        <% team_b_players = @match.players_for_team(@match.team_b) %>
+        
+        <div class="space-y-6">
+          <!-- Team A -->
+          <div class="bg-blue-50 rounded-lg p-4 border-2 border-blue-200">
+            <h3 class="text-lg font-bold text-blue-800 mb-4 text-center">
+              <%= @match.team_a.name %>
+              <span class="text-sm font-normal text-blue-600">(Best ball counts)</span>
+            </h3>
+            <div class="space-y-3">
+              <% team_a_players.each do |player| %>
+                <% existing_score = @scores.find { |s| s.user_id == player.id } %>
+                <% strokes_received = calculate_strokes_received(player, @hole_number) %>
+                
+                <div class="bg-white rounded-lg shadow p-4">
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                        <%= player.display_name.first.upcase %>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-gray-900"><%= player.display_name %></p>
+                        <p class="text-xs text-gray-500">
+                          Handicap: <%= player.handicap || 'N/A' %>
+                          <% total_strokes = calculate_total_match_strokes(player) %>
+                          <% if total_strokes > 0 %>
+                            • Gets <%= total_strokes %> stroke<%= 's' if total_strokes > 1 %> for this match
+                          <% end %>
+                        </p>
+                        <% if strokes_received > 0 %>
+                          <p class="text-xs font-medium text-green-600">
+                            • Gets <%= strokes_received %> stroke<%= 's' if strokes_received > 1 %> on this hole
+                          </p>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Score Input -->
+                  <div class="flex items-center space-x-2">
+                    <label class="text-sm font-medium text-gray-700 w-16">Strokes:</label>
+                    <%= number_field_tag "scores[#{player.id}]", 
+                        existing_score&.strokes&.positive? ? existing_score.strokes : nil,
+                        min: 1, max: 15, 
+                        class: "flex-1 text-center text-2xl font-bold border-2 border-gray-200 rounded-lg py-3 focus:border-green-500 focus:outline-none",
+                        placeholder: "0" %>
+                  </div>
+                  
+                  <!-- Net Score Preview -->
+                  <% if existing_score&.strokes&.positive? %>
+                    <div class="mt-2 text-center">
+                      <span class="text-sm text-gray-500">Net Score: </span>
+                      <span class="text-lg font-semibold text-green-600">
+                        <%= [existing_score.strokes - strokes_received, 1].max %>
+                      </span>
+                      <% if strokes_received > 0 %>
+                        <span class="text-xs text-gray-500">
+                          (<%= existing_score.strokes %> - <%= strokes_received %>)
+                        </span>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- Team B -->
+          <div class="bg-red-50 rounded-lg p-4 border-2 border-red-200">
+            <h3 class="text-lg font-bold text-red-800 mb-4 text-center">
+              <%= @match.team_b.name %>
+              <span class="text-sm font-normal text-red-600">(Best ball counts)</span>
+            </h3>
+            <div class="space-y-3">
+              <% team_b_players.each do |player| %>
+                <% existing_score = @scores.find { |s| s.user_id == player.id } %>
+                <% strokes_received = calculate_strokes_received(player, @hole_number) %>
+                
+                <div class="bg-white rounded-lg shadow p-4">
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white font-semibold">
+                        <%= player.display_name.first.upcase %>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-gray-900"><%= player.display_name %></p>
+                        <p class="text-xs text-gray-500">
+                          Handicap: <%= player.handicap || 'N/A' %>
+                          <% total_strokes = calculate_total_match_strokes(player) %>
+                          <% if total_strokes > 0 %>
+                            • Gets <%= total_strokes %> stroke<%= 's' if total_strokes > 1 %> for this match
+                          <% end %>
+                        </p>
+                        <% if strokes_received > 0 %>
+                          <p class="text-xs font-medium text-green-600">
+                            • Gets <%= strokes_received %> stroke<%= 's' if strokes_received > 1 %> on this hole
+                          </p>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Score Input -->
+                  <div class="flex items-center space-x-2">
+                    <label class="text-sm font-medium text-gray-700 w-16">Strokes:</label>
+                    <%= number_field_tag "scores[#{player.id}]", 
+                        existing_score&.strokes&.positive? ? existing_score.strokes : nil,
+                        min: 1, max: 15, 
+                        class: "flex-1 text-center text-2xl font-bold border-2 border-gray-200 rounded-lg py-3 focus:border-green-500 focus:outline-none",
+                        placeholder: "0" %>
+                  </div>
+                  
+                  <!-- Net Score Preview -->
+                  <% if existing_score&.strokes&.positive? %>
+                    <div class="mt-2 text-center">
+                      <span class="text-sm text-gray-500">Net Score: </span>
+                      <span class="text-lg font-semibold text-green-600">
+                        <%= [existing_score.strokes - strokes_received, 1].max %>
+                      </span>
+                      <% if strokes_received > 0 %>
+                        <span class="text-xs text-gray-500">
+                          (<%= existing_score.strokes %> - <%= strokes_received %>)
+                        </span>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% else %>
+        <!-- Singles Match Play - Original Layout -->
+        <div class="space-y-4">
+          <% @players.each do |player| %>
+            <% existing_score = @scores.find { |s| s.user_id == player.id } %>
+            <% strokes_received = calculate_strokes_received(player, @hole_number) %>
+            
+            <div class="bg-white rounded-lg shadow p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                    <%= player.display_name.first.upcase %>
+                  </div>
+                  <div>
+                    <p class="font-semibold text-gray-900"><%= player.display_name %></p>
+                    <p class="text-xs text-gray-500">
+                      Handicap: <%= player.handicap || 'N/A' %>
+                      <% if strokes_received > 0 %>
+                        • Gets <%= strokes_received %> stroke<%= 's' if strokes_received > 1 %>
+                      <% end %>
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Score Input -->
+              <div class="flex items-center space-x-2">
+                <label class="text-sm font-medium text-gray-700 w-16">Strokes:</label>
+                <%= number_field_tag "scores[#{player.id}]", 
+                    existing_score&.strokes&.positive? ? existing_score.strokes : nil,
+                    min: 1, max: 15, 
+                    class: "flex-1 text-center text-2xl font-bold border-2 border-gray-200 rounded-lg py-3 focus:border-green-500 focus:outline-none",
+                    placeholder: "0" %>
+              </div>
+              
+              <!-- Net Score Preview -->
+              <% if existing_score&.strokes&.positive? %>
+                <div class="mt-2 text-center">
+                  <span class="text-sm text-gray-500">Net Score: </span>
+                  <span class="text-lg font-semibold text-green-600">
+                    <%= [existing_score.strokes - strokes_received, 1].max %>
+                  </span>
+                  <% if strokes_received > 0 %>
+                    <span class="text-xs text-gray-500">
+                      (<%= existing_score.strokes %> - <%= strokes_received %>)
+                    </span>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <!-- Navigation & Actions -->
+      <div class="mt-8 space-y-4">
+        <!-- Progress Bar -->
+        <div class="bg-white rounded-lg p-4">
+          <div class="flex justify-between text-sm text-gray-500 mb-2">
+            <span>Progress</span>
+            <span><%= @hole_number %> of 18 holes</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-green-500 h-2 rounded-full transition-all duration-300" 
+                 style="width: <%= (@hole_number / 18.0 * 100).round %>%"></div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex space-x-3">
+          <% if @hole_number > 1 %>
+            <%= link_to score_hole_match_path(@match, hole: @hole_number - 1), 
+                class: "flex-1 text-center py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors" do %>
+              ← Hole <%= @hole_number - 1 %>
+            <% end %>
+          <% end %>
+          
+          <%= form.submit @hole_number == 18 ? "Complete Round! 🏆" : "Next Hole →", 
+              class: "flex-1 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors shadow-lg text-center" %>
+        </div>
+
+        <!-- Secondary Actions -->
+        <div class="flex justify-center space-x-6 pt-2">
+          <%= link_to leaderboard_tournament_path(@match.round.tournament), 
+              class: "text-blue-600 hover:text-blue-800 font-medium text-sm" do %>
+            📊 Tournament Leaderboard
+          <% end %>
+          
+          <%= link_to group_dashboard_path(@match.round.tournament.group.slug), 
+              class: "text-gray-500 hover:text-gray-700 font-medium text-sm" do %>
+            🏠 Back to Dashboard
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Quick Tips -->
+    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-3">
+      <h4 class="text-sm font-semibold text-blue-900 mb-1">💡 Quick Tips</h4>
+      <ul class="text-xs text-blue-800 space-y-1">
+        <li>• Enter the actual strokes taken (gross score)</li>
+        <li>• Net scores are calculated automatically based on handicaps</li>
+        <li>• You can go back to previous holes to make corrections</li>
+      </ul>
+    </div>
+
+  </div>
+</div> 

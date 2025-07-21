@@ -14,7 +14,7 @@
 
   <!-- Search and Filters -->
   <div class="mt-6">
-    <%= form_with url: admin_tournaments_path, method: :get, local: true, class: "flex flex-col sm:flex-row gap-4" do |form| %>
+            <%= form_with url: admin_tournaments_path(group_slug: current_group.slug), method: :get, local: true, class: "flex flex-col sm:flex-row gap-4" do |form| %>
       <div class="flex-1">
         <%= form.text_field :search, 
             value: params[:search],
@@ -60,7 +60,7 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <div>
                   <div class="text-sm font-medium text-gray-900">
-                    <%= link_to tournament.name, admin_tournament_path(tournament), class: "hover:text-green-600" %>
+                    <%= link_to tournament.name, admin_tournament_path(group_slug: current_group.slug, id: tournament), class: "hover:text-green-600" %>
                   </div>
                   <% if tournament.description.present? %>
                     <div class="text-sm text-gray-500 truncate max-w-xs">
@@ -87,12 +87,12 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div class="flex justify-end space-x-2">
-                  <%= link_to "View", admin_tournament_path(tournament), class: "text-green-600 hover:text-green-900" %>
-                  <%= link_to "Edit", edit_admin_tournament_path(tournament), class: "text-blue-600 hover:text-blue-900" %>
+                  <%= link_to "View", admin_tournament_path(group_slug: current_group.slug, id: tournament), class: "text-green-600 hover:text-green-900" %>
+                                      <%= link_to "Edit", edit_admin_tournament_path(group_slug: current_group.slug, id: tournament), class: "text-blue-600 hover:text-blue-900" %>
                   <% if tournament.upcoming? %>
-                    <%= link_to "Delete", admin_tournament_path(tournament), 
-                        data: { "turbo-method": :delete, confirm: "Are you sure? This action cannot be undone." },
-                        class: "text-red-600 hover:text-red-900" %>
+                                          <%= link_to "Delete", admin_tournament_path(group_slug: current_group.slug, id: tournament), 
+                          data: { "turbo-method": :delete, confirm: "Are you sure? This action cannot be undone." },
+                          class: "text-red-600 hover:text-red-900" %>
                   <% else %>
                     <span class="text-gray-400 cursor-not-allowed" title="Only upcoming tournaments can be deleted">Delete</span>
                   <% end %>

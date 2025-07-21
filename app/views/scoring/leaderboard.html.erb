@@ -1,0 +1,122 @@
+<% content_for :title, "Tournament Leaderboard" %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-4xl mx-auto p-4">
+    
+    <!-- Team Points Header -->
+    <div class="flex items-center mb-6 rounded-lg overflow-hidden shadow-lg">
+      <% team_standings_array = @team_standings[:team_points].to_a %>
+      <% team_a_name, team_a_points = team_standings_array[0] || ["Team A", 0] %>
+      <% team_b_name, team_b_points = team_standings_array[1] || ["Team B", 0] %>
+      
+      <div class="flex-1 bg-blue-600 text-white p-4 text-center">
+        <div class="text-2xl font-bold"><%= team_a_name %></div>
+        <div class="text-4xl font-bold"><%= team_a_points == team_a_points.to_i ? team_a_points.to_i : sprintf("%.1f", team_a_points) %></div>
+      </div>
+      <div class="flex-1 bg-red-600 text-white p-4 text-center">
+        <div class="text-2xl font-bold"><%= team_b_name %></div>
+        <div class="text-4xl font-bold"><%= team_b_points == team_b_points.to_i ? team_b_points.to_i : sprintf("%.1f", team_b_points) %></div>
+      </div>
+    </div>
+
+    <!-- Rounds -->
+    <% @rounds.each do |round| %>
+      <!-- Round Header -->
+      <div class="bg-yellow-400 text-black p-3 mb-4 rounded-lg shadow-md">
+        <h2 class="text-xl font-bold text-center uppercase"><%= round.name %></h2>
+      </div>
+
+      <!-- Matches in this round -->
+      <div class="bg-white border border-gray-200 mb-6 rounded-lg overflow-hidden shadow-md">
+        <% round.matches.each do |match| %>
+          <% match_result = @match_results[match.id] %>
+          
+          <div class="flex border-b border-gray-200 last:border-b-0">
+            <!-- Team A Player -->
+            <div class="flex-1 p-3 <%= 
+              if match_result[:player1].nil?
+                'bg-gray-50 text-gray-900'
+              elsif match_result[:leader] == match_result[:player1] || (match_result[:leader_team] == match.team_a)
+                'bg-blue-600 text-white' 
+              else 
+                'bg-gray-50 text-gray-900' 
+              end %>">
+              <div class="flex justify-between items-center">
+                <div class="font-semibold text-sm">
+                  <% if match.match_type == 'fourball_match_play' && match_result[:team_a_players] %>
+                    <% match_result[:team_a_players].each_with_index do |player, index| %>
+                      <%= player.display_name %><%= index < match_result[:team_a_players].size - 1 ? ' &' : '' %>
+                      <% unless index == match_result[:team_a_players].size - 1 %>
+                        <br>
+                      <% end %>
+                    <% end %>
+                  <% else %>
+                    <%= match_result[:player1]&.display_name || 'Players TBD' %>
+                  <% end %>
+                </div>
+                <% if (match_result[:status] == 'completed' || match_result[:status] == 'active') && (match_result[:leader] == match_result[:player1] || match_result[:leader_team] == match.team_a) %>
+                  <span class="font-bold"><%= match_result[:result] %></span>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- Status Column -->
+            <div class="w-8 bg-yellow-400 flex items-center justify-center">
+              <span class="text-xs font-bold text-black">
+                <% if match_result[:status] == 'completed' %>
+                  F
+                <% elsif match_result[:status] == 'active' && match_result[:holes_played] > 0 %>
+                  <%= match_result[:holes_played] %>
+                <% end %>
+              </span>
+            </div>
+
+            <!-- Team B Player -->
+            <div class="flex-1 p-3 <%= 
+              if match_result[:player2].nil?
+                'bg-gray-50 text-gray-900'
+              elsif match_result[:leader] == match_result[:player2] || (match_result[:leader_team] == match.team_b)
+                'bg-red-600 text-white' 
+              else 
+                'bg-gray-50 text-gray-900' 
+              end %>">
+              <div class="flex justify-between items-center">
+                <% if (match_result[:status] == 'completed' || match_result[:status] == 'active') && (match_result[:leader] == match_result[:player2] || match_result[:leader_team] == match.team_b) %>
+                  <span class="font-bold"><%= match_result[:result] %></span>
+                <% end %>
+                <div class="font-semibold text-sm">
+                  <% if match.match_type == 'fourball_match_play' && match_result[:team_b_players] %>
+                    <% match_result[:team_b_players].each_with_index do |player, index| %>
+                      <%= player.display_name %><%= index < match_result[:team_b_players].size - 1 ? ' &' : '' %>
+                      <% unless index == match_result[:team_b_players].size - 1 %>
+                        <br>
+                      <% end %>
+                    <% end %>
+                  <% else %>
+                    <%= match_result[:player2]&.display_name || 'Players TBD' %>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- Continue Match Button -->
+    <% if @current_user_match %>
+      <div class="mt-8">
+        <%= link_to next_hole_match_path(@current_user_match), 
+            class: "block w-full bg-green-600 hover:bg-green-700 text-white text-center font-bold py-4 px-6 rounded-lg text-lg shadow-lg transition-all duration-200" do %>
+          🎯 Continue Your Match
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- Navigation -->
+    <div class="mt-8 flex space-x-4">
+      <%= link_to "← Back to Dashboard", group_dashboard_path(current_group), 
+          class: "flex-1 bg-gray-600 hover:bg-gray-700 text-white text-center font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-200" %>
+    </div>
+  </div>
+</div> 

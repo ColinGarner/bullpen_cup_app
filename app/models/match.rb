@@ -5,6 +5,7 @@ class Match < ApplicationRecord
   belongs_to :winner_team, class_name: "Team", optional: true
   has_many :match_players, dependent: :destroy
   has_many :players, through: :match_players, source: :user
+  has_many :scores, dependent: :destroy
 
   # Enums for match types and status
   enum :match_type, {
@@ -160,6 +161,18 @@ class Match < ApplicationRecord
     return "TBD" unless has_golf_course?
     course_par
   end
+
+  def scheduled_for_today?
+    return false unless scheduled_time
+    
+    # Compare date components directly, completely ignoring timezones
+    # This ensures matches work for users in the course's local timezone
+    today = Date.today
+    scheduled_date = Date.new(scheduled_time.year, scheduled_time.month, scheduled_time.day)
+    
+    scheduled_date == today
+  end
+
   private
 
   def teams_must_be_different

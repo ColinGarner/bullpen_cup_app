@@ -100,7 +100,7 @@
               <% @active_tournaments.each do |tournament| %>
                 <div class="border border-green-200 rounded-xl p-4 bg-green-50">
                   <div class="flex justify-between items-start">
-                    <div>
+                    <div class="flex-1">
                       <h3 class="text-xl font-semibold text-gray-900"><%= tournament.name %></h3>
                       <p class="text-gray-600 mt-1">
                         📅 <%= tournament.start_date.strftime('%B %d') %> - <%= tournament.end_date.strftime('%B %d, %Y') %>
@@ -109,13 +109,19 @@
                         <p class="text-gray-600">📍 <%= tournament.venue %></p>
                       <% end %>
                     </div>
-                    <div class="text-right">
-                      <span class="bg-green-600 text-white text-xs px-2 py-1 rounded-full font-medium">
-                        ACTIVE
-                      </span>
-                      <div class="text-sm text-gray-600 mt-1">
-                        <%= pluralize(tournament.team_count, 'team') %>
+                    <div class="text-right flex flex-col items-end space-y-3">
+                      <div>
+                        <span class="bg-green-600 text-white text-xs px-2 py-1 rounded-full font-medium">
+                          ACTIVE
+                        </span>
+                        <div class="text-sm text-gray-600 mt-1">
+                          <%= pluralize(tournament.team_count, 'team') %>
+                        </div>
                       </div>
+                      <%= link_to leaderboard_tournament_path(tournament), 
+                          class: "inline-flex items-center px-3 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm" do %>
+                        🏆 Tournament Leaderboard
+                      <% end %>
                     </div>
                   </div>
                 </div>
@@ -246,18 +252,57 @@
             
             <div class="space-y-3">
               <% @user_upcoming_matches.each do |match| %>
-                <div class="border border-gray-200 rounded-lg p-3">
-                  <div class="text-sm font-medium text-gray-900">
-                    <%= match.round.name %>
-                  </div>
-                  <div class="text-xs text-gray-600 mt-1">
-                    <%= match.team_a.name %> vs <%= match.team_b.name %>
-                  </div>
-                  <% if match.scheduled_time %>
-                    <div class="text-xs text-blue-600 mt-1">
-                      <%= match.scheduled_time.strftime('%b %d, %I:%M %p') %>
+                <div class="border border-gray-200 rounded-lg p-4">
+                  <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                      <div class="text-sm font-medium text-gray-900">
+                        <%= match.round.name %>
+                      </div>
+                      <div class="text-xs text-gray-600 mt-1">
+                        <%= match.team_a.name %> vs <%= match.team_b.name %>
+                      </div>
+                      <% if match.scheduled_time %>
+                        <div class="text-xs text-blue-600 mt-1">
+                          <%= match.scheduled_time.strftime('%b %d, %I:%M %p') %>
+                          <% if match.scheduled_for_today? %>
+                            <span class="ml-2 inline-block px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                              Today!
+                            </span>
+                          <% end %>
+                        </div>
+                      <% end %>
+                      
+                      <!-- Match Status -->
+                      <div class="mt-2">
+                        <%= match_status_badge(match) %>
+                      </div>
                     </div>
-                  <% end %>
+                    
+                    <!-- Action Buttons -->
+                    <div class="ml-4 flex flex-col space-y-2">
+                      <% if match.status == 'upcoming' && match.scheduled_for_today? %>
+                        <%= link_to select_tees_match_path(match), 
+                            class: "inline-flex items-center px-3 py-2 bg-green-600 text-white text-xs font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-sm" do %>
+                          🏌️‍♂️ Start Scoring
+                        <% end %>
+                      <% elsif match.status == 'active' %>
+                        <%= link_to leaderboard_tournament_path(match.round.tournament), 
+                            class: "inline-flex items-center px-3 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm" do %>
+                          📊 Tournament Leaderboard
+                        <% end %>
+                        <% next_hole = next_hole_for_user(match, current_user) %>
+                        <%= link_to next_hole_match_path(match), 
+                            class: "inline-flex items-center px-3 py-2 bg-orange-500 text-white text-xs font-semibold rounded-lg hover:bg-orange-600 transition-colors shadow-sm" do %>
+                          ⚡ Continue Hole <%= next_hole %>
+                        <% end %>
+                      <% elsif match.status == 'completed' %>
+                        <%= link_to leaderboard_tournament_path(match.round.tournament), 
+                            class: "inline-flex items-center px-3 py-2 bg-gray-500 text-white text-xs font-semibold rounded-lg hover:bg-gray-600 transition-colors shadow-sm" do %>
+                          🏆 Tournament Results
+                        <% end %>
+                      <% end %>
+                    </div>
+                  </div>
                 </div>
               <% end %>
             </div>

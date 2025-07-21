@@ -75,7 +75,7 @@
 
           <!-- Submit Actions -->
           <div class="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
-            <%= link_to "Cancel", admin_tournaments_path, 
+            <%= link_to "Cancel", admin_tournaments_path(group_slug: current_group.slug), 
                 class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
             <%= form.submit "Create Tournament", 
                 class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>

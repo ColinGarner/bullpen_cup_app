@@ -32,7 +32,7 @@ class GolfCourseApiService
 
   def get_course_details(course_id)
     response = self.class.get(
-      "#{base_uri}/courses/#{course_id}",
+      "/v1/courses/#{course_id}",
       headers: {
         "Authorization" => "Key #{@api_key}"
       }

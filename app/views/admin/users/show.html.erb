@@ -2,7 +2,7 @@
   <!-- Header -->
   <div class="mb-8">
     <nav class="text-sm breadcrumbs">
-      <%= link_to "Users", admin_users_path, class: "text-blue-600 hover:text-blue-900" %> /
+      <%= link_to "Users", admin_users_path(group_slug: current_group.slug), class: "text-blue-600 hover:text-blue-900" %> /
       <span class="text-gray-500"><%= @user.display_name %></span>
     </nav>
     

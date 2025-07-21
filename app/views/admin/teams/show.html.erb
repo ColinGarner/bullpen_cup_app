@@ -9,7 +9,7 @@
           <nav class="flex" aria-label="Breadcrumb">
             <ol class="flex items-center space-x-4">
               <li>
-                <%= link_to admin_root_path, class: "text-gray-500 hover:text-gray-700" do %>
+                <%= link_to admin_group_admin_root_path(group_slug: current_group.slug), class: "text-gray-500 hover:text-gray-700" do %>
                   Dashboard
                 <% end %>
               </li>
@@ -19,7 +19,7 @@
                 </svg>
               </li>
               <li>
-                <%= link_to admin_tournament_path(@tournament), class: "text-gray-500 hover:text-gray-700" do %>
+                <%= link_to admin_tournament_path(group_slug: current_group.slug, id: @tournament), class: "text-gray-500 hover:text-gray-700" do %>
                   <%= @tournament.name %>
                 <% end %>
               </li>
@@ -37,7 +37,7 @@
           <p class="mt-2 text-lg text-gray-600">Team management for <%= @tournament.name %></p>
         </div>
         <div class="flex items-center space-x-4">
-          <%= link_to edit_admin_tournament_team_path(@tournament, @team), 
+          <%= link_to edit_admin_tournament_team_path(group_slug: current_group.slug, tournament_id: @tournament.id, id: @team.id), 
               class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" do %>
             Edit Team
           <% end %>
@@ -138,7 +138,7 @@
                   </div>
                   <div class="flex items-center space-x-2">
                     <% unless @team.captain?(player) %>
-                      <%= link_to remove_player_admin_tournament_team_path(@tournament, @team, user_id: player.id), 
+                      <%= link_to remove_player_admin_tournament_team_path(group_slug: current_group.slug, tournament_id: @tournament.id, id: @team.id, user_id: player.id), 
                           data: { "turbo-method": :delete, confirm: "Remove #{player.display_name} from the team?" },
                           class: "text-red-600 hover:text-red-800 font-medium" do %>
                         Remove
@@ -191,7 +191,7 @@
                     </div>
                   </div>
                   <div class="flex items-center space-x-2">
-                    <%= link_to add_player_admin_tournament_team_path(@tournament, @team, user_id: user.id), 
+                    <%= link_to add_player_admin_tournament_team_path(group_slug: current_group.slug, tournament_id: @tournament.id, id: @team.id, user_id: user.id), 
                         data: { "turbo-method": :post },
                         class: "bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" do %>
                       Add
@@ -208,7 +208,7 @@
                 </svg>
               </div>
               <p class="text-gray-500 font-medium">All users are assigned!</p>
-              <p class="text-sm text-gray-400 mt-1">Everyone available has been added to teams</p>
+              <p class="text-sm text-gray-400 mt-1">All group members are already on teams in this tournament</p>
             </div>
           <% end %>
         </div>

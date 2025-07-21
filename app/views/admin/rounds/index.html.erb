@@ -3,7 +3,7 @@
   <div class="sm:flex sm:items-center sm:justify-between mb-8">
     <div>
       <nav class="text-sm breadcrumbs mb-4">
-        <%= link_to "Tournaments", admin_tournaments_path, class: "text-blue-600 hover:text-blue-900" %> /
+        <%= link_to "Tournaments", admin_tournaments_path(group_slug: current_group.slug), class: "text-blue-600 hover:text-blue-900" %> /
         <%= link_to @tournament.name, admin_tournament_path(@tournament), class: "text-blue-600 hover:text-blue-900" %> /
         <span class="text-gray-500">Rounds</span>
       </nav>

@@ -20,6 +20,25 @@ Rails.application.routes.draw do
   get "groups/:group_slug", to: "groups#show", as: "group"
   get "groups/:group_slug/home", to: "groups#dashboard", as: "group_dashboard"
 
+  # Scoring routes for matches (accessible to players)
+  resources :matches, only: [] do
+    member do
+      get :select_tees, to: "scoring#select_tees"
+      post :save_tees, to: "scoring#save_tees"
+      get :next_hole, to: "scoring#next_hole"
+      get "score/hole/:hole", to: "scoring#score_hole", as: :score_hole
+      post "score/hole/:hole", to: "scoring#update_score", as: :update_score
+      get :leaderboard, to: "scoring#leaderboard"
+    end
+  end
+
+  # Tournament leaderboard (accessible to all players)
+  resources :tournaments, only: [] do
+    member do
+      get :leaderboard, to: "scoring#tournament_leaderboard"
+    end
+  end
+
   # Admin routes scoped to specific groups
   scope path: "/groups/:group_slug" do
     namespace :admin do
