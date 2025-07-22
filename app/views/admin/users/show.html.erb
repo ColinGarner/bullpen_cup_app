@@ -60,7 +60,7 @@
   </div>
 
   <!-- Stats Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
     <div class="bg-white rounded-lg shadow p-6">
       <div class="flex items-center">
         <div class="flex-shrink-0">
@@ -110,6 +110,26 @@
           <dl>
             <dt class="text-sm font-medium text-gray-500 truncate">Tournaments Created</dt>
             <dd class="text-lg font-medium text-gray-900"><%= @tournaments_created.count %></dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-8 h-8 bg-orange-500 rounded-md flex items-center justify-center">
+            <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Handicap Index</dt>
+            <dd class="text-lg font-medium text-gray-900">
+              <%= @user.handicap.present? ? number_with_precision(@user.handicap, precision: 1) : 'Not Set' %>
+            </dd>
           </dl>
         </div>
       </div>
