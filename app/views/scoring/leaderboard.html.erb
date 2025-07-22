@@ -34,16 +34,18 @@
           <div class="flex border-b border-gray-200 last:border-b-0">
             <!-- Team A Player -->
             <div class="flex-1 p-3 <%= 
-              if match_result[:player1].nil?
+              if match_result[:player1].nil? && match_result[:team_a_players].nil?
                 'bg-gray-50 text-gray-900'
-              elsif match_result[:leader] == match_result[:player1] || (match_result[:leader_team] == match.team_a)
+              elsif match.match_type == 'stableford_match_play' && match_result[:leader_team] == match.team_a
+                'bg-blue-600 text-white'
+              elsif match.match_type != 'stableford_match_play' && (match_result[:leader] == match_result[:player1] || match_result[:leader_team] == match.team_a)
                 'bg-blue-600 text-white' 
               else 
                 'bg-gray-50 text-gray-900' 
               end %>">
               <div class="flex justify-between items-center">
                 <div class="font-semibold text-sm">
-                  <% if match.match_type == 'fourball_match_play' && match_result[:team_a_players] %>
+                  <% if (match.match_type == 'fourball_match_play' || match.match_type == 'scramble_match_play' || match.match_type == 'stableford_match_play') && match_result[:team_a_players] %>
                     <% match_result[:team_a_players].each_with_index do |player, index| %>
                       <%= player.display_name %><%= index < match_result[:team_a_players].size - 1 ? ' &' : '' %>
                       <% unless index == match_result[:team_a_players].size - 1 %>
@@ -54,7 +56,12 @@
                     <%= match_result[:player1]&.display_name || 'Players TBD' %>
                   <% end %>
                 </div>
-                <% if (match_result[:status] == 'completed' || match_result[:status] == 'active') && (match_result[:leader] == match_result[:player1] || match_result[:leader_team] == match.team_a) %>
+                <% if match.match_type == 'stableford_match_play' && (match_result[:status] == 'completed' || match_result[:status] == 'active') %>
+                  <% is_leading = match_result[:leader_team] == match.team_a %>
+                  <span class="<%= is_leading ? 'font-bold' : 'font-normal' %>">
+                    <%= match_result[:team_a_score] >= 0 ? "+#{match_result[:team_a_score]}" : "#{match_result[:team_a_score]}" %>
+                  </span>
+                <% elsif (match_result[:status] == 'completed' || match_result[:status] == 'active') && (match_result[:leader] == match_result[:player1] || match_result[:leader_team] == match.team_a) %>
                   <span class="font-bold"><%= match_result[:result] %></span>
                 <% end %>
               </div>
@@ -73,19 +80,26 @@
 
             <!-- Team B Player -->
             <div class="flex-1 p-3 <%= 
-              if match_result[:player2].nil?
+              if match_result[:player2].nil? && match_result[:team_b_players].nil?
                 'bg-gray-50 text-gray-900'
-              elsif match_result[:leader] == match_result[:player2] || (match_result[:leader_team] == match.team_b)
+              elsif match.match_type == 'stableford_match_play' && match_result[:leader_team] == match.team_b
+                'bg-red-600 text-white'
+              elsif match.match_type != 'stableford_match_play' && (match_result[:leader] == match_result[:player2] || match_result[:leader_team] == match.team_b)
                 'bg-red-600 text-white' 
               else 
                 'bg-gray-50 text-gray-900' 
               end %>">
               <div class="flex justify-between items-center">
-                <% if (match_result[:status] == 'completed' || match_result[:status] == 'active') && (match_result[:leader] == match_result[:player2] || match_result[:leader_team] == match.team_b) %>
+                <% if match.match_type == 'stableford_match_play' && (match_result[:status] == 'completed' || match_result[:status] == 'active') %>
+                  <% is_leading = match_result[:leader_team] == match.team_b %>
+                  <span class="<%= is_leading ? 'font-bold' : 'font-normal' %>">
+                    <%= match_result[:team_b_score] >= 0 ? "+#{match_result[:team_b_score]}" : "#{match_result[:team_b_score]}" %>
+                  </span>
+                <% elsif (match_result[:status] == 'completed' || match_result[:status] == 'active') && (match_result[:leader] == match_result[:player2] || match_result[:leader_team] == match.team_b) %>
                   <span class="font-bold"><%= match_result[:result] %></span>
                 <% end %>
                 <div class="font-semibold text-sm">
-                  <% if match.match_type == 'fourball_match_play' && match_result[:team_b_players] %>
+                  <% if (match.match_type == 'fourball_match_play' || match.match_type == 'scramble_match_play' || match.match_type == 'stableford_match_play') && match_result[:team_b_players] %>
                     <% match_result[:team_b_players].each_with_index do |player, index| %>
                       <%= player.display_name %><%= index < match_result[:team_b_players].size - 1 ? ' &' : '' %>
                       <% unless index == match_result[:team_b_players].size - 1 %>

@@ -276,6 +276,8 @@
             <p>Each team needs <strong><%= @expected_players_per_team %> player</strong>. Players compete individually against each other.</p>
           <% when 'fourball_match_play' %>
             <p>Each team needs <strong><%= @expected_players_per_team %> players</strong>. Teams play best ball format where the lowest score from each team counts on each hole.</p>
+          <% when 'scramble_match_play' %>
+            <p>Each team needs <strong><%= @expected_players_per_team %> players</strong>. Teams play scramble format where all players tee off, then play from the best shot position until the hole is completed. Team handicap is 35% of low player + 15% of high player.</p>
           <% when 'alt_shot_match_play' %>
             <p>Each team needs <strong><%= @expected_players_per_team %> players</strong>. Teams alternate shots with the same ball throughout the round.</p>
           <% when 'stableford' %>

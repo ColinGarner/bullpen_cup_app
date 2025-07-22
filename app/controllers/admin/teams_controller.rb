@@ -17,13 +17,13 @@ class Admin::TeamsController < Admin::BaseController
 
   def show
     @players = @team.players.includes(:team_memberships)
-    
+
     # Exclude users who are already on ANY team in this tournament
     users_on_tournament_teams = User.joins(team_memberships: :team)
                                    .where(teams: { tournament: @tournament })
                                    .distinct
                                    .pluck(:id)
-    
+
     @available_users = current_group.users
                                    .where.not(id: users_on_tournament_teams)
                                    .order(:first_name, :last_name)

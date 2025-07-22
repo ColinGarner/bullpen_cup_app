@@ -3,11 +3,11 @@ class Score < ApplicationRecord
   belongs_to :user
 
   # Validations
-  validates :hole_number, presence: true, 
+  validates :hole_number, presence: true,
             numericality: { greater_than: 0, less_than_or_equal_to: 18 }
-  validates :strokes, presence: true, 
+  validates :strokes, presence: true,
             numericality: { greater_than: 0, less_than_or_equal_to: 15 }
-  validates :net_strokes, presence: true, 
+  validates :net_strokes, presence: true,
             numericality: { greater_than: 0, less_than_or_equal_to: 15 }
   validates :handicap_used, presence: true,
             numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 54 }
@@ -53,19 +53,19 @@ class Score < ApplicationRecord
   end
 
   def match_play_won?
-    hole_result == 'won'
+    hole_result == "won"
   end
 
   def match_play_lost?
-    hole_result == 'lost'
+    hole_result == "lost"
   end
 
   def match_play_halved?
-    hole_result == 'halved'
+    hole_result == "halved"
   end
 
   def match_play_pending?
-    hole_result == 'pending' || hole_result.nil?
+    hole_result == "pending" || hole_result.nil?
   end
 
   # Calculate and set net score based on gross score and strokes received
@@ -84,10 +84,10 @@ class Score < ApplicationRecord
 
   def hole_result_display
     case hole_result
-    when 'won' then '✓'
-    when 'lost' then '✗'
-    when 'halved' then '½'
-    else '-'
+    when "won" then "✓"
+    when "lost" then "✗"
+    when "halved" then "½"
+    else "-"
     end
   end
 
@@ -99,12 +99,12 @@ class Score < ApplicationRecord
   def par_for_hole
     # This would come from the course data stored in match.holes_data
     # For now, returning a default
-    match.holes_data&.dig(hole_number.to_s, 'par') || 4
+    match.holes_data&.dig(hole_number.to_s, "par") || 4
   end
 
   def handicap_index_for_hole
     # This would come from the course data stored in match.holes_data
     # For now, returning a default
-    match.holes_data&.dig(hole_number.to_s, 'handicap') || 10
+    match.holes_data&.dig(hole_number.to_s, "handicap") || 10
   end
 end

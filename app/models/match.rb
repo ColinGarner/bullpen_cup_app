@@ -12,7 +12,9 @@ class Match < ApplicationRecord
     fourball_match_play: "fourball_match_play",
     alt_shot_match_play: "alt_shot_match_play",
     singles_match_play: "singles_match_play",
-    stableford: "stableford"
+    stableford: "stableford",
+    stableford_match_play: "stableford_match_play",
+    scramble_match_play: "scramble_match_play"
   }
 
   enum :status, {
@@ -81,7 +83,7 @@ class Match < ApplicationRecord
     case match_type
     when "singles_match_play"
       2 # 1 per team
-    when "fourball_match_play", "alt_shot_match_play"
+    when "fourball_match_play", "alt_shot_match_play", "scramble_match_play"
       4 # 2 per team
     when "stableford"
       # For now, assume stableford can be either 2 or 4 players
@@ -164,13 +166,68 @@ class Match < ApplicationRecord
 
   def scheduled_for_today?
     return false unless scheduled_time
-    
+
     # Compare date components directly, completely ignoring timezones
     # This ensures matches work for users in the course's local timezone
     today = Date.today
     scheduled_date = Date.new(scheduled_time.year, scheduled_time.month, scheduled_time.day)
-    
+
     scheduled_date == today
+  end
+
+  # Check if this is a scramble format where teams share a single score
+  def scramble_format?
+    match_type == "scramble_match_play"
+  end
+
+  # Calculate team handicap for scramble format: 35% of low + 15% of high
+  def calculate_scramble_team_handicap(team)
+    return 0 unless scramble_format?
+
+    players = players_for_team(team)
+    return 0 unless players.count == 2
+
+    # Calculate course handicaps for both players
+    course_handicaps = players.map { |p| calculate_course_handicap_for_player(p) }.compact
+    return 0 unless course_handicaps.count == 2
+
+    # Sort to get low and high handicaps
+    low_handicap, high_handicap = course_handicaps.sort
+
+    # 35% of low + 15% of high, rounded to nearest integer
+    ((low_handicap * 0.35) + (high_handicap * 0.15)).round
+  end
+
+  # Helper method to calculate course handicap for a player
+  def calculate_course_handicap_for_player(player)
+    return 0 unless player.handicap && selected_tee_name
+
+    # Get tee data from stored course data
+    course_data = holes_data&.dig("course_data")
+    return 0 unless course_data
+
+    # Find the selected tee data
+    tee_data = find_tee_data_in_course(selected_tee_name, course_data)
+    return 0 unless tee_data
+
+    # Course Handicap = Handicap Index × (Slope Rating ÷ 113)
+    slope_rating = tee_data["slope_rating"] || 113
+    (player.handicap.to_f * (slope_rating / 113.0)).round
+  end
+
+  private
+
+  # Helper to find tee data within course data
+  def find_tee_data_in_course(tee_name, course_data)
+    return nil unless course_data&.dig("course", "tees")
+
+    course_data["course"]["tees"].each do |gender, gender_tees|
+      gender_tees.each do |tee|
+        return tee if tee["tee_name"] == tee_name
+      end
+    end
+
+    nil
   end
 
   private

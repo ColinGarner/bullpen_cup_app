@@ -41,7 +41,239 @@
     <%= form_with url: update_score_match_path(@match, hole: @hole_number), method: :post, local: true do |form| %>
       
       <!-- Players Scoring -->
-      <% if @match.match_type == 'fourball_match_play' %>
+      <% if @match.match_type == 'stableford_match_play' %>
+        <!-- Stableford Match Play - Group by Teams -->
+        <% team_a_players = @match.players_for_team(@match.team_a) %>
+        <% team_b_players = @match.players_for_team(@match.team_b) %>
+        
+        <div class="space-y-6">
+          <!-- Team A -->
+          <div class="bg-blue-50 rounded-lg p-4 border-2 border-blue-200">
+            <h3 class="text-lg font-bold text-blue-800 mb-4 text-center">
+              <%= @match.team_a.name %>
+              <span class="text-sm font-normal text-blue-600">(Stableford Quota)</span>
+            </h3>
+            <div class="space-y-3">
+              <% team_a_players.each do |player| %>
+                <% existing_score = @scores.find { |s| s.user_id == player.id } %>
+                <% quota = calculate_stableford_quota(player, @match) %>
+                <% current_points = calculate_current_stableford_points(player, @match) %>
+                
+                <div class="bg-white rounded-lg shadow p-4">
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                        <%= player.display_name.first.upcase %>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-gray-900"><%= player.display_name %></p>
+                        <p class="text-xs text-gray-500">
+                          Handicap: <%= player.handicap || 'N/A' %> • Quota: <%= current_points %>/<%= quota %> points
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="flex items-center space-x-2">
+                    <label class="text-sm font-medium text-gray-700 w-16">Strokes:</label>
+                    <%= number_field_tag "scores[#{player.id}]", 
+                        existing_score&.strokes&.positive? ? existing_score.strokes : nil,
+                        min: 1, max: 15, 
+                        class: "flex-1 text-center text-2xl font-bold border-2 border-gray-200 rounded-lg py-3 focus:border-green-500 focus:outline-none",
+                        placeholder: "0" %>
+                  </div>
+                  
+                  <!-- Stableford Points Preview -->
+                  <% if existing_score&.strokes&.positive? %>
+                    <% points = calculate_stableford_points(existing_score.strokes, @hole_data['par']) %>
+                    <div class="mt-2 text-center">
+                      <span class="text-sm text-gray-500">Points: </span>
+                      <span class="text-lg font-semibold text-green-600"><%= points %></span>
+                      <span class="text-xs text-gray-500 ml-2">
+                        (<%= existing_score.strokes %> vs par <%= @hole_data['par'] %>)
+                      </span>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+          
+          <!-- Team B -->
+          <div class="bg-red-50 rounded-lg p-4 border-2 border-red-200">
+            <h3 class="text-lg font-bold text-red-800 mb-4 text-center">
+              <%= @match.team_b.name %>
+              <span class="text-sm font-normal text-red-600">(Stableford Quota)</span>
+            </h3>
+            <div class="space-y-3">
+              <% team_b_players.each do |player| %>
+                <% existing_score = @scores.find { |s| s.user_id == player.id } %>
+                <% quota = calculate_stableford_quota(player, @match) %>
+                <% current_points = calculate_current_stableford_points(player, @match) %>
+                
+                <div class="bg-white rounded-lg shadow p-4">
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white font-semibold">
+                        <%= player.display_name.first.upcase %>
+                      </div>
+                      <div>
+                        <p class="font-semibold text-gray-900"><%= player.display_name %></p>
+                        <p class="text-xs text-gray-500">
+                          Handicap: <%= player.handicap || 'N/A' %> • Quota: <%= current_points %>/<%= quota %> points
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="flex items-center space-x-2">
+                    <label class="text-sm font-medium text-gray-700 w-16">Strokes:</label>
+                    <%= number_field_tag "scores[#{player.id}]", 
+                        existing_score&.strokes&.positive? ? existing_score.strokes : nil,
+                        min: 1, max: 15, 
+                        class: "flex-1 text-center text-2xl font-bold border-2 border-gray-200 rounded-lg py-3 focus:border-green-500 focus:outline-none",
+                        placeholder: "0" %>
+                  </div>
+                  
+                  <!-- Stableford Points Preview -->
+                  <% if existing_score&.strokes&.positive? %>
+                    <% points = calculate_stableford_points(existing_score.strokes, @hole_data['par']) %>
+                    <div class="mt-2 text-center">
+                      <span class="text-sm text-gray-500">Points: </span>
+                      <span class="text-lg font-semibold text-green-600"><%= points %></span>
+                      <span class="text-xs text-gray-500 ml-2">
+                        (<%= existing_score.strokes %> vs par <%= @hole_data['par'] %>)
+                      </span>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% elsif @match.match_type == 'scramble_match_play' %>
+        <!-- Scramble Match Play - Team Scores Only -->
+        <% team_a_players = @match.players_for_team(@match.team_a) %>
+        <% team_b_players = @match.players_for_team(@match.team_b) %>
+        
+        <div class="space-y-6">
+          <!-- Team A -->
+          <div class="bg-blue-50 rounded-lg p-4 border-2 border-blue-200">
+            <h3 class="text-lg font-bold text-blue-800 mb-4 text-center">
+              <%= @match.team_a.name %>
+              <span class="text-sm font-normal text-blue-600">(Team scramble score)</span>
+            </h3>
+            <div class="bg-white rounded-lg shadow p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                    T
+                  </div>
+                  <div>
+                    <p class="font-semibold text-gray-900">Team Score</p>
+                    <p class="text-xs text-gray-500">
+                      Players: <%= team_a_players.map(&:display_name).join(", ") %>
+                    </p>
+                    <% team_handicap = @match.calculate_scramble_team_handicap(@match.team_a) %>
+                    <% strokes_received = calculate_strokes_received(team_a_players.first, @hole_number) if team_a_players.any? %>
+                    <% if team_handicap > 0 %>
+                      <p class="text-xs text-gray-500">
+                        Team handicap: <%= team_handicap %> (35% + 15% formula)
+                        <% if strokes_received && strokes_received > 0 %>
+                          • Gets <%= strokes_received %> stroke<%= 's' if strokes_received > 1 %> on this hole
+                        <% end %>
+                      </p>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="flex items-center space-x-2">
+                <label class="text-sm font-medium text-gray-700 w-16">Strokes:</label>
+                <% existing_score = @scores.find { |s| s.user_id == team_a_players.first&.id } %>
+                <%= number_field_tag "scores[#{team_a_players.first&.id}]", 
+                    existing_score&.strokes&.positive? ? existing_score.strokes : nil,
+                    min: 1, max: 15, 
+                    class: "flex-1 text-center text-2xl font-bold border-2 border-gray-200 rounded-lg py-3 focus:border-green-500 focus:outline-none",
+                    placeholder: "0" %>
+              </div>
+              
+              <!-- Net Score Preview -->
+              <% if existing_score&.strokes&.positive? %>
+                <div class="mt-2 text-center">
+                  <span class="text-sm text-gray-500">Net Score: </span>
+                  <span class="text-lg font-semibold text-green-600">
+                    <%= [existing_score.strokes - (strokes_received || 0), 1].max %>
+                  </span>
+                  <% if strokes_received && strokes_received > 0 %>
+                    <span class="text-xs text-gray-500">
+                      (<%= existing_score.strokes %> - <%= strokes_received %>)
+                    </span>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- Team B -->
+          <div class="bg-red-50 rounded-lg p-4 border-2 border-red-200">
+            <h3 class="text-lg font-bold text-red-800 mb-4 text-center">
+              <%= @match.team_b.name %>
+              <span class="text-sm font-normal text-red-600">(Team scramble score)</span>
+            </h3>
+            <div class="bg-white rounded-lg shadow p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white font-semibold">
+                    T
+                  </div>
+                  <div>
+                    <p class="font-semibold text-gray-900">Team Score</p>
+                    <p class="text-xs text-gray-500">
+                      Players: <%= team_b_players.map(&:display_name).join(", ") %>
+                    </p>
+                    <% team_handicap = @match.calculate_scramble_team_handicap(@match.team_b) %>
+                    <% strokes_received = calculate_strokes_received(team_b_players.first, @hole_number) if team_b_players.any? %>
+                    <% if team_handicap > 0 %>
+                      <p class="text-xs text-gray-500">
+                        Team handicap: <%= team_handicap %> (35% + 15% formula)
+                        <% if strokes_received && strokes_received > 0 %>
+                          • Gets <%= strokes_received %> stroke<%= 's' if strokes_received > 1 %> on this hole
+                        <% end %>
+                      </p>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="flex items-center space-x-2">
+                <label class="text-sm font-medium text-gray-700 w-16">Strokes:</label>
+                <% existing_score = @scores.find { |s| s.user_id == team_b_players.first&.id } %>
+                <%= number_field_tag "scores[#{team_b_players.first&.id}]", 
+                    existing_score&.strokes&.positive? ? existing_score.strokes : nil,
+                    min: 1, max: 15, 
+                    class: "flex-1 text-center text-2xl font-bold border-2 border-gray-200 rounded-lg py-3 focus:border-green-500 focus:outline-none",
+                    placeholder: "0" %>
+              </div>
+              
+              <!-- Net Score Preview -->
+              <% if existing_score&.strokes&.positive? %>
+                <div class="mt-2 text-center">
+                  <span class="text-sm text-gray-500">Net Score: </span>
+                  <span class="text-lg font-semibold text-green-600">
+                    <%= [existing_score.strokes - (strokes_received || 0), 1].max %>
+                  </span>
+                  <% if strokes_received && strokes_received > 0 %>
+                    <span class="text-xs text-gray-500">
+                      (<%= existing_score.strokes %> - <%= strokes_received %>)
+                    </span>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% elsif @match.match_type == 'fourball_match_play' %>
         <!-- Fourball Match Play - Group by Teams -->
         <% team_a_players = @match.players_for_team(@match.team_a) %>
         <% team_b_players = @match.players_for_team(@match.team_b) %>
