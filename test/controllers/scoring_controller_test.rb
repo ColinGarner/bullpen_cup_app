@@ -47,10 +47,11 @@ class ScoringControllerTest < ActionDispatch::IntegrationTest
     @team_b.add_player(@player_b1)
     @team_b.add_player(@player_b2)
 
+    # Assign teams to tournament
+    @tournament.update!(team_a: @team_a, team_b: @team_b)
+
     @match = Match.create!(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
       match_type: "singles_match_play",
       scheduled_time: Time.current,
       golf_course_id: "12345"

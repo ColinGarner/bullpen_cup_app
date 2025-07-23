@@ -6,8 +6,6 @@ class Team < ApplicationRecord
   has_many :players, through: :team_memberships, source: :user
 
   # Match associations
-  has_many :team_a_matches, class_name: "Match", foreign_key: "team_a_id"
-  has_many :team_b_matches, class_name: "Match", foreign_key: "team_b_id"
   has_many :won_matches, class_name: "Match", foreign_key: "winner_team_id"
   has_many :match_players, dependent: :destroy
 
@@ -47,7 +45,7 @@ class Team < ApplicationRecord
 
   # Match helper methods
   def matches
-    Match.where("team_a_id = ? OR team_b_id = ?", id, id)
+    Match.joins(round: :tournament).where("tournaments.team_a_id = ? OR tournaments.team_b_id = ?", id, id)
   end
 
   def match_count

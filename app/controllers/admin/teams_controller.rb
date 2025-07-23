@@ -30,16 +30,41 @@ class Admin::TeamsController < Admin::BaseController
   end
 
   def new
+    # Check if tournament already has 2 teams
+    if @tournament.at_team_limit?
+      redirect_to scoped_admin_tournament_path(@tournament),
+                  alert: "Tournament already has the maximum of 2 teams. Cannot create more teams."
+      return
+    end
+
     @team = @tournament.teams.build
     @available_captains = current_group.users.order(:first_name, :last_name)
   end
 
   def create
+    # Check if tournament already has 2 teams
+    if @tournament.at_team_limit?
+      redirect_to scoped_admin_tournament_path(@tournament),
+                  alert: "Tournament already has the maximum of 2 teams. Cannot create more teams."
+      return
+    end
+
     @team = @tournament.teams.build(team_params)
 
     if @team.save
-      redirect_to scoped_admin_tournament_path(@tournament),
-                  notice: "Team was successfully created."
+      # Ensure all teams are properly assigned
+      assign_teams_to_tournament(@tournament)
+
+      # Determine which role this team got
+      if @tournament.team_a == @team
+        notice_message = "Team was successfully created and assigned as Team A."
+      elsif @tournament.team_b == @team
+        notice_message = "Team was successfully created and assigned as Team B."
+      else
+        notice_message = "Team was successfully created."
+      end
+
+      redirect_to scoped_admin_tournament_path(@tournament), notice: notice_message
     else
       @available_captains = current_group.users.order(:first_name, :last_name)
       render :new, status: :unprocessable_entity
@@ -123,5 +148,23 @@ class Admin::TeamsController < Admin::BaseController
 
   def team_params
     params.require(:team).permit(:name, :captain_id)
+  end
+
+  def assign_teams_to_tournament(tournament)
+    # Get all teams for this tournament in creation order
+    all_teams = tournament.teams.order(:created_at)
+
+    # Assign first team as team_a if not already assigned
+    if tournament.team_a.nil? && all_teams.first
+      tournament.update!(team_a: all_teams.first)
+    end
+
+    # Assign second team as team_b if not already assigned
+    if tournament.team_b.nil? && all_teams.second
+      tournament.update!(team_b: all_teams.second)
+    end
+
+    # Reload to get updated associations
+    tournament.reload
   end
 end

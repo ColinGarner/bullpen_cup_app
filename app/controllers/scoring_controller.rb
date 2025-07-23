@@ -118,7 +118,7 @@ class ScoringController < ApplicationController
       return
     end
 
-    @rounds = @tournament.rounds.includes(matches: [ :team_a, :team_b, :players, :scores, :winner_team ])
+    @rounds = @tournament.rounds.includes(matches: [ :players, :scores, :winner_team, round: { tournament: [:team_a, :team_b] } ])
 
     # Get all matches in the tournament with their current status
     @tournament_matches = @rounds.flat_map(&:matches)
@@ -140,7 +140,7 @@ class ScoringController < ApplicationController
   # GET /tournaments/:id/leaderboard
   def tournament_leaderboard
     @tournament = Tournament.find(params[:id])
-    @rounds = @tournament.rounds.includes(matches: [ :team_a, :team_b, :players, :scores, :winner_team ])
+    @rounds = @tournament.rounds.includes(matches: [ :players, :scores, :winner_team, round: { tournament: [:team_a, :team_b] } ])
 
     # Get all matches in the tournament with their current status
     @tournament_matches = @rounds.flat_map(&:matches)
@@ -261,11 +261,13 @@ class ScoringController < ApplicationController
   end
 
   def calculate_singles_match_status(match)
-    # Safely get players
-    players = match.players rescue []
+    # Get assigned players from match_players (even if no scores yet)
+    players = match.players.to_a
+    Rails.logger.info "DEBUG: Match #{match.id} has #{players.count} players: #{players.map(&:display_name).join(', ')}"
     return { status: "no_players", result: "No Players", description: "", player1: nil, player2: nil, holes_played: 0 } if players.count != 2
 
-    player1, player2 = players.to_a
+    player1, player2 = players
+    Rails.logger.info "DEBUG: Assigned player1: #{player1.display_name}, player2: #{player2.display_name}"
 
     # Safely get scores
     match_scores = match.scores rescue []
@@ -336,7 +338,7 @@ class ScoringController < ApplicationController
       status = match.status == "completed" ? "completed" : (holes_played > 0 ? "active" : "upcoming")
     end
 
-    {
+    result_hash = {
       status: status,
       result: result,
       description: description,
@@ -346,14 +348,16 @@ class ScoringController < ApplicationController
       player1: player1,
       player2: player2
     }
+    Rails.logger.info "DEBUG: Returning result for match #{match.id}: player1=#{result_hash[:player1]&.display_name}, player2=#{result_hash[:player2]&.display_name}"
+    result_hash
   end
 
   def calculate_fourball_match_status(match)
-    # Safely get players grouped by team
-    team_a_players = match.players_for_team(match.team_a) rescue []
-    team_b_players = match.players_for_team(match.team_b) rescue []
+    # Get assigned players grouped by team (even if no scores yet)
+    team_a_players = match.players_for_team(match.team_a)
+    team_b_players = match.players_for_team(match.team_b)
 
-    return { status: "no_players", result: "No Players", description: "", player1: nil, player2: nil, holes_played: 0 } if team_a_players.empty? || team_b_players.empty?
+    return { status: "no_players", result: "No Players", description: "", player1: nil, player2: nil, team_a_players: [], team_b_players: [], holes_played: 0 } if team_a_players.empty? || team_b_players.empty?
 
     # Get all scores for the match
     match_scores = match.scores rescue []
@@ -452,11 +456,11 @@ class ScoringController < ApplicationController
   end
 
   def calculate_scramble_match_status(match)
-    # Safely get players grouped by team
-    team_a_players = match.players_for_team(match.team_a) rescue []
-    team_b_players = match.players_for_team(match.team_b) rescue []
+    # Get assigned players grouped by team (even if no scores yet)
+    team_a_players = match.players_for_team(match.team_a)
+    team_b_players = match.players_for_team(match.team_b)
 
-    return { status: "no_players", result: "No Players", description: "", player1: nil, player2: nil, holes_played: 0 } if team_a_players.empty? || team_b_players.empty?
+    return { status: "no_players", result: "No Players", description: "", player1: nil, player2: nil, team_a_players: [], team_b_players: [], holes_played: 0 } if team_a_players.empty? || team_b_players.empty?
 
     # Get all scores for the match
     match_scores = match.scores rescue []
@@ -551,11 +555,11 @@ class ScoringController < ApplicationController
   end
 
     def calculate_stableford_match_status(match)
-    # Get players from both teams
+    # Get assigned players from both teams (even if no scores yet)
     team_a_players = match.players_for_team(match.team_a)
     team_b_players = match.players_for_team(match.team_b)
 
-    return { status: "no_players", result: "Players TBD", description: "", holes_played: 0 } if team_a_players.empty? || team_b_players.empty?
+    return { status: "no_players", result: "Players TBD", description: "", team_a_players: [], team_b_players: [], holes_played: 0 } if team_a_players.empty? || team_b_players.empty?
 
     # Ensure we have course data for this match
     unless match.holes_data.present?

@@ -3,7 +3,7 @@ class Admin::MatchesController < Admin::BaseController
   before_action :set_match, only: [ :show, :edit, :update, :destroy, :start, :complete, :cancel, :players, :add_player, :remove_player ]
 
   def index
-    @matches = @round.matches.includes(:team_a, :team_b, :winner_team, :match_players, :players)
+    @matches = @round.matches.includes(:winner_team, :match_players, :players, round: { tournament: [ :team_a, :team_b ] })
     @matches = @matches.where(match_type: params[:match_type]) if params[:match_type].present?
     @matches = @matches.where(status: params[:status]) if params[:status].present?
     @matches = @matches.order(:scheduled_time, :created_at)
@@ -16,7 +16,6 @@ class Admin::MatchesController < Admin::BaseController
 
   def new
     @match = @round.matches.build
-    @available_teams = @tournament.teams.order(:name)
   end
 
   def create
@@ -31,13 +30,11 @@ class Admin::MatchesController < Admin::BaseController
       redirect_to scoped_admin_tournament_round_match_path(@tournament, @round, @match),
                   notice: "Match was successfully created with course: #{@match.golf_course_display}"
     else
-      @available_teams = @tournament.teams.order(:name)
       render :new, status: :unprocessable_entity
     end
   end
 
   def edit
-    @available_teams = @tournament.teams.order(:name)
   end
 
   def update
@@ -50,7 +47,6 @@ class Admin::MatchesController < Admin::BaseController
       redirect_to scoped_admin_tournament_round_match_path(@tournament, @round, @match),
                   notice: "Match was successfully updated."
     else
-      @available_teams = @tournament.teams.order(:name)
       render :edit, status: :unprocessable_entity
     end
   end
@@ -192,7 +188,7 @@ class Admin::MatchesController < Admin::BaseController
   end
 
   def match_params
-    params.require(:match).permit(:team_a_id, :team_b_id, :match_type, :scheduled_time, :golf_course_id, :golf_course_name, :golf_course_location)
+    params.require(:match).permit(:match_type, :scheduled_time, :golf_course_id, :golf_course_name, :golf_course_location)
   end
 
   def golf_course_missing?

@@ -35,6 +35,26 @@
           </div>
         </div>
       <% end %>
+      
+      <!-- Singles Match Play Stroke Info -->
+      <% if @match.match_type == 'singles_match_play' && @players.count == 2 %>
+        <% player1, player2 = @players %>
+        <% player1_total_strokes = calculate_total_match_strokes(player1) %>
+        <% player2_total_strokes = calculate_total_match_strokes(player2) %>
+        <% if player1_total_strokes > 0 || player2_total_strokes > 0 %>
+          <div class="mt-2 text-center">
+            <% if player1_total_strokes > 0 %>
+              <p class="text-xs text-gray-600">
+                <%= player1.display_name %> gets <%= player1_total_strokes %> stroke<%= 's' if player1_total_strokes > 1 %>
+              </p>
+            <% elsif player2_total_strokes > 0 %>
+              <p class="text-xs text-gray-600">
+                <%= player2.display_name %> gets <%= player2_total_strokes %> stroke<%= 's' if player2_total_strokes > 1 %>
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
     </div>
 
     <!-- Scoring Form -->
@@ -408,7 +428,7 @@
           </div>
         </div>
       <% else %>
-        <!-- Singles Match Play - Original Layout -->
+        <!-- Singles Match Play - Enhanced Layout -->
         <div class="space-y-4">
           <% @players.each do |player| %>
             <% existing_score = @scores.find { |s| s.user_id == player.id } %>
@@ -425,7 +445,7 @@
                     <p class="text-xs text-gray-500">
                       Handicap: <%= player.handicap || 'N/A' %>
                       <% if strokes_received > 0 %>
-                        • Gets <%= strokes_received %> stroke<%= 's' if strokes_received > 1 %>
+                        • Gets <%= strokes_received %> stroke<%= 's' if strokes_received > 1 %> on this hole
                       <% end %>
                     </p>
                   </div>
@@ -438,24 +458,32 @@
                 <%= number_field_tag "scores[#{player.id}]", 
                     existing_score&.strokes&.positive? ? existing_score.strokes : nil,
                     min: 1, max: 15, 
-                    class: "flex-1 text-center text-2xl font-bold border-2 border-gray-200 rounded-lg py-3 focus:border-green-500 focus:outline-none",
-                    placeholder: "0" %>
+                    class: "stroke-input flex-1 text-center text-2xl font-bold border-2 border-gray-200 rounded-lg py-3 focus:border-green-500 focus:outline-none",
+                    placeholder: "0",
+                    data: { 
+                      player_id: player.id, 
+                      strokes_received: strokes_received 
+                    } %>
               </div>
               
-              <!-- Net Score Preview -->
-              <% if existing_score&.strokes&.positive? %>
-                <div class="mt-2 text-center">
+              <!-- Real-time Net Score Preview -->
+              <div class="mt-2 text-center">
+                <div id="net-score-<%= player.id %>" class="net-score-display" style="<%= existing_score&.strokes&.positive? ? '' : 'display: none;' %>">
                   <span class="text-sm text-gray-500">Net Score: </span>
-                  <span class="text-lg font-semibold text-green-600">
-                    <%= [existing_score.strokes - strokes_received, 1].max %>
+                  <span class="net-score-value text-lg font-semibold text-green-600">
+                    <% if existing_score&.strokes&.positive? %>
+                      <%= [existing_score.strokes - strokes_received, 1].max %>
+                    <% end %>
                   </span>
                   <% if strokes_received > 0 %>
-                    <span class="text-xs text-gray-500">
-                      (<%= existing_score.strokes %> - <%= strokes_received %>)
+                    <span class="net-score-calculation text-xs text-gray-500">
+                      <% if existing_score&.strokes&.positive? %>
+                        (<%= existing_score.strokes %> - <%= strokes_received %>)
+                      <% end %>
                     </span>
                   <% end %>
                 </div>
-              <% end %>
+              </div>
             </div>
           <% end %>
         </div>
@@ -510,8 +538,64 @@
         <li>• Enter the actual strokes taken (gross score)</li>
         <li>• Net scores are calculated automatically based on handicaps</li>
         <li>• You can go back to previous holes to make corrections</li>
+        <li>• Net scores update in real-time as you type</li>
       </ul>
     </div>
 
   </div>
-</div> 
+</div>
+
+<script>
+  function initializeNetScoreCalculation() {
+    // Real-time net score calculation for singles match play
+    const strokeInputs = document.querySelectorAll('.stroke-input');
+    
+    strokeInputs.forEach(function(input) {
+      // Remove any existing event listeners to prevent duplicates
+      input.removeEventListener('input', handleStrokeInput);
+      
+      // Add the event listener
+      input.addEventListener('input', handleStrokeInput);
+      
+      // Trigger initial calculation if there's already a value
+      if (input.value) {
+        input.dispatchEvent(new Event('input'));
+      }
+    });
+  }
+  
+  function handleStrokeInput() {
+    const playerId = this.dataset.playerId;
+    const strokesReceived = parseInt(this.dataset.strokesReceived) || 0;
+    const grossStrokes = parseInt(this.value) || 0;
+    
+    const netScoreDisplay = document.getElementById('net-score-' + playerId);
+    const netScoreValue = netScoreDisplay.querySelector('.net-score-value');
+    const netScoreCalculation = netScoreDisplay.querySelector('.net-score-calculation');
+    
+    if (grossStrokes > 0) {
+      // Calculate net score (minimum of 1)
+      const netStrokes = Math.max(grossStrokes - strokesReceived, 1);
+      
+      // Update the display
+      netScoreValue.textContent = netStrokes;
+      
+      // Update calculation display if strokes are received
+      if (strokesReceived > 0 && netScoreCalculation) {
+        netScoreCalculation.textContent = '(' + grossStrokes + ' - ' + strokesReceived + ')';
+      }
+      
+      // Show the net score display
+      netScoreDisplay.style.display = 'block';
+    } else {
+      // Hide the net score display if no strokes entered
+      netScoreDisplay.style.display = 'none';
+    }
+  }
+
+  // Initialize on page load (works for both full page loads and Turbo navigations)
+  document.addEventListener('turbo:load', initializeNetScoreCalculation);
+  
+  // Fallback for non-Turbo environments
+  document.addEventListener('DOMContentLoaded', initializeNetScoreCalculation);
+</script> 

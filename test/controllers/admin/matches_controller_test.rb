@@ -52,10 +52,11 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
     @team_b.add_player(@player_b1)
     @team_b.add_player(@player_b2)
 
+    # Assign teams to tournament
+    @tournament.update!(team_a: @team_a, team_b: @team_b)
+
     @match = Match.create!(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
       match_type: "singles_match_play"
     )
 
@@ -98,8 +99,6 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_difference("Match.count") do
       post admin_tournament_round_matches_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id), params: {
         match: {
-          team_a_id: @team_a.id,
-          team_b_id: @team_b.id,
           match_type: "fourball_match_play",
           scheduled_time: 2.hours.from_now,
           golf_course_id: "1",
@@ -113,24 +112,19 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Match was successfully created with course: Test Golf Course", flash[:notice]
   end
 
-  test "should not create invalid match" do
+  test "should not create match without golf course" do
     sign_in @admin
 
     assert_no_difference("Match.count") do
       post admin_tournament_round_matches_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id), params: {
         match: {
-          team_a_id: @team_a.id,
-          team_b_id: @team_a.id, # Same team - invalid
-          match_type: "singles_match_play",
-          golf_course_id: "1",
-          golf_course_name: "Test Golf Course",
-          golf_course_location: "Test Location"
+          match_type: "singles_match_play"
+          # Missing golf course data
         }
       }
     end
 
     assert_response :unprocessable_entity
-    assert_includes response.body, "cannot be the same as Team A"
   end
 
   test "should get edit match form for admin" do
@@ -160,20 +154,17 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "fourball_match_play", @match.match_type
   end
 
-  test "should not update match with invalid data" do
+  test "should not update match without golf course" do
     sign_in @admin
 
     patch admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id), params: {
       match: {
-        team_b_id: @team_a.id, # Same as team_a - invalid
-        golf_course_id: "1",
-        golf_course_name: "Test Golf Course",
-        golf_course_location: "Test Location"
+        match_type: "fourball_match_play"
+        # Missing golf course data
       }
     }
 
     assert_response :unprocessable_entity
-    assert_includes response.body, "cannot be the same as Team A"
   end
 
   test "should delete match for admin" do

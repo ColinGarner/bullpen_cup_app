@@ -10,6 +10,6 @@ class CreateScores < ActiveRecord::Migration[8.0]
     end
 
     # Add basic indexes for performance
-    add_index :scores, [:match_id, :user_id, :hole_number], unique: true, name: "index_scores_unique_per_hole"
+    add_index :scores, [ :match_id, :user_id, :hole_number ], unique: true, name: "index_scores_unique_per_hole"
   end
 end

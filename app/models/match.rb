@@ -1,7 +1,5 @@
 class Match < ApplicationRecord
   belongs_to :round
-  belongs_to :team_a, class_name: "Team"
-  belongs_to :team_b, class_name: "Team"
   belongs_to :winner_team, class_name: "Team", optional: true
   has_many :match_players, dependent: :destroy
   has_many :players, through: :match_players, source: :user
@@ -27,8 +25,7 @@ class Match < ApplicationRecord
   # Validations
   validates :match_type, presence: true
   validates :status, presence: true
-  validate :teams_must_be_different
-  validate :teams_must_belong_to_tournament
+  validate :tournament_must_have_teams
   validate :winner_must_be_competing_team
   # Simple golf course validations
   validates :golf_course_name, length: { maximum: 200 }, allow_blank: true
@@ -36,9 +33,18 @@ class Match < ApplicationRecord
 
   # Scopes
   scope :by_round, ->(round) { where(round: round) }
-  scope :for_team, ->(team) { where("team_a_id = ? OR team_b_id = ?", team.id, team.id) }
+  scope :for_team, ->(team) { joins(round: :tournament).where("tournaments.team_a_id = ? OR tournaments.team_b_id = ?", team.id, team.id) }
   scope :by_match_type, ->(type) { where(match_type: type) }
   scope :by_status, ->(status) { where(status: status) }
+
+  # Team access methods
+  def team_a
+    tournament.team_a
+  end
+
+  def team_b
+    tournament.team_b
+  end
 
   # Helper methods
   def opposing_team(team)
@@ -172,33 +178,33 @@ class Match < ApplicationRecord
     # 1. It's scheduled for today in server timezone
     # 2. It's scheduled within the last 24 hours (handles timezone differences)
     # 3. It's scheduled for tomorrow but very early (handles timezone ahead of server)
-    
+
     current_time = Time.current
     today = Date.today
-    
+
     # Extract the scheduled date
     scheduled_date = Date.new(scheduled_time.year, scheduled_time.month, scheduled_time.day)
-    
+
     # Check if it's today in server timezone
     return true if scheduled_date == today
-    
+
     # Check if it's within a reasonable window (yesterday to tomorrow)
     # This handles timezone differences where user might be up to 12 hours ahead/behind
     yesterday = today - 1.day
     tomorrow = today + 1.day
-    
+
     if scheduled_date == yesterday
-      # If scheduled yesterday, only allow if it's within last 18 hours
-      # (handles case where server is ahead of user's timezone)
+      # If scheduled yesterday, allow if it's within last 36 hours
+      # (handles case where server is ahead of user's timezone by up to 1.5 days)
       time_diff = current_time - scheduled_time
-      return time_diff <= 18.hours
+      return time_diff <= 36.hours
     elsif scheduled_date == tomorrow
-      # If scheduled tomorrow, only allow if it's very early tomorrow
+      # If scheduled tomorrow, allow if it's within next 12 hours
       # (handles case where server is behind user's timezone)
-      time_diff = scheduled_time - current_time  
-      return time_diff <= 6.hours
+      time_diff = scheduled_time - current_time
+      return time_diff <= 12.hours
     end
-    
+
     false
   end
 
@@ -259,22 +265,13 @@ class Match < ApplicationRecord
 
   private
 
-  def teams_must_be_different
-    return unless team_a && team_b
-    errors.add(:team_b, "cannot be the same as Team A") if team_a == team_b
-  end
-
-  def teams_must_belong_to_tournament
-    return unless round && team_a && team_b
+  def tournament_must_have_teams
+    return unless round&.tournament
 
     tournament = round.tournament
 
-    unless team_a.tournament == tournament
-      errors.add(:team_a, "must belong to the same tournament as the round")
-    end
-
-    unless team_b.tournament == tournament
-      errors.add(:team_b, "must belong to the same tournament as the round")
+    unless tournament.team_a && tournament.team_b
+      errors.add(:base, "Tournament must have both Team A and Team B assigned")
     end
   end
 

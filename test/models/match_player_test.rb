@@ -39,10 +39,11 @@ class MatchPlayerTest < ActiveSupport::TestCase
 
     @team_a.add_player(@player)
 
+    # Assign teams to tournament
+    @tournament.update!(team_a: @team_a, team_b: @team_b)
+
     @match = Match.create!(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
       match_type: "singles_match_play"
     )
   end
@@ -143,8 +144,6 @@ class MatchPlayerTest < ActiveSupport::TestCase
   test "should allow same player in different matches" do
     other_match = Match.create!(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
       match_type: "singles_match_play"
     )
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_20_215358) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_23_132152) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -63,8 +63,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_20_215358) do
 
   create_table "matches", force: :cascade do |t|
     t.bigint "round_id", null: false
-    t.bigint "team_a_id", null: false
-    t.bigint "team_b_id", null: false
     t.string "match_type", null: false
     t.string "status", default: "upcoming", null: false
     t.bigint "winner_team_id"
@@ -83,11 +81,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_20_215358) do
     t.index ["round_id", "status"], name: "index_matches_on_round_id_and_status"
     t.index ["round_id"], name: "index_matches_on_round_id"
     t.index ["status"], name: "index_matches_on_status"
-    t.index ["team_a_id", "team_b_id"], name: "index_matches_on_team_a_id_and_team_b_id"
-    t.index ["team_a_id"], name: "index_matches_on_team_a_id"
-    t.index ["team_b_id"], name: "index_matches_on_team_b_id"
     t.index ["winner_team_id"], name: "index_matches_on_winner_team_id"
-    t.check_constraint "team_a_id <> team_b_id", name: "matches_different_teams"
   end
 
   create_table "rounds", force: :cascade do |t|
@@ -157,10 +151,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_20_215358) do
     t.datetime "updated_at", null: false
     t.boolean "cancelled", default: false, null: false
     t.bigint "group_id"
+    t.bigint "team_a_id"
+    t.bigint "team_b_id"
     t.index ["cancelled"], name: "index_tournaments_on_cancelled"
     t.index ["created_by_id"], name: "index_tournaments_on_created_by_id"
     t.index ["group_id"], name: "index_tournaments_on_group_id"
     t.index ["start_date"], name: "index_tournaments_on_start_date"
+    t.index ["team_a_id"], name: "index_tournaments_on_team_a_id"
+    t.index ["team_b_id"], name: "index_tournaments_on_team_b_id"
+    t.check_constraint "team_a_id <> team_b_id", name: "tournaments_different_teams"
   end
 
   create_table "users", force: :cascade do |t|
@@ -197,8 +196,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_20_215358) do
   add_foreign_key "match_players", "teams"
   add_foreign_key "match_players", "users"
   add_foreign_key "matches", "rounds"
-  add_foreign_key "matches", "teams", column: "team_a_id"
-  add_foreign_key "matches", "teams", column: "team_b_id"
   add_foreign_key "matches", "teams", column: "winner_team_id"
   add_foreign_key "rounds", "tournaments"
   add_foreign_key "scores", "matches"
@@ -208,5 +205,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_20_215358) do
   add_foreign_key "teams", "tournaments"
   add_foreign_key "teams", "users", column: "captain_id"
   add_foreign_key "tournaments", "groups"
+  add_foreign_key "tournaments", "teams", column: "team_a_id"
+  add_foreign_key "tournaments", "teams", column: "team_b_id"
   add_foreign_key "tournaments", "users", column: "created_by_id"
 end

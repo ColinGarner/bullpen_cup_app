@@ -40,13 +40,14 @@ class MatchTest < ActiveSupport::TestCase
     @team_a.add_player(@player_a2)
     @team_b.add_player(@player_b1)
     @team_b.add_player(@player_b2)
+
+    # Assign teams to tournament
+    @tournament.update!(team_a: @team_a, team_b: @team_b)
   end
 
   test "should create valid match" do
     match = Match.new(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
       match_type: "singles_match_play"
     )
 
@@ -56,8 +57,6 @@ class MatchTest < ActiveSupport::TestCase
 
   test "should require round" do
     match = Match.new(
-      team_a: @team_a,
-      team_b: @team_b,
       match_type: "singles_match_play"
     )
 
@@ -65,76 +64,43 @@ class MatchTest < ActiveSupport::TestCase
     assert_includes match.errors[:round], "must exist"
   end
 
-  test "should require team_a" do
-    match = Match.new(
-      round: @round,
-      team_b: @team_b,
-      match_type: "singles_match_play"
-    )
-
-    assert_not match.valid?
-    assert_includes match.errors[:team_a], "must exist"
-  end
-
-  test "should require team_b" do
-    match = Match.new(
-      round: @round,
-      team_a: @team_a,
-      match_type: "singles_match_play"
-    )
-
-    assert_not match.valid?
-    assert_includes match.errors[:team_b], "must exist"
-  end
+  # Note: team_a and team_b are now assigned at tournament level, not match level
 
   test "should require match_type" do
     match = Match.new(
-      round: @round,
-      team_a: @team_a,
-      team_b: @team_b
+      round: @round
     )
 
     assert_not match.valid?
     assert_includes match.errors[:match_type], "can't be blank"
   end
 
-  test "should not allow same team for team_a and team_b" do
-    match = Match.new(
-      round: @round,
-      team_a: @team_a,
-      team_b: @team_a,
-      match_type: "singles_match_play"
-    )
-
-    assert_not match.valid?
-    assert_includes match.errors[:team_b], "cannot be the same as Team A"
-  end
-
-  test "should validate teams belong to same tournament as round" do
-    other_tournament = Tournament.create!(
-      name: "Other Tournament",
+  test "should validate tournament has teams assigned" do
+    # Create a tournament without teams
+    tournament_without_teams = Tournament.create!(
+      name: "Empty Tournament",
       start_date: 1.week.from_now.to_date,
       end_date: 2.weeks.from_now.to_date,
       created_by: @user,
       group: @group
     )
 
-    other_team = Team.create!(
-      name: "Other Team",
-      tournament: other_tournament,
-      captain: @user
+    round_without_teams = Round.create!(
+      tournament: tournament_without_teams,
+      round_number: 1,
+      name: "Test Round"
     )
 
     match = Match.new(
-      round: @round,
-      team_a: @team_a,
-      team_b: other_team,
+      round: round_without_teams,
       match_type: "singles_match_play"
     )
 
     assert_not match.valid?
-    assert_includes match.errors[:team_b], "must belong to the same tournament as the round"
+    assert_includes match.errors[:base], "Tournament must have both Team A and Team B assigned"
   end
+
+  # Note: Team validation now happens at tournament level, not match level
 
   test "should have valid match_type enum values" do
     valid_types = %w[fourball_match_play alt_shot_match_play singles_match_play stableford]
@@ -142,9 +108,7 @@ class MatchTest < ActiveSupport::TestCase
     valid_types.each do |match_type|
       match = Match.new(
         round: @round,
-        team_a: @team_a,
-        team_b: @team_b,
-        match_type: match_type
+                        match_type: match_type
       )
       assert match.valid?, "#{match_type} should be valid"
     end
@@ -152,9 +116,7 @@ class MatchTest < ActiveSupport::TestCase
 
   test "should not accept invalid match_type" do
     match = Match.new(
-      round: @round,
-      team_a: @team_a,
-      team_b: @team_b
+      round: @round
     )
 
     # Rails enums throw ArgumentError when setting invalid values
@@ -169,9 +131,7 @@ class MatchTest < ActiveSupport::TestCase
     valid_statuses.each do |status|
       match = Match.create!(
         round: @round,
-        team_a: @team_a,
-        team_b: @team_b,
-        match_type: "singles_match_play",
+                        match_type: "singles_match_play",
         status: status
       )
       assert_equal status, match.status
@@ -181,9 +141,7 @@ class MatchTest < ActiveSupport::TestCase
   test "should default status to upcoming" do
     match = Match.create!(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
-      match_type: "singles_match_play"
+                  match_type: "singles_match_play"
     )
 
     assert_equal "upcoming", match.status
@@ -193,9 +151,7 @@ class MatchTest < ActiveSupport::TestCase
   test "should validate correct number of players for singles_match_play" do
     match = Match.create!(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
-      match_type: "singles_match_play"
+                  match_type: "singles_match_play"
     )
 
     # Add correct number of players (1 per team)
@@ -209,9 +165,7 @@ class MatchTest < ActiveSupport::TestCase
   test "should validate correct number of players for fourball_match_play" do
     match = Match.create!(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
-      match_type: "fourball_match_play"
+                  match_type: "fourball_match_play"
     )
 
     # Add correct number of players (2 per team)
@@ -227,9 +181,7 @@ class MatchTest < ActiveSupport::TestCase
   test "should validate correct number of players for alt_shot_match_play" do
     match = Match.create!(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
-      match_type: "alt_shot_match_play"
+                  match_type: "alt_shot_match_play"
     )
 
     # Add correct number of players (2 per team)
@@ -245,9 +197,7 @@ class MatchTest < ActiveSupport::TestCase
   test "should invalidate incorrect player count for singles_match_play" do
     match = Match.create!(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
-      match_type: "singles_match_play"
+                  match_type: "singles_match_play"
     )
 
     # Add too many players
@@ -261,9 +211,7 @@ class MatchTest < ActiveSupport::TestCase
   test "should invalidate uneven teams" do
     match = Match.create!(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
-      match_type: "fourball_match_play"
+                  match_type: "fourball_match_play"
     )
 
     # Add uneven number of players per team
@@ -278,9 +226,7 @@ class MatchTest < ActiveSupport::TestCase
   test "should validate players belong to correct teams" do
     match = Match.create!(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
-      match_type: "singles_match_play"
+                  match_type: "singles_match_play"
     )
 
     # Try to add player from team_a to team_b in match
@@ -293,9 +239,7 @@ class MatchTest < ActiveSupport::TestCase
   test "should allow setting winner_team" do
     match = Match.create!(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
-      match_type: "singles_match_play",
+                  match_type: "singles_match_play",
       winner_team: @team_a
     )
 
@@ -311,9 +255,7 @@ class MatchTest < ActiveSupport::TestCase
 
     match = Match.new(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
-      match_type: "singles_match_play",
+                  match_type: "singles_match_play",
       winner_team: other_team
     )
 
@@ -324,9 +266,7 @@ class MatchTest < ActiveSupport::TestCase
   test "should complete match with winner" do
     match = Match.create!(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
-      match_type: "singles_match_play"
+                  match_type: "singles_match_play"
     )
 
     assert match.upcoming?
@@ -341,9 +281,7 @@ class MatchTest < ActiveSupport::TestCase
   test "should get opposing team" do
     match = Match.create!(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
-      match_type: "singles_match_play"
+                  match_type: "singles_match_play"
     )
 
     assert_equal @team_b, match.opposing_team(@team_a)
@@ -353,9 +291,7 @@ class MatchTest < ActiveSupport::TestCase
   test "should return nil for opposing team if team not in match" do
     match = Match.create!(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
-      match_type: "singles_match_play"
+                  match_type: "singles_match_play"
     )
 
     other_team = Team.create!(
@@ -370,9 +306,7 @@ class MatchTest < ActiveSupport::TestCase
   test "should get players for team" do
     match = Match.create!(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
-      match_type: "fourball_match_play"
+                  match_type: "fourball_match_play"
     )
 
     MatchPlayer.create!(match: match, team: @team_a, user: @player_a1)

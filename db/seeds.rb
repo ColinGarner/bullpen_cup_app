@@ -3,9 +3,14 @@ puts "Clearing existing data..."
 MatchPlayer.destroy_all
 Match.destroy_all
 Round.destroy_all
+
+# Clear tournament team references first to avoid foreign key violations
+puts "Clearing tournament team references..."
+Tournament.update_all(team_a_id: nil, team_b_id: nil)
+
+Tournament.destroy_all
 TeamMembership.destroy_all
 Team.destroy_all
-Tournament.destroy_all
 GroupMembership.destroy_all
 Group.destroy_all
 User.destroy_all
@@ -195,6 +200,7 @@ puts "Creating teams..."
   end
 
   # Create 2 teams per tournament
+  teams = []
   2.times do |team_index|
     team = Team.create!(
       name: "Team #{[ 'Alpha', 'Bravo' ][team_index]}",
@@ -206,7 +212,12 @@ puts "Creating teams..."
     (1..3).each do |player_index|
       team.add_player(members[team_index * 2 + player_index])
     end
+
+    teams << team
   end
+
+  # Assign teams to tournament
+  tournament.update!(team_a: teams[0], team_b: teams[1])
 end
 
 puts "\n" + "="*50

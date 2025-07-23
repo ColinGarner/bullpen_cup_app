@@ -40,10 +40,11 @@ class ScoreTest < ActiveSupport::TestCase
       handicap: 10
     )
 
+    # Assign teams to tournament
+    @tournament.update!(team_a: @team_a, team_b: @team_b)
+
     @match = Match.create!(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
       match_type: "singles_match_play",
       holes_data: {
         "holes" => Array.new(18) { |i| { "par" => 4, "handicap" => i + 1 } }
@@ -352,8 +353,6 @@ class ScoreTest < ActiveSupport::TestCase
   test "for_match scope should return scores for specific match" do
     other_match = Match.create!(
       round: @round,
-      team_a: @team_a,
-      team_b: @team_b,
       match_type: "fourball_match_play"
     )
 

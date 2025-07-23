@@ -3,6 +3,8 @@ class Tournament < ApplicationRecord
 
   belongs_to :created_by, class_name: "User"
   belongs_to :group
+  belongs_to :team_a, class_name: "Team", optional: true
+  belongs_to :team_b, class_name: "Team", optional: true
 
   # New relationships
   has_many :teams, dependent: :destroy
@@ -17,8 +19,11 @@ class Tournament < ApplicationRecord
   validates :venue, length: { maximum: 200 }
   validates :cancelled, inclusion: { in: [ true, false ] }
 
-  # Custom validation to ensure end_date is after start_date
+  # Custom validations
   validate :end_date_after_start_date
+  validate :teams_must_be_different
+  validate :teams_must_belong_to_tournament
+  validate :tournament_must_have_at_most_two_teams
 
   # Scopes - now based on dates and cancelled status
   scope :upcoming, -> { where(cancelled: false).where("start_date > ?", Date.current) }
@@ -119,10 +124,54 @@ class Tournament < ApplicationRecord
     group&.slug
   end
 
+  def at_team_limit?
+    teams.count >= 2
+  end
+
+  def next_team_role
+    case teams.count
+    when 0
+      "Team A"
+    when 1
+      "Team B"
+    else
+      nil
+    end
+  end
+
   private
 
   def end_date_after_start_date
     return unless start_date && end_date
     errors.add(:end_date, "must be after start date") if end_date < start_date
+  end
+
+  def teams_must_be_different
+    return unless team_a && team_b
+    errors.add(:team_b, "cannot be the same as Team A") if team_a == team_b
+  end
+
+  def teams_must_belong_to_tournament
+    if team_a && !teams.include?(team_a)
+      errors.add(:team_a, "must belong to this tournament")
+    end
+
+    if team_b && !teams.include?(team_b)
+      errors.add(:team_b, "must belong to this tournament")
+    end
+  end
+
+  def tournament_must_have_at_most_two_teams
+    # Only validate after tournament is persisted and has teams
+    return unless persisted? && teams.count > 0
+
+    if teams.count > 2
+      errors.add(:base, "Tournament must not have more than 2 teams")
+    end
+  end
+
+  # Helper methods for team management
+  def teams_assigned?
+    team_a.present? && team_b.present?
   end
 end

@@ -20,37 +20,25 @@
       <% end %>
     </div>
 
-    <!-- Teams Row -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Team A -->
-      <div>
-        <%= form.label :team_a_id, "Team A", class: "block text-sm font-medium text-gray-700 mb-2" %>
-        <%= form.select :team_a_id,
-            options_from_collection_for_select(@available_teams, :id, :name, @match.team_a_id),
-            { prompt: "Select Team A..." },
-            {
-              class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500",
-              required: true
-            } %>
-        <% if @match.errors[:team_a].any? %>
-          <p class="mt-1 text-sm text-red-600"><%= @match.errors[:team_a].first %></p>
-        <% end %>
-      </div>
+    <!-- Teams Display (Fixed at Tournament Level) -->
+    <div class="bg-gray-50 p-4 rounded-lg">
+      <h3 class="text-sm font-medium text-gray-700 mb-3">Tournament Teams (Fixed)</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Team A -->
+        <div class="bg-blue-100 p-3 rounded border-l-4 border-blue-500">
+          <div class="text-sm font-medium text-blue-900">Team A</div>
+          <div class="text-lg font-bold text-blue-800"><%= @tournament.team_a&.name || 'Not Assigned' %></div>
+        </div>
 
-      <!-- Team B -->
-      <div>
-        <%= form.label :team_b_id, "Team B", class: "block text-sm font-medium text-gray-700 mb-2" %>
-        <%= form.select :team_b_id,
-            options_from_collection_for_select(@available_teams, :id, :name, @match.team_b_id),
-            { prompt: "Select Team B..." },
-            {
-              class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500",
-              required: true
-            } %>
-        <% if @match.errors[:team_b].any? %>
-          <p class="mt-1 text-sm text-red-600"><%= @match.errors[:team_b].first %></p>
-        <% end %>
+        <!-- Team B -->
+        <div class="bg-red-100 p-3 rounded border-l-4 border-red-500">
+          <div class="text-sm font-medium text-red-900">Team B</div>
+          <div class="text-lg font-bold text-red-800"><%= @tournament.team_b&.name || 'Not Assigned' %></div>
+        </div>
       </div>
+      <% unless @tournament.team_a && @tournament.team_b %>
+        <p class="mt-2 text-sm text-amber-600">⚠️ Teams must be assigned at the tournament level before creating matches.</p>
+      <% end %>
     </div>
 
     <!-- Golf Course Selection -->

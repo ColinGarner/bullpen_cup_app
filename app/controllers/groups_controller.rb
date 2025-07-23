@@ -52,7 +52,7 @@ class GroupsController < ApplicationController
     @user_upcoming_matches = current_user.matches.joins(round: :tournament)
                                         .where(tournaments: { group: @group })
                                         .where(status: [ "upcoming", "active" ])
-                                        .includes(:round, :team_a, :team_b)
+                                        .includes(round: { tournament: [ :team_a, :team_b ] })
                                         .order("rounds.round_number ASC, scheduled_time ASC")
                                         .limit(5)
   end

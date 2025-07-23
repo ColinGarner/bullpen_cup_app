@@ -5,9 +5,13 @@
     
     <!-- Team Points Header -->
     <div class="flex items-center mb-6 rounded-lg overflow-hidden shadow-lg">
-      <% team_standings_array = @team_standings[:team_points].to_a %>
-      <% team_a_name, team_a_points = team_standings_array[0] || ["Team A", 0] %>
-      <% team_b_name, team_b_points = team_standings_array[1] || ["Team B", 0] %>
+      <% # Get teams directly from tournament - Team A always on left, Team B always on right %>
+      <% team_a = @tournament.team_a %>
+      <% team_b = @tournament.team_b %>
+      <% team_a_name = team_a&.name || "Team A" %>
+      <% team_b_name = team_b&.name || "Team B" %>
+      <% team_a_points = @team_standings[:team_points][team_a_name] || 0 %>
+      <% team_b_points = @team_standings[:team_points][team_b_name] || 0 %>
       
       <div class="flex-1 bg-blue-600 text-white p-4 text-center">
         <div class="text-2xl font-bold"><%= team_a_name %></div>
