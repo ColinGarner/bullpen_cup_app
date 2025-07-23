@@ -118,7 +118,7 @@ class ScoringController < ApplicationController
       return
     end
 
-    @rounds = @tournament.rounds.includes(matches: [ :players, :scores, :winner_team, round: { tournament: [:team_a, :team_b] } ])
+    @rounds = @tournament.rounds.includes(matches: [ :players, :scores, :winner_team, round: { tournament: [ :team_a, :team_b ] } ])
 
     # Get all matches in the tournament with their current status
     @tournament_matches = @rounds.flat_map(&:matches)
@@ -140,7 +140,7 @@ class ScoringController < ApplicationController
   # GET /tournaments/:id/leaderboard
   def tournament_leaderboard
     @tournament = Tournament.find(params[:id])
-    @rounds = @tournament.rounds.includes(matches: [ :players, :scores, :winner_team, round: { tournament: [:team_a, :team_b] } ])
+    @rounds = @tournament.rounds.includes(matches: [ :players, :scores, :winner_team, round: { tournament: [ :team_a, :team_b ] } ])
 
     # Get all matches in the tournament with their current status
     @tournament_matches = @rounds.flat_map(&:matches)
