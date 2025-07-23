@@ -167,12 +167,39 @@ class Match < ApplicationRecord
   def scheduled_for_today?
     return false unless scheduled_time
 
-    # Compare date components directly, completely ignoring timezones
-    # This ensures matches work for users in the course's local timezone
+    # Handle timezone differences by being more flexible about "today"
+    # Consider a match available for scoring if:
+    # 1. It's scheduled for today in server timezone
+    # 2. It's scheduled within the last 24 hours (handles timezone differences)
+    # 3. It's scheduled for tomorrow but very early (handles timezone ahead of server)
+    
+    current_time = Time.current
     today = Date.today
+    
+    # Extract the scheduled date
     scheduled_date = Date.new(scheduled_time.year, scheduled_time.month, scheduled_time.day)
-
-    scheduled_date == today
+    
+    # Check if it's today in server timezone
+    return true if scheduled_date == today
+    
+    # Check if it's within a reasonable window (yesterday to tomorrow)
+    # This handles timezone differences where user might be up to 12 hours ahead/behind
+    yesterday = today - 1.day
+    tomorrow = today + 1.day
+    
+    if scheduled_date == yesterday
+      # If scheduled yesterday, only allow if it's within last 18 hours
+      # (handles case where server is ahead of user's timezone)
+      time_diff = current_time - scheduled_time
+      return time_diff <= 18.hours
+    elsif scheduled_date == tomorrow
+      # If scheduled tomorrow, only allow if it's very early tomorrow
+      # (handles case where server is behind user's timezone)
+      time_diff = scheduled_time - current_time  
+      return time_diff <= 6.hours
+    end
+    
+    false
   end
 
   # Check if this is a scramble format where teams share a single score

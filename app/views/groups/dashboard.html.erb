@@ -297,25 +297,7 @@
                     
                     <!-- Action Buttons -->
                     <div class="ml-4 flex flex-col space-y-2">
-                      <!-- DEBUG LOGGING - REMOVE AFTER FIXING -->
-                      <% Rails.logger.info "=== START SCORING BUTTON DEBUG ===" %>
-                      <% Rails.logger.info "Match ID: #{match.id}" %>
-                      <% Rails.logger.info "Match: #{match.display_name}" %>
-                      <% Rails.logger.info "Status: #{match.status}" %>
-                      <% Rails.logger.info "Status == 'upcoming'?: #{match.status == 'upcoming'}" %>
-                      <% Rails.logger.info "Scheduled time: #{match.scheduled_time}" %>
-                      <% Rails.logger.info "Scheduled for today?: #{match.scheduled_for_today?}" %>
-                      <% Rails.logger.info "Date.today: #{Date.today}" %>
-                      <% Rails.logger.info "Time.current: #{Time.current}" %>
-                      <% Rails.logger.info "Time.zone: #{Time.zone}" %>
-                      <% if match.scheduled_time %>
-                        <% scheduled_date = Date.new(match.scheduled_time.year, match.scheduled_time.month, match.scheduled_time.day) %>
-                        <% Rails.logger.info "Match scheduled date: #{scheduled_date}" %>
-                        <% Rails.logger.info "Dates match?: #{scheduled_date == Date.today}" %>
-                      <% end %>
-                      <% Rails.logger.info "Both conditions met?: #{match.status == 'upcoming' && match.scheduled_for_today?}" %>
-                      <% Rails.logger.info "=== END DEBUG ===" %>
-                      <!-- END DEBUG LOGGING -->
+
                       
                       <% if match.status == 'upcoming' && match.scheduled_for_today? %>
                         <%= link_to select_tees_match_path(match), 
