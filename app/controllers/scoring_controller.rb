@@ -820,9 +820,10 @@ class ScoringController < ApplicationController
     return 0 unless tee_data
 
     # Course Handicap = Handicap Index × (Slope Rating ÷ 113) + (Course Rating - Par)
-    # For simplicity, we'll use: Handicap Index × (Slope Rating ÷ 113)
     slope_rating = tee_data["slope_rating"] || 113
-    (player.handicap.to_f * (slope_rating / 113.0)).round
+    par = tee_data["par_total"] || 72
+    course_rating = tee_data["course_rating"] || 72
+    ((player.handicap.to_f * (slope_rating / 113.0)) + (course_rating - par)).round
   end
 
   # Helper method to calculate total strokes a player receives for the entire match
