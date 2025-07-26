@@ -93,7 +93,9 @@
             class: "inline-flex items-center px-4 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors" %>
         
         <%= form.submit "Let's Start Scoring! 🚀", 
-            class: "inline-flex items-center px-8 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-lg" %>
+            id: "start_scoring_btn",
+            disabled: true,
+            class: "inline-flex items-center px-8 py-3 font-semibold rounded-lg transition-colors shadow-lg bg-gray-400 text-gray-200 cursor-not-allowed" %>
       </div>
     <% end %>
 
@@ -113,6 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const teeSelect = document.getElementById('tee_name');
   const teeInfo = document.getElementById('tee-info');
   const teeDetails = document.getElementById('tee-details');
+  const startScoringBtn = document.getElementById('start_scoring_btn');
   
   // Tee data for lookup
   const teeData = {
@@ -127,6 +130,19 @@ document.addEventListener('DOMContentLoaded', function() {
       },
     <% end %>
   };
+  
+  // Function to update button state
+  function updateButtonState(enabled) {
+    if (enabled) {
+      startScoringBtn.disabled = false;
+      startScoringBtn.className = "inline-flex items-center px-8 py-3 font-semibold rounded-lg transition-colors shadow-lg bg-green-600 text-white hover:bg-green-700 cursor-pointer";
+      startScoringBtn.value = "Let's Start Scoring! 🚀";
+    } else {
+      startScoringBtn.disabled = true;
+      startScoringBtn.className = "inline-flex items-center px-8 py-3 font-semibold rounded-lg transition-colors shadow-lg bg-gray-400 text-gray-200 cursor-not-allowed";
+      startScoringBtn.value = "Please Select Tees First";
+    }
+  }
   
   teeSelect.addEventListener('change', function() {
     const selectedTee = this.value;
@@ -155,8 +171,29 @@ document.addEventListener('DOMContentLoaded', function() {
       `;
       
       teeInfo.classList.remove('hidden');
+      updateButtonState(true); // Enable button when valid tee is selected
     } else {
       teeInfo.classList.add('hidden');
+      updateButtonState(false); // Disable button when no tee is selected
+    }
+  });
+  
+  // Prevent form submission when button is disabled
+  startScoringBtn.closest('form').addEventListener('submit', function(e) {
+    if (startScoringBtn.disabled) {
+      e.preventDefault();
+      
+      // Show a helpful message
+      const teeSelectContainer = teeSelect.closest('.bg-white');
+      teeSelectContainer.classList.add('ring-2', 'ring-red-500', 'ring-opacity-50');
+      
+      // Remove the highlight after 2 seconds
+      setTimeout(() => {
+        teeSelectContainer.classList.remove('ring-2', 'ring-red-500', 'ring-opacity-50');
+      }, 2000);
+      
+      // Focus on the tee select dropdown
+      teeSelect.focus();
     }
   });
 });

@@ -19,6 +19,8 @@ class Tournament < ApplicationRecord
   validates :venue, length: { maximum: 200 }
   validates :cancelled, inclusion: { in: [ true, false ] }
 
+  # 5GKLSL
+
   # Custom validations
   validate :end_date_after_start_date
   validate :teams_must_be_different

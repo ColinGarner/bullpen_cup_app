@@ -65,7 +65,21 @@ class ScoringController < ApplicationController
       return
     end
 
+    # Validate that tees have been selected and holes data exists
+    unless @match.selected_tee_name.present? && @match.holes_data.present?
+      redirect_to select_tees_match_path(@match), alert: "Please select tees before scoring."
+      return
+    end
+
     @hole_data = @match.holes_data&.dig("holes", @hole_number - 1)
+    
+    # Validate that hole data exists for this specific hole
+    unless @hole_data.present?
+      Rails.logger.error "score_hole: Missing hole data for hole #{@hole_number} in match #{@match.id}"
+      redirect_to select_tees_match_path(@match), alert: "Course data is incomplete. Please re-select your tees."
+      return
+    end
+
     @players = @match.players.includes(:scores)
     @scores = @match.scores.where(hole_number: @hole_number).includes(:user)
   end
@@ -73,6 +87,13 @@ class ScoringController < ApplicationController
   # POST /matches/:id/score/hole/:hole
   def update_score
     @hole_number = params[:hole].to_i
+    
+    # Validate that tees have been selected before allowing score updates
+    unless @match.selected_tee_name.present? && @match.holes_data.present?
+      redirect_to select_tees_match_path(@match), alert: "Please select tees before scoring."
+      return
+    end
+
     player_scores = params[:scores] || {}
 
     player_scores.each do |user_id, strokes|
@@ -165,6 +186,12 @@ class ScoringController < ApplicationController
 
   # GET /matches/:id/next_hole - redirects to the next hole that needs scoring
   def next_hole
+    # Validate that tees have been selected before allowing scoring
+    unless @match.selected_tee_name.present? && @match.holes_data.present?
+      redirect_to select_tees_match_path(@match), alert: "Please select tees before scoring."
+      return
+    end
+
     next_hole_number = calculate_next_hole_for_user(current_user)
     redirect_to score_hole_match_path(@match, hole: next_hole_number)
   end
