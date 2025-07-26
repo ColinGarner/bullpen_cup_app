@@ -17,13 +17,14 @@ class ScoringController < ApplicationController
     # If tees already selected, allow re-selection for now (can remove this later)
     # This helps during development and testing
 
-    # Check if match has golf course data
-    unless @match.golf_course_id.present?
-      redirect_to root_path, alert: "No golf course assigned to this match. Please contact an admin."
+    # Check if we have course data available
+    if @course_data.present?
+      @available_tees = extract_available_tees
+    else
+      # No course data available
+      redirect_to root_path, alert: "Course information not available. Please contact an admin to set up this match properly."
       return
     end
-
-    @available_tees = extract_available_tees
   end
 
   # POST /matches/:id/save_tees
@@ -46,15 +47,29 @@ class ScoringController < ApplicationController
     # Extract holes data for the selected tee
     selected_tee_holes = selected_tee_data["holes"]
 
-    # Update match with selected tee and start scoring
-    @match.update!(
-      selected_tee_name: tee_name,
-      holes_data: { "holes" => selected_tee_holes, "course_data" => @course_data },
-      status: "active"
-    )
+    # Prepare holes data with validation
+    holes_data_to_save = {
+      "holes" => selected_tee_holes,
+      "course_data" => @course_data
+    }
 
-    redirect_to next_hole_match_path(@match), notice: "Tees selected! Start scoring."
+    # Update match with selected tee and start scoring
+    begin
+      @match.update!(
+        selected_tee_name: tee_name,
+        holes_data: holes_data_to_save,
+        status: "active"
+      )
+
+      Rails.logger.info "save_tees: Successfully saved holes data for match #{@match.id} with tee '#{tee_name}'"
+      redirect_to next_hole_match_path(@match), notice: "Tees selected! Start scoring."
+    rescue => e
+      Rails.logger.error "save_tees: Failed to update match #{@match.id}: #{e.class}: #{e.message}"
+      redirect_to select_tees_match_path(@match), alert: "Failed to save tee selection. Please try again."
+    end
   end
+
+
 
   # GET /matches/:id/score/hole/:hole
   def score_hole
@@ -219,7 +234,17 @@ class ScoringController < ApplicationController
     end
   end
 
+
+
   def fetch_course_data
+    # All matches should have course data in holes_data JSON
+    # This works for both legacy matches and new Course-based matches
+    if @match.holes_data&.dig("course_data").present?
+      @course_data = @match.holes_data["course_data"]
+      return
+    end
+
+    # Fallback: if no holes_data but golf_course_id exists (legacy matches)
     return if @match.golf_course_id.blank?
 
     begin
@@ -228,13 +253,13 @@ class ScoringController < ApplicationController
 
       if @course_data.nil?
         Rails.logger.error "Golf Course API returned nil for course ID: #{@match.golf_course_id}"
-        @api_error = "Unable to load course information from API. Using default tee options."
+        @api_error = "Unable to load course information from API."
       end
 
     rescue => e
       Rails.logger.error "Failed to fetch course data: #{e.class}: #{e.message}"
       Rails.logger.error "Course ID: #{@match.golf_course_id}"
-      @api_error = "Course API unavailable: #{e.message}. Using default tee options."
+      @api_error = "Course API unavailable: #{e.message}."
     end
   end
 
@@ -771,18 +796,21 @@ class ScoringController < ApplicationController
     player_course_handicap = calculate_course_handicap(player)
     other_course_handicap = calculate_course_handicap(other_player)
 
-    # Calculate stroke difference (lower handicap plays off scratch)
-    stroke_difference = (player_course_handicap - other_course_handicap).round
+    # Find the lowest course handicap (could be negative for plus players)
+    low_course_handicap = [player_course_handicap, other_course_handicap].min
+    
+    # Calculate strokes relative to the low player (who plays off scratch)
+    player_strokes_needed = player_course_handicap - low_course_handicap
+    
+    # If this player is the low player, they play off scratch (0 strokes)
+    return 0 if player_strokes_needed <= 0
 
-    # If this player has the lower handicap (negative difference), they get 0 strokes
-    return 0 if stroke_difference <= 0
-
-    # This player gets strokes equal to the difference
+    # This player gets strokes equal to the difference from the low player
     # Strokes are allocated to holes based on hole handicap ranking
     hole_handicap = hole_data["handicap"]
 
-    # Player gets a stroke on this hole if the hole handicap is <= the stroke difference
-    hole_handicap <= stroke_difference ? 1 : 0
+    # Player gets a stroke on this hole if the hole handicap is <= their stroke allocation
+    hole_handicap <= player_strokes_needed ? 1 : 0
   end
 
   def calculate_fourball_strokes_received(player, hole_number, hole_data)
@@ -795,25 +823,24 @@ class ScoringController < ApplicationController
     # Get all players in the match
     all_players = team_a_players + team_b_players
 
-    # Find the overall low man (lowest course handicap from all 4 players)
-    low_man = all_players.min_by { |p| calculate_course_handicap(p) }
-    return 0 unless low_man&.handicap
-
-    # Calculate course handicaps
+    # Find the lowest course handicap from all players (including plus handicaps)
+    low_course_handicap = all_players.map { |p| calculate_course_handicap(p) }.min
+    
+    # Calculate course handicap for this player
     player_course_handicap = calculate_course_handicap(player)
-    low_man_course_handicap = calculate_course_handicap(low_man)
 
-    # Calculate stroke difference from the low man
-    stroke_difference = (player_course_handicap - low_man_course_handicap).round
+    # Calculate strokes relative to the low player (who plays off scratch)
+    player_strokes_needed = player_course_handicap - low_course_handicap
 
-    # No negative strokes
-    return 0 if stroke_difference <= 0
+    # If this player is tied for low, they play off scratch (0 strokes)
+    return 0 if player_strokes_needed <= 0
 
+    # This player gets strokes equal to the difference from the low player
     # Strokes are allocated to holes based on hole handicap ranking
     hole_handicap = hole_data["handicap"]
 
-    # Player gets a stroke on this hole if the hole handicap is <= their stroke difference
-    hole_handicap <= stroke_difference ? 1 : 0
+    # Player gets a stroke on this hole if the hole handicap is <= their stroke allocation
+    hole_handicap <= player_strokes_needed ? 1 : 0
   end
 
   def calculate_scramble_strokes_received(player, hole_number, hole_data)
@@ -864,16 +891,14 @@ class ScoringController < ApplicationController
       team_b_players = @match.players_for_team(@match.team_b)
       all_players = team_a_players + team_b_players
 
-      # Find the overall low man
-      low_man = all_players.min_by { |p| calculate_course_handicap(p) }
-      return 0 unless low_man&.handicap
+      # Find the lowest course handicap (including plus handicaps)
+      low_course_handicap = all_players.map { |p| calculate_course_handicap(p) }.min
 
-      # Calculate stroke difference from the low man
+      # Calculate strokes relative to the low player (who plays off scratch)
       player_course_handicap = calculate_course_handicap(player)
-      low_man_course_handicap = calculate_course_handicap(low_man)
-      stroke_difference = (player_course_handicap - low_man_course_handicap).round
+      player_strokes_needed = player_course_handicap - low_course_handicap
 
-      [ stroke_difference, 0 ].max
+      [player_strokes_needed, 0].max
     when "scramble_match_play"
       # In scramble, calculate team handicap difference
       player_team = @match.team_a_players.include?(player) ? @match.team_a : @match.team_b
@@ -883,9 +908,12 @@ class ScoringController < ApplicationController
       player_team_handicap = @match.calculate_scramble_team_handicap(player_team)
       opposing_team_handicap = @match.calculate_scramble_team_handicap(opposing_team)
 
-      # Return the difference (how many strokes this team gets)
-      stroke_difference = (player_team_handicap - opposing_team_handicap).round
-      [ stroke_difference, 0 ].max
+      # Find the lower team handicap (plays off scratch)
+      low_team_handicap = [player_team_handicap, opposing_team_handicap].min
+      
+      # Calculate strokes relative to the low team
+      team_strokes_needed = player_team_handicap - low_team_handicap
+      [team_strokes_needed, 0].max
     when "singles_match_play"
       # In singles, calculate against the other player
       players = @match.players.to_a
@@ -894,11 +922,14 @@ class ScoringController < ApplicationController
       other_player = players.find { |p| p != player }
       return 0 unless other_player&.handicap
 
+      # Find the lowest course handicap (including plus handicaps)
       player_course_handicap = calculate_course_handicap(player)
       other_course_handicap = calculate_course_handicap(other_player)
-      stroke_difference = (player_course_handicap - other_course_handicap).round
+      low_course_handicap = [player_course_handicap, other_course_handicap].min
 
-      [ stroke_difference, 0 ].max
+      # Calculate strokes relative to the low player (who plays off scratch)
+      player_strokes_needed = player_course_handicap - low_course_handicap
+      [player_strokes_needed, 0].max
     else
       0
     end

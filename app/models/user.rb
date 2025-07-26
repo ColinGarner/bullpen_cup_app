@@ -8,10 +8,10 @@ class User < ApplicationRecord
   validates :first_name, presence: true, length: { minimum: 2, maximum: 50 }
   validates :last_name, presence: true, length: { minimum: 2, maximum: 50 }
 
-  # Validations for handicap
+  # Validations for handicap (allows plus handicaps as negative values)
   validates :handicap, numericality: {
-    greater_than_or_equal_to: 0,
-    less_than_or_equal_to: 54,
+    greater_than_or_equal_to: -10.0,  # Plus handicaps (e.g., +2 stored as -2.0)
+    less_than_or_equal_to: 54.0,      # USGA maximum handicap
     allow_nil: true
   }
 
@@ -111,6 +111,15 @@ class User < ApplicationRecord
 
   def formatted_handicap
     return "N/A" unless handicap.present?
-    handicap % 1 == 0 ? handicap.to_i.to_s : handicap.to_s
+    
+    if handicap < 0
+      # Plus handicap: -2.0 displays as "+2" or "+2.5"
+      abs_handicap = handicap.abs
+      formatted = abs_handicap % 1 == 0 ? abs_handicap.to_i.to_s : abs_handicap.to_s
+      "+#{formatted}"
+    else
+      # Regular handicap: 12.0 displays as "12" or "12.5"
+      handicap % 1 == 0 ? handicap.to_i.to_s : handicap.to_s
+    end
   end
 end

@@ -48,7 +48,7 @@
                 Course API Issue
               </h3>
               <p class="text-sm text-yellow-700 mt-1">
-                <%= @api_error %> You can still proceed with scoring using the default tee options below.
+                <%= @api_error %> Course information was entered manually by an admin.
               </p>
             </div>
           </div>
@@ -111,11 +111,22 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('turbo:load', function() {
   const teeSelect = document.getElementById('tee_name');
   const teeInfo = document.getElementById('tee-info');
   const teeDetails = document.getElementById('tee-details');
   const startScoringBtn = document.getElementById('start_scoring_btn');
+  
+  // Exit if elements don't exist (not on select tees page)
+  if (!teeSelect || !teeInfo || !teeDetails || !startScoringBtn) {
+    return;
+  }
+  
+  // Prevent duplicate event listeners
+  if (teeSelect.dataset.initialized === 'true') {
+    return;
+  }
+  teeSelect.dataset.initialized = 'true';
   
   // Tee data for lookup
   const teeData = {
@@ -196,5 +207,13 @@ document.addEventListener('DOMContentLoaded', function() {
       teeSelect.focus();
     }
   });
+});
+
+// Clean up initialization flag when page is cached by Turbo
+document.addEventListener('turbo:before-cache', function() {
+  const teeSelect = document.getElementById('tee_name');
+  if (teeSelect) {
+    teeSelect.dataset.initialized = 'false';
+  }
 });
 </script> 

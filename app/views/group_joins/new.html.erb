@@ -77,12 +77,21 @@
 
 <script>
   // Auto-uppercase the invite code as user types
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('turbo:load', function() {
     const codeInput = document.getElementById('invite_code');
-    if (codeInput) {
+    if (codeInput && !codeInput.dataset.initialized) {
       codeInput.addEventListener('input', function(e) {
         e.target.value = e.target.value.toUpperCase();
       });
+      codeInput.dataset.initialized = 'true';
+    }
+  });
+  
+  // Clean up on cache
+  document.addEventListener('turbo:before-cache', function() {
+    const codeInput = document.getElementById('invite_code');
+    if (codeInput) {
+      codeInput.dataset.initialized = 'false';
     }
   });
 </script> 

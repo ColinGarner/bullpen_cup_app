@@ -10,9 +10,54 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_23_132152) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_26_161431) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "course_holes", force: :cascade do |t|
+    t.bigint "course_tee_id", null: false
+    t.integer "hole_number", null: false
+    t.integer "par", null: false
+    t.integer "yardage", null: false
+    t.integer "handicap", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_tee_id", "hole_number"], name: "index_course_holes_on_course_tee_id_and_hole_number", unique: true
+    t.index ["course_tee_id"], name: "index_course_holes_on_course_tee_id"
+    t.index ["handicap"], name: "index_course_holes_on_handicap"
+    t.index ["hole_number"], name: "index_course_holes_on_hole_number"
+  end
+
+  create_table "course_tees", force: :cascade do |t|
+    t.bigint "course_id", null: false
+    t.string "tee_name", null: false
+    t.string "gender", null: false
+    t.decimal "course_rating", precision: 4, scale: 1, null: false
+    t.integer "slope_rating", null: false
+    t.integer "total_yards", null: false
+    t.integer "total_meters", null: false
+    t.integer "par_total", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["course_id", "tee_name", "gender"], name: "index_course_tees_on_course_id_and_tee_name_and_gender", unique: true
+    t.index ["course_id"], name: "index_course_tees_on_course_id"
+    t.index ["gender"], name: "index_course_tees_on_gender"
+  end
+
+  create_table "courses", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "club_name", null: false
+    t.text "address"
+    t.string "city"
+    t.string "state"
+    t.string "country", default: "United States"
+    t.string "api_course_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["api_course_id"], name: "index_courses_on_api_course_id", unique: true, where: "(api_course_id IS NOT NULL)"
+    t.index ["club_name"], name: "index_courses_on_club_name"
+    t.index ["name", "city", "state"], name: "index_courses_on_name_and_city_and_state"
+  end
 
   create_table "group_memberships", force: :cascade do |t|
     t.bigint "group_id", null: false
@@ -76,6 +121,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_23_132152) do
     t.bigint "scorer_user_id"
     t.jsonb "holes_data"
     t.string "selected_tee_name"
+    t.bigint "course_id"
+    t.index ["course_id"], name: "index_matches_on_course_id"
     t.index ["golf_course_id"], name: "index_matches_on_golf_course_id"
     t.index ["match_type"], name: "index_matches_on_match_type"
     t.index ["round_id", "status"], name: "index_matches_on_round_id_and_status"
@@ -190,11 +237,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_23_132152) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "course_holes", "course_tees"
+  add_foreign_key "course_tees", "courses"
   add_foreign_key "group_memberships", "groups"
   add_foreign_key "group_memberships", "users"
   add_foreign_key "match_players", "matches"
   add_foreign_key "match_players", "teams"
   add_foreign_key "match_players", "users"
+  add_foreign_key "matches", "courses"
   add_foreign_key "matches", "rounds"
   add_foreign_key "matches", "teams", column: "winner_team_id"
   add_foreign_key "rounds", "tournaments"

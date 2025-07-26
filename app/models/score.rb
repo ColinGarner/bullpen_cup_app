@@ -10,7 +10,7 @@ class Score < ApplicationRecord
   validates :net_strokes, presence: true,
             numericality: { greater_than: 0, less_than_or_equal_to: 15 }
   validates :handicap_used, presence: true,
-            numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 54 }
+            numericality: { greater_than_or_equal_to: -10.0, less_than_or_equal_to: 54.0 }
   validates :strokes_received_on_hole, presence: true,
             numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 3 }
   validates :hole_result, inclusion: { in: %w[won lost halved pending], allow_nil: true }

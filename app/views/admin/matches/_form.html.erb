@@ -71,8 +71,83 @@
         </div>
       </div>
 
+      <!-- Manual Course Creation Option -->
+      <div id="manual_course_option" class="mt-4 hidden">
+        <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="text-sm font-medium text-blue-800">Course Not Found?</h4>
+              <p class="text-sm text-blue-700">Create a new course manually if it's not in our database.</p>
+            </div>
+            <button type="button" id="show_manual_course_form" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700">
+              + Create Course
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manual Course Creation Form -->
+      <div id="manual_course_form" class="mt-4 hidden">
+        <div class="bg-gray-50 border border-gray-200 rounded-md p-4">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="text-md font-medium text-gray-800">Create New Course</h4>
+            <button type="button" id="cancel_manual_course" class="text-sm text-gray-600 hover:text-gray-800">Cancel</button>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Course Name</label>
+              <input type="text" id="manual_course_name" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500" placeholder="e.g. The Mallard Golf Course">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Club Name</label>
+              <input type="text" id="manual_club_name" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500" placeholder="e.g. The Mallard Golf Club">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">City</label>
+              <input type="text" id="manual_city" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500" placeholder="e.g. Kansas City">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">State</label>
+              <input type="text" id="manual_state" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500" placeholder="e.g. MO">
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Address (Optional)</label>
+            <textarea id="manual_address" rows="2" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500" placeholder="Full address (optional)"></textarea>
+          </div>
+
+          <!-- Tee Configuration Section -->
+          <div class="border-t border-gray-200 pt-4 mb-4">
+            <h5 class="text-md font-medium text-gray-800 mb-3">Tee Configurations</h5>
+            <p class="text-sm text-gray-600 mb-4">Add at least one tee configuration. Each tee needs course rating, slope rating, and hole-by-hole data.</p>
+            
+            <div id="tees_container">
+              <!-- Tees will be added here dynamically -->
+            </div>
+            
+            <div class="flex space-x-2 mb-4">
+              <button type="button" id="add_male_tee" class="px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700">
+                + Add Male Tee
+              </button>
+              <button type="button" id="add_female_tee" class="px-3 py-2 bg-pink-600 text-white text-sm rounded-md hover:bg-pink-700">
+                + Add Female Tee
+              </button>
+            </div>
+          </div>
+
+          <div class="text-center">
+            <button type="button" id="create_manual_course" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none disabled:bg-gray-400 disabled:cursor-not-allowed">
+              Create Complete Course
+            </button>
+            <p class="mt-2 text-xs text-gray-500">Course must have at least one tee with complete hole data</p>
+          </div>
+        </div>
+      </div>
+
       <!-- Selected Course Display -->
-      <div id="selected_course_display" class="mt-4 <%= 'hidden' unless @match.has_golf_course? %>">
+      <div id="selected_course_display" class="mt-4 <%= 'hidden' unless @match.course || @match.has_golf_course? %>">
         <div class="bg-green-50 border border-green-200 rounded-md p-4">
           <div class="flex items-center">
             <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
@@ -81,7 +156,11 @@
             <div class="ml-3">
               <h4 class="text-sm font-medium text-green-800">Selected Course:</h4>
               <p class="text-sm text-green-700" id="selected_course_name">
-                <%= @match.golf_course_display if @match.has_golf_course? %>
+                <% if @match.course %>
+                  <%= @match.course.display_name %> - <%= @match.course.location_display %>
+                <% elsif @match.has_golf_course? %>
+                  <%= @match.golf_course_display %>
+                <% end %>
               </p>
             </div>
             <div class="ml-auto">
@@ -94,13 +173,16 @@
       </div>
 
       <!-- Hidden form fields for selected course -->
+      <%= form.hidden_field :course_id %>
       <%= form.hidden_field :golf_course_id %>
       <%= form.hidden_field :golf_course_name %>
       <%= form.hidden_field :golf_course_location %>
 
       <!-- Course validation error -->
-      <% if @match.errors[:golf_course_id].any? %>
-        <p class="mt-2 text-sm text-red-600"><%= @match.errors[:golf_course_id].first %></p>
+      <% if @match.errors[:course_id].any? || @match.errors[:golf_course_id].any? %>
+        <p class="mt-2 text-sm text-red-600">
+          <%= @match.errors[:course_id].first || @match.errors[:golf_course_id].first %>
+        </p>
       <% end %>
     </div>
 
@@ -167,7 +249,8 @@ document.addEventListener('turbo:load', function() {
   }
   
   const form = searchInput.closest('form');
-  const courseIdField = document.getElementById('match_golf_course_id');
+  // Form field references
+  const golfCourseIdField = document.getElementById('match_golf_course_id');
   const courseNameField = document.getElementById('match_golf_course_name');
   const courseLocationField = document.getElementById('match_golf_course_location');
   
@@ -193,14 +276,14 @@ document.addEventListener('turbo:load', function() {
         'X-Requested-With': 'XMLHttpRequest'
       }
     })
-    .then(response => response.json())
-    .then(data => {
-      if (data.courses && data.courses.length > 0) {
-        showResults(data.courses);
-      } else {
-        showNoResults(query);
-      }
-    })
+          .then(response => response.json())
+      .then(data => {
+        if (data.courses && data.courses.length > 0) {
+          showResults(data);
+        } else {
+          showNoResults(query);
+        }
+      })
     .catch(error => {
       console.error('Search error:', error);
       showError();
@@ -227,7 +310,7 @@ document.addEventListener('turbo:load', function() {
     const matchType = document.getElementById('match_match_type').value;
     const teamA = document.getElementById('match_team_a_id').value;
     const teamB = document.getElementById('match_team_b_id').value;
-    const golfCourseId = courseIdField.value;
+    const golfCourseId = golfCourseIdField.value;
     
     if (!matchType) {
       errors.push('Match type is required');
@@ -245,7 +328,8 @@ document.addEventListener('turbo:load', function() {
       errors.push('Team A and Team B must be different');
     }
     
-    if (!golfCourseId) {
+    const courseId = document.getElementById('match_course_id').value;
+    if (!golfCourseId && !courseId) {
       errors.push('Golf course selection is required');
     }
     
@@ -267,27 +351,46 @@ document.addEventListener('turbo:load', function() {
     resultsContainer.classList.remove('hidden');
   }
   
-  function showResults(courses) {
+  function showResults(data) {
+    const courses = data.courses || [];
+    
     const html = courses.map(course => `
       <div class="course-result p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
            data-course-id="${course.id}"
            data-course-name="${course.name}"
-           data-course-location="${course.location}">
-        <div class="font-medium text-gray-900">${course.name}</div>
-        <div class="text-sm text-gray-500">${course.location}</div>
+           data-course-location="${course.location}"
+           data-course-source="${course.source || 'api'}">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="font-medium text-gray-900">${course.name}</div>
+            <div class="text-sm text-gray-500">${course.location}</div>
+          </div>
+          <div class="text-xs px-2 py-1 rounded ${course.source === 'local' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">
+            ${course.source === 'local' ? 'Local' : 'API'}
+          </div>
+        </div>
       </div>
     `).join('');
     
     resultsContainer.innerHTML = html;
     resultsContainer.classList.remove('hidden');
     
+    // Show manual course option if no results
+    const manualOption = document.getElementById('manual_course_option');
+    if (courses.length === 0) {
+      manualOption.classList.remove('hidden');
+    } else {
+      manualOption.classList.add('hidden');
+    }
+    
     // Add click handlers
     resultsContainer.querySelectorAll('.course-result').forEach(result => {
       result.addEventListener('click', function() {
-        selectCourse(
+        selectCourseFromSearch(
           this.dataset.courseId,
           this.dataset.courseName,
-          this.dataset.courseLocation
+          this.dataset.courseLocation,
+          this.dataset.courseSource
         );
       });
     });
@@ -296,6 +399,10 @@ document.addEventListener('turbo:load', function() {
   function showNoResults(query) {
     resultsContainer.innerHTML = `<div class="p-4 text-sm text-gray-500">No courses found for "${query}"</div>`;
     resultsContainer.classList.remove('hidden');
+    
+    // Show manual course option
+    const manualOption = document.getElementById('manual_course_option');
+    manualOption.classList.remove('hidden');
   }
   
   function showError() {
@@ -307,32 +414,426 @@ document.addEventListener('turbo:load', function() {
     resultsContainer.classList.add('hidden');
   }
 
-  function selectCourse(id, name, location) {
-    courseIdField.value = id;
-    courseNameField.value = name;
-    courseLocationField.value = location;
-    selectedCourseName.textContent = name;
+  function selectCourseFromSearch(id, name, location, source) {
+    if (source === 'local') {
+      // Local course - set course_id field
+      const courseId = id.replace('local_', '');
+      document.getElementById('match_course_id').value = courseId;
+      document.getElementById('match_golf_course_id').value = '';
+      document.getElementById('match_golf_course_name').value = name;
+      document.getElementById('match_golf_course_location').value = location;
+    } else {
+      // API course - set legacy fields
+      const apiId = id.replace('api_', '');
+      document.getElementById('match_course_id').value = '';
+      document.getElementById('match_golf_course_id').value = apiId;
+      document.getElementById('match_golf_course_name').value = name;
+      document.getElementById('match_golf_course_location').value = location;
+    }
+    
+    selectedCourseName.textContent = `${name} - ${location}`;
     selectedDisplay.classList.remove('hidden');
     searchInput.value = ''; // Clear search input
     hideResults();
+    
+    // Hide manual course option
+    const manualOption = document.getElementById('manual_course_option');
+    manualOption.classList.add('hidden');
+  }
+
+  // Legacy function for backwards compatibility
+  function selectCourse(id, name, location) {
+    selectCourseFromSearch(id, name, location, 'api');
   }
 
   function clearSelection() {
-    courseIdField.value = '';
-    courseNameField.value = '';
-    courseLocationField.value = '';
+    document.getElementById('match_course_id').value = '';
+    document.getElementById('match_golf_course_id').value = '';
+    document.getElementById('match_golf_course_name').value = '';
+    document.getElementById('match_golf_course_location').value = '';
     selectedCourseName.textContent = '';
     selectedDisplay.classList.add('hidden');
     searchInput.value = ''; // Clear search input
     hideResults();
+    
+    // Hide manual course option
+    const manualOption = document.getElementById('manual_course_option');
+    manualOption.classList.add('hidden');
+  }
+
+  // Manual course creation handlers (check if already initialized)
+  const showManualButton = document.getElementById('show_manual_course_form');
+  const cancelManualButton = document.getElementById('cancel_manual_course');
+  const createManualButton = document.getElementById('create_manual_course');
+  
+  if (!showManualButton.dataset.initialized) {
+    showManualButton.addEventListener('click', function() {
+      document.getElementById('manual_course_option').classList.add('hidden');
+      document.getElementById('manual_course_form').classList.remove('hidden');
+    });
+    showManualButton.dataset.initialized = 'true';
+  }
+
+  if (!cancelManualButton.dataset.initialized) {
+    cancelManualButton.addEventListener('click', function() {
+      document.getElementById('manual_course_form').classList.add('hidden');
+      document.getElementById('manual_course_option').classList.remove('hidden');
+      clearManualCourseForm();
+    });
+    cancelManualButton.dataset.initialized = 'true';
+  }
+
+  if (!createManualButton.dataset.initialized) {
+    createManualButton.addEventListener('click', function(e) {
+      // Prevent double-clicking
+      if (this.disabled) {
+        e.preventDefault();
+        return false;
+      }
+      createManualCourse();
+    });
+    createManualButton.dataset.initialized = 'true';
+  }
+
+  // Tee management
+  let teeCounter = 0;
+  
+  const addMaleTeeButton = document.getElementById('add_male_tee');
+  const addFemaleTeeButton = document.getElementById('add_female_tee');
+  
+  if (!addMaleTeeButton.dataset.initialized) {
+    addMaleTeeButton.addEventListener('click', function() {
+      addTeeForm('male');
+    });
+    addMaleTeeButton.dataset.initialized = 'true';
+  }
+  
+  if (!addFemaleTeeButton.dataset.initialized) {
+    addFemaleTeeButton.addEventListener('click', function() {
+      addTeeForm('female');
+    });
+    addFemaleTeeButton.dataset.initialized = 'true';
+  }
+
+  function addTeeForm(gender) {
+    teeCounter++;
+    const teeId = `tee_${teeCounter}`;
+    const container = document.getElementById('tees_container');
+    
+    const teeDiv = document.createElement('div');
+    teeDiv.className = 'bg-white border border-gray-200 rounded-lg p-4 mb-4';
+    teeDiv.id = teeId;
+    
+    teeDiv.innerHTML = `
+      <div class="flex items-center justify-between mb-3">
+        <h6 class="text-sm font-medium text-gray-800">
+          ${gender.charAt(0).toUpperCase() + gender.slice(1)} Tee Configuration
+        </h6>
+        <button type="button" onclick="removeTee('${teeId}')" class="text-red-600 hover:text-red-800 text-sm">
+          Remove
+        </button>
+      </div>
+      
+      <input type="hidden" class="tee-gender" value="${gender}">
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Tee Name</label>
+                     <input type="text" class="tee-name block w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-green-500 focus:border-green-500" placeholder="e.g. Blue">
+         </div>
+         <div>
+           <label class="block text-xs font-medium text-gray-700 mb-1">Course Rating</label>
+           <input type="number" step="0.1" class="tee-course-rating block w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-green-500 focus:border-green-500" placeholder="e.g. 72.1">
+         </div>
+         <div>
+           <label class="block text-xs font-medium text-gray-700 mb-1">Slope Rating</label>
+           <input type="number" class="tee-slope-rating block w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-green-500 focus:border-green-500" placeholder="e.g. 113">
+         </div>
+         <div>
+           <label class="block text-xs font-medium text-gray-700 mb-1">Total Yards</label>
+           <input type="number" class="tee-total-yards block w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-green-500 focus:border-green-500" placeholder="e.g. 6500">
+         </div>
+         <div>
+           <label class="block text-xs font-medium text-gray-700 mb-1">Total Meters</label>
+           <input type="number" class="tee-total-meters block w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-green-500 focus:border-green-500" placeholder="e.g. 5944">
+         </div>
+         <div>
+           <label class="block text-xs font-medium text-gray-700 mb-1">Par Total</label>
+           <input type="number" class="tee-par-total block w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-green-500 focus:border-green-500" placeholder="e.g. 72">
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-100 pt-3">
+        <div class="flex items-center justify-between mb-2">
+          <h7 class="text-sm font-medium text-gray-700">Hole Information (1-18)</h7>
+          <button type="button" onclick="quickFillHoles('${teeId}')" class="text-xs text-blue-600 hover:text-blue-800">
+            Quick Fill Par 72
+          </button>
+        </div>
+        <div class="holes-container grid grid-cols-6 gap-2 text-xs">
+          ${generateHoleInputs()}
+        </div>
+      </div>
+    `;
+    
+    container.appendChild(teeDiv);
+    updateCreateButtonState();
+  }
+
+  function generateHoleInputs() {
+    let html = '';
+    for (let i = 1; i <= 18; i++) {
+      html += `
+        <div class="hole-group">
+          <div class="text-center font-medium text-gray-600 mb-1">Hole ${i}</div>
+                     <input type="number" class="hole-par block w-full px-1 py-1 text-xs border border-gray-300 rounded" placeholder="Par" min="3" max="6">
+           <input type="number" class="hole-yardage block w-full px-1 py-1 text-xs border border-gray-300 rounded mt-1" placeholder="Yards" min="50" max="800">
+           <input type="number" class="hole-handicap block w-full px-1 py-1 text-xs border border-gray-300 rounded mt-1" placeholder="HCP" min="1" max="18">
+        </div>
+      `;
+    }
+    return html;
+  }
+
+  window.quickFillHoles = function(teeId) {
+    const teeDiv = document.getElementById(teeId);
+    const parInputs = teeDiv.querySelectorAll('.hole-par');
+    const handicapInputs = teeDiv.querySelectorAll('.hole-handicap');
+    
+    // Standard par 72 layout
+    const pars = [4, 4, 3, 5, 4, 4, 3, 5, 4, 4, 3, 5, 4, 4, 3, 5, 4, 4];
+    
+    parInputs.forEach((input, index) => {
+      input.value = pars[index];
+    });
+    
+    handicapInputs.forEach((input, index) => {
+      input.value = index + 1;
+    });
+  }
+
+  window.removeTee = function(teeId) {
+    document.getElementById(teeId).remove();
+    updateCreateButtonState();
+  }
+
+  function updateCreateButtonState() {
+    const button = document.getElementById('create_manual_course');
+    const tees = document.querySelectorAll('#tees_container > div');
+    
+    if (tees.length === 0) {
+      button.disabled = true;
+      button.classList.add('bg-gray-400', 'cursor-not-allowed');
+      button.classList.remove('bg-green-600', 'hover:bg-green-700');
+    } else {
+      button.disabled = false;
+      button.classList.remove('bg-gray-400', 'cursor-not-allowed');
+      button.classList.add('bg-green-600', 'hover:bg-green-700');
+    }
+  }
+
+  function resetCreateButton() {
+    const button = document.getElementById('create_manual_course');
+    button.disabled = false;
+    button.textContent = 'Create Complete Course';
+    button.classList.remove('bg-gray-400', 'cursor-not-allowed');
+    button.classList.add('bg-green-600', 'hover:bg-green-700');
+    updateCreateButtonState(); // Re-check if button should be enabled based on tee count
+  }
+
+  function clearManualCourseForm() {
+    document.getElementById('manual_course_name').value = '';
+    document.getElementById('manual_club_name').value = '';
+    document.getElementById('manual_city').value = '';
+    document.getElementById('manual_state').value = '';
+    document.getElementById('manual_address').value = '';
+    document.getElementById('tees_container').innerHTML = '';
+    teeCounter = 0;
+    updateCreateButtonState();
+  }
+
+  function createManualCourse() {
+    const createButton = document.getElementById('create_manual_course');
+    
+    // Immediately disable button to prevent double-clicking
+    if (createButton.disabled) {
+      return; // Already processing
+    }
+    createButton.disabled = true;
+    createButton.textContent = 'Creating...';
+    createButton.classList.add('bg-gray-400', 'cursor-not-allowed');
+    createButton.classList.remove('bg-green-600', 'hover:bg-green-700');
+    
+    const courseName = document.getElementById('manual_course_name').value.trim();
+    const clubName = document.getElementById('manual_club_name').value.trim();
+    const city = document.getElementById('manual_city').value.trim();
+    const state = document.getElementById('manual_state').value.trim();
+    const address = document.getElementById('manual_address').value.trim();
+
+    if (!courseName || !clubName) {
+      alert('Course name and club name are required');
+      // Re-enable button
+      resetCreateButton();
+      return;
+    }
+
+    // Collect tee data
+    const tees = [];
+    const teeElements = document.querySelectorAll('#tees_container > div');
+    
+    if (teeElements.length === 0) {
+      alert('Please add at least one tee configuration');
+      resetCreateButton();
+      return;
+    }
+
+    for (const teeElement of teeElements) {
+      const teeName = teeElement.querySelector('.tee-name').value.trim();
+      const gender = teeElement.querySelector('.tee-gender').value;
+      const courseRating = parseFloat(teeElement.querySelector('.tee-course-rating').value);
+      const slopeRating = parseInt(teeElement.querySelector('.tee-slope-rating').value);
+      const totalYards = parseInt(teeElement.querySelector('.tee-total-yards').value);
+      const totalMeters = parseInt(teeElement.querySelector('.tee-total-meters').value);
+      const parTotal = parseInt(teeElement.querySelector('.tee-par-total').value);
+
+      if (!teeName || !courseRating || !slopeRating || !totalYards || !totalMeters || !parTotal) {
+        alert('All tee configuration fields are required');
+        resetCreateButton();
+        return;
+      }
+
+      // Collect hole data for this tee
+      const holes = [];
+      const holeGroups = teeElement.querySelectorAll('.hole-group');
+      
+      for (let i = 0; i < holeGroups.length; i++) {
+        const holeGroup = holeGroups[i];
+        const par = parseInt(holeGroup.querySelector('.hole-par').value);
+        const yardage = parseInt(holeGroup.querySelector('.hole-yardage').value);
+        const handicap = parseInt(holeGroup.querySelector('.hole-handicap').value);
+
+        if (!par || !yardage || !handicap) {
+          alert(`Please complete all hole data for ${teeName} tee (Hole ${i + 1})`);
+          resetCreateButton();
+          return;
+        }
+
+        if (par < 3 || par > 6) {
+          alert(`Invalid par for ${teeName} tee, Hole ${i + 1}. Par must be between 3 and 6.`);
+          resetCreateButton();
+          return;
+        }
+
+        if (yardage < 50 || yardage > 800) {
+          alert(`Invalid yardage for ${teeName} tee, Hole ${i + 1}. Yardage must be between 50 and 800 yards.`);
+          resetCreateButton();
+          return;
+        }
+
+        if (handicap < 1 || handicap > 18) {
+          alert(`Invalid handicap for ${teeName} tee, Hole ${i + 1}. Handicap must be between 1 and 18.`);
+          resetCreateButton();
+          return;
+        }
+
+        holes.push({
+          hole_number: i + 1,
+          par: par,
+          yardage: yardage,
+          handicap: handicap
+        });
+      }
+
+      if (holes.length !== 18) {
+        alert(`${teeName} tee must have exactly 18 holes`);
+        resetCreateButton();
+        return;
+      }
+
+      tees.push({
+        tee_name: teeName,
+        gender: gender,
+        course_rating: courseRating,
+        slope_rating: slopeRating,
+        total_yards: totalYards,
+        total_meters: totalMeters,
+        par_total: parTotal,
+        holes: holes
+      });
+    }
+
+    const courseData = {
+      course: {
+        name: courseName,
+        club_name: clubName,
+        city: city,
+        state: state,
+        address: address,
+        tees: tees
+      }
+    };
+
+    // Button state is already managed above
+
+    fetch('/groups/<%= current_group.slug %>/admin/tournaments/<%= @tournament.id %>/rounds/<%= @round.id %>/matches/create_course', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+      },
+      body: JSON.stringify(courseData)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Course created successfully, select it
+        selectCourseFromSearch(
+          `local_${data.course.id}`,
+          data.course.name,
+          data.course.location,
+          'local'
+        );
+        
+        // Hide manual course form
+        document.getElementById('manual_course_form').classList.add('hidden');
+        clearManualCourseForm();
+        
+        alert('Course created successfully!');
+      } else {
+        alert('Error creating course: ' + (data.errors ? data.errors.join(', ') : data.error));
+        resetCreateButton();
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error creating course. Please check your data and try again.');
+      resetCreateButton();
+    });
   }
 });
 
-// Clean up initialization flag when page is cached by Turbo
+// Clean up initialization flags when page is cached by Turbo
 document.addEventListener('turbo:before-cache', function() {
   const searchInput = document.getElementById('golf_course_search');
   if (searchInput) {
     searchInput.dataset.initialized = 'false';
   }
+  
+  // Clean up manual course form button flags
+  const manualButtons = [
+    'show_manual_course_form',
+    'cancel_manual_course', 
+    'create_manual_course',
+    'add_male_tee',
+    'add_female_tee'
+  ];
+  
+  manualButtons.forEach(buttonId => {
+    const button = document.getElementById(buttonId);
+    if (button) {
+      button.dataset.initialized = 'false';
+    }
+  });
 });
+
 </script> 

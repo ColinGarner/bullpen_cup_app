@@ -1,6 +1,7 @@
 class Match < ApplicationRecord
   belongs_to :round
   belongs_to :winner_team, class_name: "Team", optional: true
+  belongs_to :course, optional: true
   has_many :match_players, dependent: :destroy
   has_many :players, through: :match_players, source: :user
   has_many :scores, dependent: :destroy

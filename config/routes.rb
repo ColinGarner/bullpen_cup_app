@@ -73,6 +73,8 @@ Rails.application.routes.draw do
             end
             collection do
               get :search_courses
+              post :create_course
+              post :select_course
             end
           end
         end

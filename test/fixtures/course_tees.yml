@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  course: one
+  tee_name: MyString
+  gender: MyString
+  course_rating: 9.99
+  slope_rating: 1
+  total_yards: 1
+  total_meters: 1
+  par_total: 1
+
+two:
+  course: two
+  tee_name: MyString
+  gender: MyString
+  course_rating: 9.99
+  slope_rating: 1
+  total_yards: 1
+  total_meters: 1
+  par_total: 1
