@@ -147,7 +147,7 @@
                   </div>
                   
                   <div class="flex items-center space-x-2">
-                    <label class="text-sm font-medium text-gray-700 w-16">Strokes:</label>
+                    <label class="text-sm font-medium text-gray-700 w-16">Score:</label>
                     <%= number_field_tag "scores[#{player.id}]", 
                         existing_score&.strokes&.positive? ? existing_score.strokes : nil,
                         min: 1, max: 15, 
@@ -209,7 +209,7 @@
               </div>
               
               <div class="flex items-center space-x-2">
-                <label class="text-sm font-medium text-gray-700 w-16">Strokes:</label>
+                <label class="text-sm font-medium text-gray-700 w-16">Score:</label>
                 <% existing_score = @scores.find { |s| s.user_id == team_a_players.first&.id } %>
                 <%= number_field_tag "scores[#{team_a_players.first&.id}]", 
                     existing_score&.strokes&.positive? ? existing_score.strokes : nil,
@@ -267,7 +267,7 @@
               </div>
               
               <div class="flex items-center space-x-2">
-                <label class="text-sm font-medium text-gray-700 w-16">Strokes:</label>
+                <label class="text-sm font-medium text-gray-700 w-16">Score:</label>
                 <% existing_score = @scores.find { |s| s.user_id == team_b_players.first&.id } %>
                 <%= number_field_tag "scores[#{team_b_players.first&.id}]", 
                     existing_score&.strokes&.positive? ? existing_score.strokes : nil,
@@ -336,7 +336,7 @@
                   
                   <!-- Score Input -->
                   <div class="flex items-center space-x-2">
-                    <label class="text-sm font-medium text-gray-700 w-16">Strokes:</label>
+                    <label class="text-sm font-medium text-gray-700 w-16">Score:</label>
                     <%= number_field_tag "scores[#{player.id}]", 
                         existing_score&.strokes&.positive? ? existing_score.strokes : nil,
                         min: 1, max: 15, 
@@ -400,7 +400,7 @@
                   
                   <!-- Score Input -->
                   <div class="flex items-center space-x-2">
-                    <label class="text-sm font-medium text-gray-700 w-16">Strokes:</label>
+                    <label class="text-sm font-medium text-gray-700 w-16">Score:</label>
                     <%= number_field_tag "scores[#{player.id}]", 
                         existing_score&.strokes&.positive? ? existing_score.strokes : nil,
                         min: 1, max: 15, 
@@ -454,7 +454,7 @@
               
               <!-- Score Input -->
               <div class="flex items-center space-x-2">
-                <label class="text-sm font-medium text-gray-700 w-16">Strokes:</label>
+                <label class="text-sm font-medium text-gray-700 w-16">Score:</label>
                 <%= number_field_tag "scores[#{player.id}]", 
                     existing_score&.strokes&.positive? ? existing_score.strokes : nil,
                     min: 1, max: 15, 
