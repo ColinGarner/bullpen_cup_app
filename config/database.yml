@@ -12,6 +12,8 @@ development:
   username: <%= ENV['DATABASE_USERNAME'] || ENV['USER'] %>
   password: <%= ENV['DATABASE_PASSWORD'] %>
   host: <%= ENV['DATABASE_HOST'] || 'localhost' %>
+  variables:
+    timezone: 'America/Chicago'
 
 test:
   adapter: postgresql
@@ -21,6 +23,8 @@ test:
   username: <%= ENV['DATABASE_USERNAME'] || ENV['USER'] %>
   password: <%= ENV['DATABASE_PASSWORD'] %>
   host: <%= ENV['DATABASE_HOST'] || 'localhost' %>
+  variables:
+    timezone: 'America/Chicago'
 
 production:
   primary:
