@@ -32,6 +32,7 @@ production:
     encoding: unicode
     pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
     url: <%= ENV['DATABASE_URL'] %>
+    template: template0
   cache:
     adapter: postgresql
     encoding: unicode
@@ -39,6 +40,7 @@ production:
     pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
     url: <%= ENV['CACHE_DATABASE_URL'] || ENV['DATABASE_URL'] %>
     migrations_paths: db/cache_migrate
+    template: template0
   queue:
     adapter: postgresql
     encoding: unicode
@@ -46,6 +48,7 @@ production:
     pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
     url: <%= ENV['QUEUE_DATABASE_URL'] || ENV['DATABASE_URL'] %>
     migrations_paths: db/queue_migrate
+    template: template0
   cable:
     adapter: postgresql
     encoding: unicode
@@ -53,3 +56,4 @@ production:
     pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
     url: <%= ENV['CABLE_DATABASE_URL'] || ENV['DATABASE_URL'] %>
     migrations_paths: db/cable_migrate
+    template: template0
