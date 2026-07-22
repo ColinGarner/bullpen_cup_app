@@ -22,16 +22,12 @@ class GroupInviteCodesTest < ApplicationSystemTestCase
   test "complete invite code workflow from admin to new member" do
     # Step 1: Admin views their invite code
     login_as(@admin_user)
-    visit root_path
-
-    # Navigate to admin dashboard
-    click_link "Switch to #{@group.name}"
-    click_link "Admin"
+    visit admin_group_admin_root_path(group_slug: @group.slug)
 
     # Verify invite code is displayed
     assert_text "Group Invite Code"
     assert_text @group.invite_code
-    assert_button "Regenerate Code"
+    assert_link "Regenerate Code"
 
     # Step 2: Get the invite code (simulate sharing)
     invite_code = @group.invite_code
@@ -63,9 +59,7 @@ class GroupInviteCodesTest < ApplicationSystemTestCase
 
   test "admin can regenerate invite code and new code works" do
     login_as(@admin_user)
-    visit root_path
-    click_link "Switch to #{@group.name}"
-    click_link "Admin"
+    visit admin_group_admin_root_path(group_slug: @group.slug)
 
     # Get original invite code
     original_code = @group.invite_code
@@ -97,9 +91,7 @@ class GroupInviteCodesTest < ApplicationSystemTestCase
 
   test "old invite code becomes invalid after regeneration" do
     login_as(@admin_user)
-    visit root_path
-    click_link "Switch to #{@group.name}"
-    click_link "Admin"
+    visit admin_group_admin_root_path(group_slug: @group.slug)
 
     # Get original code
     original_code = @group.invite_code
@@ -108,6 +100,10 @@ class GroupInviteCodesTest < ApplicationSystemTestCase
     accept_confirm do
       click_link "Regenerate Code"
     end
+
+    # Wait for the PATCH round-trip to complete before continuing —
+    # otherwise `logout` can race the still-in-flight regeneration.
+    assert_text "New invite code generated:"
 
     # Try to use old code
     logout
@@ -138,12 +134,12 @@ class GroupInviteCodesTest < ApplicationSystemTestCase
     login_as(@new_user)
     visit join_group_path
 
-    # Try invalid code
-    fill_in "Group Invite Code", with: "INVALID"
+    # Try invalid code (kept within the field's maxlength of 6)
+    fill_in "Group Invite Code", with: "BADCOD"
     click_button "Join Group"
 
     assert_text "Invalid group code. Please check the code and try again."
-    assert_field "Group Invite Code", with: "INVALID"  # Preserves input
+    assert_field "Group Invite Code", with: "BADCOD"  # Preserves input
   end
 
   test "user already a member gets friendly message" do
@@ -181,9 +177,7 @@ class GroupInviteCodesTest < ApplicationSystemTestCase
   # Copy Functionality Tests
   test "admin can copy invite code with javascript" do
     login_as(@admin_user)
-    visit root_path
-    click_link "Switch to #{@group.name}"
-    click_link "Admin"
+    visit admin_group_admin_root_path(group_slug: @group.slug)
 
     # Find the copy button (can't actually test clipboard, but can test UI)
     copy_button = find("button[onclick*='copyInviteCode']")
@@ -200,9 +194,9 @@ class GroupInviteCodesTest < ApplicationSystemTestCase
     visit root_path
 
     # Should show onboarding with join option
-    assert_text "Join a Golf Group"
-    assert_text "Enter Group Code"
-    assert_link "Enter Group Code", href: join_group_path
+    assert_text "Join Golf Trip"
+    assert_text "Enter Trip Code"
+    assert_link "Enter Trip Code", href: join_group_path
   end
 
   test "join form has proper styling and accessibility" do
@@ -224,9 +218,7 @@ class GroupInviteCodesTest < ApplicationSystemTestCase
 
   test "admin dashboard shows complete invite instructions" do
     login_as(@admin_user)
-    visit root_path
-    click_link "Switch to #{@group.name}"
-    click_link "Admin"
+    visit admin_group_admin_root_path(group_slug: @group.slug)
 
     # Check invite code section
     assert_text "Group Invite Code"
@@ -245,7 +237,9 @@ class GroupInviteCodesTest < ApplicationSystemTestCase
     login_as(@new_user)
     visit join_group_path
 
-    invalid_codes = [ "", "ABC", "ABCDEFG", "abc!@#", "123456789", "XXXXXX" ]
+    # Empty string is blocked by HTML5 `required` on the input, so the form
+    # never submits — cover server-side rejection paths instead.
+    invalid_codes = [ "ABC", "ABCDEFG", "abc!@#", "123456789", "XXXXXX" ]
 
     invalid_codes.each do |code|
       fill_in "Group Invite Code", with: code
@@ -305,8 +299,8 @@ class GroupInviteCodesTest < ApplicationSystemTestCase
 
   # Helper method to simulate different browsers/devices
   test "invite code system works on mobile viewport" do
-    # Simulate mobile viewport
-    page.driver.resize_window(375, 667)  # iPhone dimensions
+    # Simulate mobile viewport (iPhone dimensions)
+    page.current_window.resize_to(375, 667)
 
     login_as(@new_user)
     visit join_group_path
@@ -319,13 +313,8 @@ class GroupInviteCodesTest < ApplicationSystemTestCase
     assert_text "Welcome to #{@group.name}!"
   end
 
-  private
-
-  def login_as(user)
-    sign_in user
-  end
-
-  def logout
-    sign_out :user
-  end
+  # login_as / logout come from Warden::Test::Helpers via Devise::Test::IntegrationHelpers.
+  # Do not shadow either here — Devise's sign_in/sign_out internally call
+  # login_as(user, scope) and logout(scope), which raise ArgumentError if
+  # a 0- or 1-arg local override sits in the middle.
 end
