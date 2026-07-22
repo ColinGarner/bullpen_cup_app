@@ -1,19 +1,19 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  name: MyString
-  club_name: MyString
+  name: Course One
+  club_name: Club One
   address: MyText
-  city: MyString
-  state: MyString
-  country: MyString
-  api_course_id: MyString
+  city: City One
+  state: ST
+  country: United States
+  api_course_id: fixture-one
 
 two:
-  name: MyString
-  club_name: MyString
+  name: Course Two
+  club_name: Club Two
   address: MyText
-  city: MyString
-  state: MyString
-  country: MyString
-  api_course_id: MyString
+  city: City Two
+  state: ST
+  country: United States
+  api_course_id: fixture-two

@@ -810,7 +810,7 @@ class ScoringController < ApplicationController
     hole_handicap = hole_data["handicap"]
 
     # Player gets a stroke on this hole if the hole handicap is <= their stroke allocation
-    hole_handicap <= player_strokes_needed ? 1 : 0
+    (player_strokes_needed / 18) + (hole_handicap <= (player_strokes_needed % 18) ? 1 : 0)
   end
 
   def calculate_fourball_strokes_received(player, hole_number, hole_data)
@@ -840,7 +840,7 @@ class ScoringController < ApplicationController
     hole_handicap = hole_data["handicap"]
 
     # Player gets a stroke on this hole if the hole handicap is <= their stroke allocation
-    hole_handicap <= player_strokes_needed ? 1 : 0
+    (player_strokes_needed / 18) + (hole_handicap <= (player_strokes_needed % 18) ? 1 : 0)
   end
 
   def calculate_scramble_strokes_received(player, hole_number, hole_data)
@@ -862,7 +862,7 @@ class ScoringController < ApplicationController
     hole_handicap = hole_data["handicap"]
 
     # Team gets a stroke on this hole if the hole handicap is <= their stroke difference
-    hole_handicap <= stroke_difference ? 1 : 0
+    (stroke_difference / 18) + (hole_handicap <= (stroke_difference % 18) ? 1 : 0)
   end
 
   def calculate_course_handicap(player, match = @match)
