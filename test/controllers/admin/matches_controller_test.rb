@@ -41,11 +41,12 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
       captain: @user
     )
 
-    # Add players to teams
-    @player_a1 = User.create!(first_name: "Player", last_name: "A1", email: "a1@example.com", password: "password123")
-    @player_a2 = User.create!(first_name: "Player", last_name: "A2", email: "a2@example.com", password: "password123")
-    @player_b1 = User.create!(first_name: "Player", last_name: "B1", email: "b1@example.com", password: "password123")
-    @player_b2 = User.create!(first_name: "Player", last_name: "B2", email: "b2@example.com", password: "password123")
+    # Add players to teams. Handicaps are required by add_player for
+    # singles_match_play (see MatchesController#requires_handicap?).
+    @player_a1 = User.create!(first_name: "Player", last_name: "A1", email: "a1@example.com", password: "password123", handicap: 10)
+    @player_a2 = User.create!(first_name: "Player", last_name: "A2", email: "a2@example.com", password: "password123", handicap: 15)
+    @player_b1 = User.create!(first_name: "Player", last_name: "B1", email: "b1@example.com", password: "password123", handicap: 8)
+    @player_b2 = User.create!(first_name: "Player", last_name: "B2", email: "b2@example.com", password: "password123", handicap: 12)
 
     @team_a.add_player(@player_a1)
     @team_a.add_player(@player_a2)
@@ -148,7 +149,7 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
     }
 
     assert_redirected_to admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id)
-    assert_equal "Match was successfully updated.", flash[:notice]
+    assert_match(/\AMatch was successfully updated with course: /, flash[:notice])
 
     @match.reload
     assert_equal "fourball_match_play", @match.match_type
@@ -248,7 +249,7 @@ class Admin::MatchesControllerTest < ActionDispatch::IntegrationTest
   test "should not add invalid player to match" do
     sign_in @admin
 
-    other_user = User.create!(first_name: "Other", last_name: "User", email: "other@example.com", password: "password123")
+    other_user = User.create!(first_name: "Other", last_name: "User", email: "other@example.com", password: "password123", handicap: 20)
 
     assert_no_difference("@match.match_players.count") do
       post add_player_admin_tournament_round_match_path(group_slug: @group.slug, tournament_id: @tournament.id, round_id: @round.id, id: @match.id), params: {

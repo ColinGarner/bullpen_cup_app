@@ -9,12 +9,12 @@ class CourseHole < ApplicationRecord
             numericality: { greater_than: 2, less_than_or_equal_to: 6, only_integer: true }
   validates :yardage, presence: true,
             numericality: { greater_than: 50, less_than: 800, only_integer: true }
-  validates :handicap, presence: true,
+  validates :stroke_index, presence: true,
             numericality: { greater_than: 0, less_than_or_equal_to: 18, only_integer: true }
 
   # Unique constraint validation
   validates :hole_number, uniqueness: { scope: :course_tee_id }
-  validates :handicap, uniqueness: { scope: :course_tee_id }
+  validates :stroke_index, uniqueness: { scope: :course_tee_id }
 
   # Callbacks
   after_save :update_tee_totals
@@ -22,7 +22,7 @@ class CourseHole < ApplicationRecord
 
   # Scopes
   scope :by_hole_number, -> { order(:hole_number) }
-  scope :by_handicap, -> { order(:handicap) }
+  scope :by_stroke_index, -> { order(:stroke_index) }
   scope :par_3s, -> { where(par: 3) }
   scope :par_4s, -> { where(par: 4) }
   scope :par_5s, -> { where(par: 5) }
@@ -33,7 +33,7 @@ class CourseHole < ApplicationRecord
   end
 
   def difficulty_rating
-    case handicap
+    case stroke_index
     when 1..6 then "Hard"
     when 7..12 then "Medium"
     when 13..18 then "Easy"
@@ -51,11 +51,13 @@ class CourseHole < ApplicationRecord
   end
 
   # Convert to API-like structure for compatibility
+  # External golf-course API uses "handicap" as the JSON key for the hole's
+  # stroke index; keep the same key on the way out for compatibility.
   def to_api_format
     {
-      'par' => par,
-      'yardage' => yardage,
-      'handicap' => handicap
+      "par" => par,
+      "yardage" => yardage,
+      "handicap" => stroke_index
     }
   end
 
@@ -63,7 +65,7 @@ class CourseHole < ApplicationRecord
 
   def update_tee_totals
     return unless course_tee.holes_complete?
-    
+
     course_tee.update_columns(
       total_yards: course_tee.course_holes.sum(:yardage),
       par_total: course_tee.course_holes.sum(:par)

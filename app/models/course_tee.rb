@@ -5,7 +5,7 @@ class CourseTee < ApplicationRecord
   # Validations
   validates :tee_name, presence: true, length: { maximum: 100 }
   validates :gender, presence: true, inclusion: { in: %w[male female] }
-  validates :course_rating, presence: true, 
+  validates :course_rating, presence: true,
             numericality: { greater_than: 50, less_than: 85 }
   validates :slope_rating, presence: true,
             numericality: { greater_than: 55, less_than: 155, only_integer: true }
@@ -17,14 +17,14 @@ class CourseTee < ApplicationRecord
             numericality: { greater_than: 60, less_than: 80, only_integer: true }
 
   # Unique constraint validation
-  validates :tee_name, uniqueness: { scope: [:course_id, :gender] }
+  validates :tee_name, uniqueness: { scope: [ :course_id, :gender ] }
 
   # Callbacks
   before_save :calculate_total_meters, if: :total_yards_changed?
 
   # Scopes
-  scope :male, -> { where(gender: 'male') }
-  scope :female, -> { where(gender: 'female') }
+  scope :male, -> { where(gender: "male") }
+  scope :female, -> { where(gender: "female") }
   scope :by_yardage, -> { order(:total_yards) }
 
   # Methods
@@ -52,14 +52,14 @@ class CourseTee < ApplicationRecord
   # Convert to API-like structure for compatibility
   def to_api_format
     {
-      'tee_name' => tee_name,
-      'course_rating' => course_rating.to_f,
-      'slope_rating' => slope_rating,
-      'total_yards' => total_yards,
-      'total_meters' => total_meters,
-      'number_of_holes' => 18,
-      'par_total' => par_total,
-      'holes' => course_holes.order(:hole_number).map(&:to_api_format)
+      "tee_name" => tee_name,
+      "course_rating" => course_rating.to_f,
+      "slope_rating" => slope_rating,
+      "total_yards" => total_yards,
+      "total_meters" => total_meters,
+      "number_of_holes" => 18,
+      "par_total" => par_total,
+      "holes" => course_holes.order(:hole_number).map(&:to_api_format)
     }
   end
 

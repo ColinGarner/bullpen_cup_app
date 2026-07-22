@@ -11,7 +11,7 @@ class CreateCourseHoles < ActiveRecord::Migration[8.0]
     end
 
     # Unique constraint: each hole number must be unique per tee
-    add_index :course_holes, [:course_tee_id, :hole_number], unique: true
+    add_index :course_holes, [ :course_tee_id, :hole_number ], unique: true
     add_index :course_holes, :hole_number
     add_index :course_holes, :handicap
   end

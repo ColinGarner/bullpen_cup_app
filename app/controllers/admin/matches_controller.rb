@@ -208,9 +208,9 @@ class Admin::MatchesController < Admin::BaseController
     end
 
     # Sort courses: local first, then by name
-    sorted_courses = all_courses.sort_by { |course| [course[:source] == "local" ? 0 : 1, course[:name]] }
+    sorted_courses = all_courses.sort_by { |course| [ course[:source] == "local" ? 0 : 1, course[:name] ] }
 
-    render json: { 
+    render json: {
       courses: sorted_courses.first(20), # Limit total results
       has_local_courses: local_courses.any?,
       api_available: all_courses.any? { |c| c[:source] == "api" }
@@ -220,7 +220,7 @@ class Admin::MatchesController < Admin::BaseController
   # POST /admin/groups/:group_slug/tournaments/:tournament_id/rounds/:round_id/matches/create_course
   def create_course
     course_params = params.require(:course)
-    
+
     begin
       course = Course.new(
         name: course_params[:name],
@@ -228,7 +228,7 @@ class Admin::MatchesController < Admin::BaseController
         address: course_params[:address],
         city: course_params[:city],
         state: course_params[:state],
-        country: course_params[:country] || 'United States'
+        country: course_params[:country] || "United States"
       )
 
       if course.save
@@ -254,18 +254,18 @@ class Admin::MatchesController < Admin::BaseController
                   hole_number: index + 1,
                   par: hole_data[:par],
                   yardage: hole_data[:yardage],
-                  handicap: hole_data[:handicap]
+                  stroke_index: hole_data[:handicap]
                 )
               end
-              
+
               # Recalculate totals based on actual hole data
               tee.recalculate_totals!
             end
           end
         end
 
-        render json: { 
-          success: true, 
+        render json: {
+          success: true,
           course: {
             id: course.id,
             name: course.name,
@@ -275,16 +275,16 @@ class Admin::MatchesController < Admin::BaseController
           }
         }, status: :created
       else
-        render json: { 
-          success: false, 
-          errors: course.errors.full_messages 
+        render json: {
+          success: false,
+          errors: course.errors.full_messages
         }, status: :unprocessable_entity
       end
     rescue => e
       Rails.logger.error "Failed to create course: #{e.class}: #{e.message}"
-      render json: { 
-        success: false, 
-        error: "Failed to create course: #{e.message}" 
+      render json: {
+        success: false,
+        error: "Failed to create course: #{e.message}"
       }, status: :internal_server_error
     end
   end
@@ -299,7 +299,7 @@ class Admin::MatchesController < Admin::BaseController
         # Select existing local course
         course_id = course_identifier.sub("local_", "").to_i
         course = Course.find(course_id)
-        
+
         render json: {
           success: true,
           course: {
@@ -314,13 +314,13 @@ class Admin::MatchesController < Admin::BaseController
       elsif course_source == "api"
         # Create local course from API data
         api_course_id = course_identifier.sub("api_", "")
-        
+
         service = GolfCourseApiService.new
         api_data = service.get_course_details(api_course_id)
-        
+
         if api_data
           course = Course.create_from_api_data(api_data, api_course_id)
-          
+
           render json: {
             success: true,
             course: {
@@ -359,15 +359,15 @@ class Admin::MatchesController < Admin::BaseController
     begin
       # Convert Course model to API-compatible format and store in holes_data
       course_data = match.course.to_api_format
-      
+
       # Clear any existing golf_course fields since we're using Course model
       match.golf_course_id = nil
       match.golf_course_name = match.course.name
       match.golf_course_location = match.course.location_display
-      
+
       # Store the course data in holes_data for scoring compatibility
       match.holes_data = { "course_data" => course_data }
-      
+
       Rails.logger.info "Copied Course model data to holes_data for match #{match.id}"
     rescue => e
       Rails.logger.error "Failed to copy course data to match: #{e.class}: #{e.message}"
@@ -389,11 +389,11 @@ class Admin::MatchesController < Admin::BaseController
 
   def match_params
     permitted_params = params.require(:match).permit(:match_type, :scheduled_time, :golf_course_id, :golf_course_name, :golf_course_location, :course_id)
-    
+
     # Convert empty strings to nil for foreign key fields to prevent constraint violations
     permitted_params[:course_id] = nil if permitted_params[:course_id].blank?
     permitted_params[:golf_course_id] = nil if permitted_params[:golf_course_id].blank?
-    
+
     permitted_params
   end
 
@@ -401,7 +401,7 @@ class Admin::MatchesController < Admin::BaseController
     # Check if either new Course model or legacy golf_course_id is present
     course_id = params.dig(:match, :course_id)
     golf_course_id = params.dig(:match, :golf_course_id)
-    
+
     course_id.blank? && golf_course_id.blank?
   end
 

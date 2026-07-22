@@ -23,7 +23,7 @@ class ScoringController < ApplicationController
     else
       # No course data available
       redirect_to root_path, alert: "Course information not available. Please contact an admin to set up this match properly."
-      return
+      nil
     end
   end
 
@@ -87,7 +87,7 @@ class ScoringController < ApplicationController
     end
 
     @hole_data = @match.holes_data&.dig("holes", @hole_number - 1)
-    
+
     # Validate that hole data exists for this specific hole
     unless @hole_data.present?
       Rails.logger.error "score_hole: Missing hole data for hole #{@hole_number} in match #{@match.id}"
@@ -102,7 +102,7 @@ class ScoringController < ApplicationController
   # POST /matches/:id/score/hole/:hole
   def update_score
     @hole_number = params[:hole].to_i
-    
+
     # Validate that tees have been selected before allowing score updates
     unless @match.selected_tee_name.present? && @match.holes_data.present?
       redirect_to select_tees_match_path(@match), alert: "Please select tees before scoring."
@@ -797,11 +797,11 @@ class ScoringController < ApplicationController
     other_course_handicap = calculate_course_handicap(other_player)
 
     # Find the lowest course handicap (could be negative for plus players)
-    low_course_handicap = [player_course_handicap, other_course_handicap].min
-    
+    low_course_handicap = [ player_course_handicap, other_course_handicap ].min
+
     # Calculate strokes relative to the low player (who plays off scratch)
     player_strokes_needed = player_course_handicap - low_course_handicap
-    
+
     # If this player is the low player, they play off scratch (0 strokes)
     return 0 if player_strokes_needed <= 0
 
@@ -825,7 +825,7 @@ class ScoringController < ApplicationController
 
     # Find the lowest course handicap from all players (including plus handicaps)
     low_course_handicap = all_players.map { |p| calculate_course_handicap(p) }.min
-    
+
     # Calculate course handicap for this player
     player_course_handicap = calculate_course_handicap(player)
 
@@ -898,7 +898,7 @@ class ScoringController < ApplicationController
       player_course_handicap = calculate_course_handicap(player)
       player_strokes_needed = player_course_handicap - low_course_handicap
 
-      [player_strokes_needed, 0].max
+      [ player_strokes_needed, 0 ].max
     when "scramble_match_play"
       # In scramble, calculate team handicap difference
       player_team = @match.team_a_players.include?(player) ? @match.team_a : @match.team_b
@@ -909,11 +909,11 @@ class ScoringController < ApplicationController
       opposing_team_handicap = @match.calculate_scramble_team_handicap(opposing_team)
 
       # Find the lower team handicap (plays off scratch)
-      low_team_handicap = [player_team_handicap, opposing_team_handicap].min
-      
+      low_team_handicap = [ player_team_handicap, opposing_team_handicap ].min
+
       # Calculate strokes relative to the low team
       team_strokes_needed = player_team_handicap - low_team_handicap
-      [team_strokes_needed, 0].max
+      [ team_strokes_needed, 0 ].max
     when "singles_match_play"
       # In singles, calculate against the other player
       players = @match.players.to_a
@@ -925,11 +925,11 @@ class ScoringController < ApplicationController
       # Find the lowest course handicap (including plus handicaps)
       player_course_handicap = calculate_course_handicap(player)
       other_course_handicap = calculate_course_handicap(other_player)
-      low_course_handicap = [player_course_handicap, other_course_handicap].min
+      low_course_handicap = [ player_course_handicap, other_course_handicap ].min
 
       # Calculate strokes relative to the low player (who plays off scratch)
       player_strokes_needed = player_course_handicap - low_course_handicap
-      [player_strokes_needed, 0].max
+      [ player_strokes_needed, 0 ].max
     else
       0
     end

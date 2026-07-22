@@ -111,7 +111,7 @@ class User < ApplicationRecord
 
   def formatted_handicap
     return "N/A" unless handicap.present?
-    
+
     if handicap < 0
       # Plus handicap: -2.0 displays as "+2" or "+2.5"
       abs_handicap = handicap.abs

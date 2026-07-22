@@ -14,7 +14,7 @@ class CreateCourses < ActiveRecord::Migration[8.0]
 
     # Indexes for performance and uniqueness
     add_index :courses, :api_course_id, unique: true, where: "api_course_id IS NOT NULL"
-    add_index :courses, [:name, :city, :state]
+    add_index :courses, [ :name, :city, :state ]
     add_index :courses, :club_name
   end
 end

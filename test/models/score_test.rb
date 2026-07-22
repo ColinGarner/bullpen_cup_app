@@ -243,19 +243,33 @@ class ScoreTest < ActiveSupport::TestCase
     assert_includes score.errors[:handicap_used], "can't be blank"
   end
 
-  test "should validate handicap_used is not negative" do
+  test "should allow negative handicap_used for plus handicap players" do
     score = Score.new(
       match: @match,
       user: @player,
       hole_number: 1,
       strokes: 4,
       net_strokes: 4,
-      handicap_used: -1,
+      handicap_used: -2.0,
+      strokes_received_on_hole: 0
+    )
+
+    assert score.valid?, score.errors.full_messages.to_sentence
+  end
+
+  test "should validate handicap_used floor at -10" do
+    score = Score.new(
+      match: @match,
+      user: @player,
+      hole_number: 1,
+      strokes: 4,
+      net_strokes: 4,
+      handicap_used: -11,
       strokes_received_on_hole: 0
     )
 
     assert_not score.valid?
-    assert_includes score.errors[:handicap_used], "must be greater than or equal to 0"
+    assert_includes score.errors[:handicap_used], "must be greater than or equal to -10.0"
   end
 
   test "should validate handicap_used is not greater than 54" do
@@ -270,7 +284,7 @@ class ScoreTest < ActiveSupport::TestCase
     )
 
     assert_not score.valid?
-    assert_includes score.errors[:handicap_used], "must be less than or equal to 54"
+    assert_includes score.errors[:handicap_used], "must be less than or equal to 54.0"
   end
 
   test "should require strokes_received_on_hole" do

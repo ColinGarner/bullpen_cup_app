@@ -14,7 +14,7 @@ class CreateCourseTees < ActiveRecord::Migration[8.0]
     end
 
     # Unique constraint: each tee name must be unique per course and gender
-    add_index :course_tees, [:course_id, :tee_name, :gender], unique: true
+    add_index :course_tees, [ :course_id, :tee_name, :gender ], unique: true
     add_index :course_tees, :gender
   end
 end

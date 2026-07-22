@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_16_145331) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_22_005122) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -19,13 +19,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_16_145331) do
     t.integer "hole_number", null: false
     t.integer "par", null: false
     t.integer "yardage", null: false
-    t.integer "handicap", null: false
+    t.integer "stroke_index", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["course_tee_id", "hole_number"], name: "index_course_holes_on_course_tee_id_and_hole_number", unique: true
     t.index ["course_tee_id"], name: "index_course_holes_on_course_tee_id"
-    t.index ["handicap"], name: "index_course_holes_on_handicap"
     t.index ["hole_number"], name: "index_course_holes_on_hole_number"
+    t.index ["stroke_index"], name: "index_course_holes_on_stroke_index"
   end
 
   create_table "course_tees", force: :cascade do |t|
@@ -99,7 +99,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_16_145331) do
     t.datetime "updated_at", null: false
     t.index ["match_id", "team_id"], name: "index_match_players_on_match_id_and_team_id"
     t.index ["match_id", "user_id"], name: "index_match_players_on_match_and_user_unique", unique: true
-    t.index ["match_id", "user_id"], name: "index_match_players_on_match_id_and_user_id"
     t.index ["match_id"], name: "index_match_players_on_match_id"
     t.index ["team_id", "user_id"], name: "index_match_players_on_team_id_and_user_id"
     t.index ["team_id"], name: "index_match_players_on_team_id"
@@ -197,7 +196,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_16_145331) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "cancelled", default: false, null: false
-    t.bigint "group_id"
+    t.bigint "group_id", null: false
     t.bigint "team_a_id"
     t.bigint "team_b_id"
     t.index ["cancelled"], name: "index_tournaments_on_cancelled"
@@ -221,19 +220,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_16_145331) do
     t.string "first_name"
     t.string "last_name"
     t.decimal "handicap", precision: 4, scale: 1
-    t.string "invitation_token"
-    t.datetime "invitation_created_at"
-    t.datetime "invitation_sent_at"
-    t.datetime "invitation_accepted_at"
-    t.integer "invitation_limit"
-    t.string "invited_by_type"
-    t.bigint "invited_by_id"
-    t.integer "invitations_count", default: 0
     t.index ["admin"], name: "index_users_on_admin"
     t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["invitation_token"], name: "index_users_on_invitation_token", unique: true
-    t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
-    t.index ["invited_by_type", "invited_by_id"], name: "index_users_on_invited_by"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 

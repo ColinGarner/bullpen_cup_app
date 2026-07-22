@@ -5,11 +5,11 @@ one:
   hole_number: 1
   par: 1
   yardage: 1
-  handicap: 1
+  stroke_index: 1
 
 two:
   course_tee: two
   hole_number: 1
   par: 1
   yardage: 1
-  handicap: 1
+  stroke_index: 1

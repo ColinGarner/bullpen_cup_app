@@ -2,7 +2,7 @@ class RefreshCollationVersion < ActiveRecord::Migration[8.0]
   def up
     # Fix collation version mismatch that occurs when PostgreSQL is updated
     # but template databases still have old collation versions
-    
+
     begin
       # Refresh collation version for template1 database
       execute "ALTER DATABASE template1 REFRESH COLLATION VERSION"
@@ -12,7 +12,7 @@ class RefreshCollationVersion < ActiveRecord::Migration[8.0]
     end
 
     begin
-      # Refresh collation version for postgres database  
+      # Refresh collation version for postgres database
       execute "ALTER DATABASE postgres REFRESH COLLATION VERSION"
       puts "✅ Refreshed collation version for postgres database"
     rescue ActiveRecord::StatementInvalid => e
@@ -22,7 +22,7 @@ class RefreshCollationVersion < ActiveRecord::Migration[8.0]
     begin
       # Refresh collation version for current database if it's not one of the above
       current_db = connection.current_database
-      unless ['template1', 'postgres'].include?(current_db)
+      unless [ 'template1', 'postgres' ].include?(current_db)
         execute "ALTER DATABASE #{current_db} REFRESH COLLATION VERSION"
         puts "✅ Refreshed collation version for #{current_db}"
       end

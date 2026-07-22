@@ -144,20 +144,20 @@ class ScoringControllerTest < ActionDispatch::IntegrationTest
 
     get select_tees_match_path(@match)
     assert_response :redirect
-    assert_equal "No golf course assigned to this match. Please contact an admin.", flash[:alert]
+    assert_equal "Course information not available. Please contact an admin to set up this match properly.", flash[:alert]
   end
 
-  test "should handle golf course API error gracefully" do
+  test "should redirect when golf course API returns nil" do
     sign_in @player_a1
 
-    # Mock API error
     mock_service = Minitest::Mock.new
     mock_service.expect(:get_course_details, nil, [ @match.golf_course_id ])
     GolfCourseApiService.stub(:new, mock_service) do
       get select_tees_match_path(@match)
     end
 
-    assert_response :success
+    assert_response :redirect
+    assert_equal "Course information not available. Please contact an admin to set up this match properly.", flash[:alert]
     mock_service.verify
   end
 

@@ -10,7 +10,7 @@ class Admin::RoundsController < Admin::BaseController
     # Load matches with proper associations for team access through tournament
     @round = @tournament.rounds.includes(
       matches: [
-        { round: { tournament: [:team_a, :team_b] } },
+        { round: { tournament: [ :team_a, :team_b ] } },
         :match_players,
         :players
       ]
